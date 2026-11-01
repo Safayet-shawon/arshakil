@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/*
+  Palette: white + grey only, no black. The deepest tone is charcoal (--color-ink).
+  Mustard is the single accent: cursor, the "." after AR, the apostrophe in "Let's", and mild glows/lines.
+*/
+@theme {
+  --color-paper: #ffffff;
+  --color-ink: #4d4f53;
+  --color-g50: #f7f7f6;
+  --color-g100: #eeeeed;
+  --color-g200: #dedede;
+  --color-g300: #c6c6c6;
+  --color-g400: #a3a3a3;
+  --color-g500: #808080;
+  --color-g600: #666666;
+  --color-accent: #f7b500;
+  --color-accent-d: #d49a00;
+
+  /* Impact for display, Arial for body. */
+  --font-display: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  --font-body: Arial, Helvetica, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-expo: cubic-bezier(0.77, 0, 0.18, 1);
+}
+
+html {
+  background: var(--color-g100);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-ink);
+  overflow-x: hidden;
+}
+
+::selection { background: var(--color-accent); color: var(--color-ink); }
+
+.font-display { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.01em; text-transform: uppercase; }
+.label { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; }
+
+/* Outlined display text (hero name, intro roles, "Let's") */
+.text-outline { color: transparent; -webkit-text-stroke: 2px var(--color-g600); }
+.text-outline-soft { color: transparent; -webkit-text-stroke: 1.5px var(--color-g400); }
+
+/* Marquee */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-track { animation: marquee 30s linear infinite; }
+
+@keyframes pulse-dot { 50% { opacity: 0.25; } }
+.pulse-dot { animation: pulse-dot 2s infinite; }
+
+@keyframes dots { 0%, 100% { opacity: 0.15; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-8px); } }
+.dots > span { display: inline-block; animation: dots 1s infinite; }
+.dots > span:nth-child(2) { animation-delay: 0.2s; }
+.dots > span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes flash { 0% { opacity: 0; } 7% { opacity: 1; } 100% { opacity: 0; } }
+.flash-go { animation: flash 0.9s ease-out; }
+
+@keyframes shake { from { transform: translate(0, 0); } to { transform: translate(2px, -1px); } }
+
+@keyframes ripple { to { transform: scale(7); opacity: 0; } }
+
+/* Custom cursor only for real pointers */
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor, html.has-cursor * { cursor: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track, .pulse-dot, .dots > span { animation: none; }
+  * { scroll-behavior: auto !important; }
+}
