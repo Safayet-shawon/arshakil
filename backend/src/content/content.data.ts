@@ -4,12 +4,12 @@ import type { Field, Project, Service, SiteInfo } from "./content.types";
 export const site: SiteInfo = {
   name: "Shakil",
   fullName: "AR. Shakhaouth Hossain Shakil",
-  tagline: "Architect · Photographer · Traveller · Writer · Content Creator",
+  tagline: "Architect · Photographer · Traveller · Writer · Content Creator · Social Worker",
   intro: "Designing spaces and stories that are calm, considered and built to last. Founder of studio Kolpo, Dhaka.",
   email: "hello@example.com",
   location: "Dhaka, Bangladesh",
   firm: "Kolpo",
-  roles: ["Architect", "Photographer", "Traveller", "Writer", "Content Creator"],
+  roles: ["Architect", "Photographer", "Traveller", "Writer", "Content Creator", "Social Worker"],
 };
 
 export const fields: Field[] = [

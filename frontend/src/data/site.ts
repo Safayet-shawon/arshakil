@@ -6,7 +6,7 @@ export const site = {
   /** Hero name, split in two rows: [row 1 words], [row 2 words]. */
   heroName: [["AR.", "Shakhaouth"], ["Hossain", "Shakil"]] as const,
   fullName: "AR. Shakhaouth Hossain Shakil",
-  tagline: "Architect · Photographer · Traveller · Writer · Content Creator",
+  tagline: "Architect · Photographer · Traveller · Writer · Content Creator · Social Worker",
   intro: "Designing spaces and stories that are calm, considered and built to last. Founder of studio Kolpo, Dhaka.",
   email: "hello@example.com",
   location: "Dhaka, Bangladesh",
@@ -16,10 +16,10 @@ export const site = {
 };
 
 /** Words that swipe in the hero (and walk through the intro counter, minus the last one). */
-export const roles = ["Architect", "Photographer", "Traveller", "Writer", "Content Creator"];
+export const roles = ["Architect", "Photographer", "Traveller", "Writer", "Content Creator", "Social Worker"];
 
 /** Shown on the left of the intro while the counter runs. "Photographer" is the reveal at the end. */
-export const introRoles = ["Architect", "Traveller", "Writer", "Content Creator"];
+export const introRoles = ["Architect", "Traveller", "Writer", "Content Creator", "Social Worker"];
 
 export const nav: NavItem[] = [
   { label: "Work", href: "#work", count: "04" },
