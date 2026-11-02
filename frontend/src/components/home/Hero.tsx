@@ -10,7 +10,7 @@ import RoleSwipe from "./RoleSwipe";
 const ease = [0.16, 1, 0.3, 1] as const;
 
 /** How long "ARCHITECT SHAKHAOUTH HOSSAIN SHAKIL" holds before it morphs into "AR. SHAKHAOUTH ...". */
-const HOLD_MS = 1300;
+const HOLD_MS = 2000;
 
 /**
  * Hero, laid out like the Dribbble shot: name across the top, portrait rising behind it,

@@ -31,8 +31,8 @@ const SCENES: { word: string; Art: ComponentType }[] = [
 const CELLS = SCENES.length + 1; // last cell is the photographer's camera
 const PHOTO = SCENES.length;
 
-const SCENE_MS = 600;
-const T = { photo: SCENES.length * SCENE_MS, type: 3300, front: 4300, cheese: 4400, three: 4900, two: 5250, one: 5600, click: 5950, flash: 6000, done: 6300, exit: 6450 };
+const SCENE_MS = 1000;
+const T = { photo: SCENES.length * SCENE_MS, type: 5600, front: 7000, cheese: 7100, three: 7900, two: 8400, one: 8900, click: 9400, flash: 9450, done: 9800, exit: 9950 };
 const KEYS: [number, number][] = [[0, 1], [T.photo, 80], [T.front, 90], [T.click, 99], [T.flash, 100]];
 const TYPED = "PHOTOGRAPHER";
 const SAY = "Say cheeseee!";
@@ -49,7 +49,7 @@ const countAt = (t: number) => {
 };
 const displayAt = (t: number) => {
   if (t < T.type) return "";
-  if (t < T.front) return TYPED.slice(0, Math.min(TYPED.length, Math.floor((t - T.type) / 45) + 1));
+  if (t < T.front) return TYPED.slice(0, Math.min(TYPED.length, Math.floor((t - T.type) / 70) + 1));
   if (t < T.three) return "SAY CHEESE";
   if (t < T.two) return "3";
   if (t < T.one) return "2";
@@ -78,7 +78,7 @@ function Cell({ index, word, Art }: { index: number; word: string; Art: Componen
   return (
     <motion.div className="absolute inset-0 overflow-hidden border-[1.5px] border-g300 bg-paper/45"
       initial={{ clipPath: "inset(100% 0% 0% 0%)" }} animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
-      transition={{ duration: 0.45, ease: [0.77, 0, 0.18, 1] }}>
+      transition={{ duration: 0.7, ease: [0.77, 0, 0.18, 1] }}>
       <div className="absolute inset-0 opacity-[0.5]"><Art /></div>
       <span className="label absolute left-3 top-2.5 text-[10px] text-g500">{String(index + 1).padStart(2, "0")}</span>
       <div className="absolute bottom-2.5 left-3 font-display leading-none text-ink"
@@ -210,14 +210,14 @@ export default function Intro() {
                 animate={v.front
                   ? { x: 0, y: typeof window === "undefined" ? 0 : window.innerHeight * 0.09, scale: 1.1, rotate: 0, opacity: 1 }
                   : { x: slot.x, y: slot.y, scale: slot.s, rotate: 0, opacity: 1 }}
-                transition={v.front ? { duration: 0.6, ease: [0.16, 1, 0.3, 1] } : { type: "spring", stiffness: 160, damping: 15 }}>
+                transition={v.front ? { duration: 0.9, ease: [0.16, 1, 0.3, 1] } : { type: "spring", stiffness: 90, damping: 13 }}>
                 <PhotoCamera text={v.display} pressed={v.snap} focus={v.front && !v.snap} />
               </motion.div>
             )}
           </div>
           {onCamera && v.front && (
             <div className="pointer-events-none absolute inset-x-0 top-[7%] z-[14] flex justify-center overflow-hidden py-[.04em] font-display text-[clamp(40px,8.6vw,150px)] leading-[1.02] text-ink [-webkit-text-stroke:10px_var(--color-g200)] [paint-order:stroke_fill]">
-              <Letters text={SAY} step={0.022} hidden={{ y: "115%" }} shown={{ y: 0 }} />
+              <Letters text={SAY} step={0.038} hidden={{ y: "115%" }} shown={{ y: 0 }} />
             </div>
           )}
 
