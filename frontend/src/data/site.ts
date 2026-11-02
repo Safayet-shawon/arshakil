@@ -3,10 +3,10 @@ import type { Field, NavItem, Social } from "@/types";
 // All content below is placeholder. The backend (NestJS, /api/content) serves the same shape.
 export const site = {
   name: "Shakil",
-  /** Hero name, split in two rows: [row 1 words], [row 2 words]. */
+  /** Hero name, split in two rows. */
   heroName: [["AR.", "Shakhaouth"], ["Hossain", "Shakil"]] as const,
   fullName: "AR. Shakhaouth Hossain Shakil",
-  tagline: "Architect · Photographer · Traveller · Writer · Content Creator · Social Worker",
+  tagline: "Architect · Photographer · Traveller · Author · Content Creator · Social Worker",
   intro: "Designing spaces and stories that are calm, considered and built to last. Founder of studio Kolpo, Dhaka.",
   email: "hello@example.com",
   location: "Dhaka, Bangladesh",
@@ -15,30 +15,43 @@ export const site = {
   heroImage: "/images/hero-portrait.png",
 };
 
-/** Words that swipe in the hero (and walk through the intro counter, minus the last one). */
-export const roles = ["Architect", "Photographer", "Traveller", "Writer", "Content Creator", "Social Worker"];
+/** Words that swipe in the hero. */
+export const roles = ["Architect", "Photographer", "Traveller", "Author", "Content Creator", "Social Worker"];
 
 /** Shown on the left of the intro while the counter runs. "Photographer" is the reveal at the end. */
-export const introRoles = ["Architect", "Traveller", "Writer", "Content Creator", "Social Worker"];
+export const introRoles = ["Architect", "Traveller", "Author", "Content Creator", "Social Worker"];
 
-export const nav: NavItem[] = [
-  { label: "Work", href: "#work", count: "04" },
-  { label: "Service", href: "#services", count: "04" },
-  { label: "Fields", href: "#fields", count: "06" },
-  { label: "Contact", href: "#contact" },
+export const fields: Field[] = [
+  { slug: "architecture", title: "Architecture", href: "/architecture", blurb: "Solo projects and the work of studio Kolpo." },
+  { slug: "photography", title: "Photography", href: "/photography", blurb: "Buildings, people and places, one frame at a time." },
+  { slug: "content-creation", title: "Content Creation", href: "/content-creation", blurb: "Videos and vlogs on YouTube, Facebook, TikTok and Instagram." },
+  { slug: "travel", title: "Travel", href: "/travel", blurb: "Cities, landscapes and the history behind them." },
+  { slug: "author", title: "Author", href: "/author", blurb: "Books and essays, free to read and download as PDF." },
+  { slug: "social-work", title: "Social Work", href: "/social-work", blurb: "Community projects and giving back." },
 ];
 
 export const socials: Social[] = [
-  { label: "YouTube", href: "https://youtube.com/", icon: "▶" },
-  { label: "Instagram", href: "https://instagram.com/", icon: "◎" },
-  { label: "LinkedIn", href: "https://linkedin.com/", icon: "in" },
+  { label: "YouTube", href: "https://youtube.com/", icon: "▶", handle: "@your-channel" },
+  { label: "Facebook", href: "https://facebook.com/", icon: "f", handle: "/your-page" },
+  { label: "TikTok", href: "https://tiktok.com/", icon: "♪", handle: "@your-handle" },
+  { label: "Instagram", href: "https://instagram.com/", icon: "◎", handle: "@your-handle" },
+  { label: "LinkedIn", href: "https://linkedin.com/", icon: "in", handle: "/in/your-name" },
 ];
 
-export const fields: Field[] = [
-  { slug: "architecture", title: "Architecture", blurb: "Solo projects and the work of studio Kolpo." },
-  { slug: "photography", title: "Photography", blurb: "Buildings, people and places, one frame at a time." },
-  { slug: "films", title: "Films", blurb: "Moving image as another way to draw." },
-  { slug: "travel", title: "Travel", blurb: "Cities and landscapes, documented as vlogs." },
-  { slug: "writing", title: "Writing", blurb: "Books and essays on design and place. PDF available." },
-  { slug: "ventures", title: "Ventures", blurb: "Businesses built with the discipline of buildings." },
+/** The three shown in the hero. */
+export const heroSocials = [socials[0], socials[3], socials[4]];
+
+export const nav: NavItem[] = [
+  { label: "Work", href: "/#work", count: "06" },
+  { label: "Services", href: "/#services", count: "04" },
+  { label: "Fields", href: "/#fields", count: "06", children: fields.map((f) => ({ label: f.title, href: f.href })) },
+  {
+    label: "Content", href: "/content-creation",
+    children: [
+      ...socials.slice(0, 4).map((s) => ({ label: s.label, href: s.href, external: true })),
+      { label: "All videos", href: "/content-creation" },
+    ],
+  },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/#contact" },
 ];

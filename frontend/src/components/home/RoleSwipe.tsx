@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { roles } from "@/data/site";
-import { prefersReducedMotion } from "@/lib/utils";
+import { cn, prefersReducedMotion } from "@/lib/utils";
 
 const LINE = 1.18; // em per word
 
@@ -29,7 +29,7 @@ export default function RoleSwipe() {
         transform: `translateY(${-i * LINE}em)`,
         transition: jump ? "none" : "transform .8s var(--ease-in-out-expo)",
       }}>
-        {words.map((w, k) => <span key={k} aria-hidden className="block h-[1.18em] whitespace-nowrap">{w}</span>)}
+        {words.map((w, k) => <span key={k} aria-hidden className={cn("block h-[1.18em] whitespace-nowrap", w === "Architect" && "text-accent-soft")}>{w}</span>)}
       </span>
     </h2>
   );

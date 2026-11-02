@@ -14,6 +14,9 @@ export const markIntroDone = () => {
   listeners.forEach((l) => l());
 };
 
+/** True once the intro has played in this tab (so it is skipped when you navigate back home). */
+export const isIntroDone = () => done;
+
 const subscribe = (cb: () => void) => { listeners.add(cb); return () => { listeners.delete(cb); }; };
 
 export const useIntroDone = () => useSyncExternalStore(subscribe, () => done, () => false);

@@ -4,21 +4,21 @@ import type { Field, Project, Service, SiteInfo } from "./content.types";
 export const site: SiteInfo = {
   name: "Shakil",
   fullName: "AR. Shakhaouth Hossain Shakil",
-  tagline: "Architect · Photographer · Traveller · Writer · Content Creator · Social Worker",
+  tagline: "Architect · Photographer · Traveller · Author · Content Creator · Social Worker",
   intro: "Designing spaces and stories that are calm, considered and built to last. Founder of studio Kolpo, Dhaka.",
   email: "hello@example.com",
   location: "Dhaka, Bangladesh",
   firm: "Kolpo",
-  roles: ["Architect", "Photographer", "Traveller", "Writer", "Content Creator", "Social Worker"],
+  roles: ["Architect", "Photographer", "Traveller", "Author", "Content Creator", "Social Worker"],
 };
 
 export const fields: Field[] = [
   { slug: "architecture", title: "Architecture", blurb: "Solo projects and the work of studio Kolpo." },
   { slug: "photography", title: "Photography", blurb: "Buildings, people and places, one frame at a time." },
-  { slug: "films", title: "Films", blurb: "Moving image as another way to draw." },
-  { slug: "travel", title: "Travel", blurb: "Cities and landscapes, documented as vlogs." },
-  { slug: "writing", title: "Writing", blurb: "Books and essays on design and place. PDF available." },
-  { slug: "ventures", title: "Ventures", blurb: "Businesses built with the discipline of buildings." },
+  { slug: "content-creation", title: "Content Creation", blurb: "Videos and vlogs on YouTube, Facebook, TikTok and Instagram." },
+  { slug: "travel", title: "Travel", blurb: "Cities, landscapes and the history behind them." },
+  { slug: "author", title: "Author", blurb: "Books and essays, free to read and download as PDF." },
+  { slug: "social-work", title: "Social Work", blurb: "Community projects and giving back." },
 ];
 
 export const projects: Project[] = [

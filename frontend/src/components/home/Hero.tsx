@@ -1,7 +1,7 @@
 "use client";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useIntroDone } from "@/lib/intro";
-import { site, socials } from "@/data/site";
+import { heroSocials, site } from "@/data/site";
 import { Apos, ButtonLink } from "../ui/Button";
 import RoleSwipe from "./RoleSwipe";
 import { cn } from "@/lib/utils";
@@ -97,7 +97,7 @@ export default function Hero() {
 
       {/* right: socials */}
       <div className="absolute right-[clamp(20px,6.5vw,110px)] top-[64vh] z-[4] flex min-w-[150px] flex-col gap-2 max-md:hidden">
-        {socials.map((s, i) => (
+        {heroSocials.map((s, i) => (
           <motion.a key={s.label} href={s.href} data-link target="_blank" rel="noreferrer"
             initial={{ opacity: 0, x: 26 }} animate={entered ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8, delay: 1.25 + i * 0.1, ease }} whileHover={{ x: -6 }}

@@ -2,7 +2,7 @@
 import { AnimatePresence, motion, type TargetAndTransition } from "framer-motion";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { introRoles, site } from "@/data/site";
-import { markIntroDone } from "@/lib/intro";
+import { isIntroDone, markIntroDone } from "@/lib/intro";
 import { cn, lerp, pad3, prefersReducedMotion } from "@/lib/utils";
 import Camera from "./Camera";
 
@@ -56,7 +56,8 @@ export default function Intro() {
   }, []);
 
   useEffect(() => {
-    if (prefersReducedMotion()) { markIntroDone(); setGone(true); return; }
+    // already played in this tab (e.g. coming back home from another page): skip it
+    if (isIntroDone() || prefersReducedMotion()) { markIntroDone(); setGone(true); return; }
     document.documentElement.classList.add("lenis-stopped");
     const t0 = performance.now();
     const tick = (now: number) => {
@@ -131,7 +132,7 @@ export default function Intro() {
                 <li key={r} className={cn("font-display text-[clamp(28px,min(4.8vw,9vh),80px)] leading-none transition-all duration-500",
                   i === role ? "translate-x-[18px] text-ink [-webkit-text-stroke:1.5px_var(--color-ink)]"
                     : i < role ? "text-g400 [-webkit-text-stroke:1.5px_var(--color-g400)]"
-                      : "text-outline-soft")}>{r}</li>
+                      : "text-outline-soft", r === "Architect" && "!text-accent-soft [-webkit-text-stroke:1.5px_var(--color-accent-soft)]")}>{r}</li>
               ))}
               <li className={cn("font-display text-[clamp(28px,min(4.8vw,9vh),80px)] leading-none text-outline translate-x-[18px] transition-opacity duration-400", role >= introRoles.length ? "opacity-100" : "opacity-0")}>
                 And<span className="dots text-accent [-webkit-text-stroke:0]"><span>.</span><span>.</span><span>.</span></span>
