@@ -12,13 +12,14 @@ import SocialWorker from "./intro/SocialWorker";
 import Traveller from "./intro/Traveller";
 
 /**
- * Entry sequence, one "scene" per role (art behind the big word):
+ * Entry sequence. The screen is split into a 3 x 2 contact sheet (2 x 3 on phones).
+ * Each role wipes into its own cell, one after another, and stays:
  *   Architect (blueprint) -> Content Creator (vlogger) -> Author (books, pages, letters)
  *   -> Traveller (mountains) -> Social Worker (people + hearts)
- *   -> Photographer: a camera whose lens shows the view and whose display types the word,
- *      it zooms to the front, "Say cheeseee!", 3-2-1, click + flash
+ *   -> Photographer: a camera lands in the last cell (lens shows the view, display types the word),
+ *      zooms to the front, "Say cheeseee!", 3-2-1, click + flash
  *   -> the hero takes over: ARCHITECT (mustard) SHAKHAOUTH HOSSAIN SHAKIL, then ARCHITECT -> AR.
- * The counter fills grey -> mustard across all of it.
+ * The art is muted (low opacity) so the grid reads calm; the counter fills grey -> mustard.
  */
 const SCENES: { word: string; Art: ComponentType }[] = [
   { word: "Architect", Art: Architect },
@@ -27,14 +28,17 @@ const SCENES: { word: string; Art: ComponentType }[] = [
   { word: "Traveller", Art: Traveller },
   { word: "Social Worker", Art: SocialWorker },
 ];
-const MENU = [...SCENES.map((s) => s.word), "Photographer"];
-const PHOTO = SCENES.length; // index of the camera scene
+const CELLS = SCENES.length + 1; // last cell is the photographer's camera
+const PHOTO = SCENES.length;
 
 const SCENE_MS = 1000;
 const T = { photo: SCENES.length * SCENE_MS, type: 5600, front: 7000, cheese: 7100, three: 7900, two: 8400, one: 8900, click: 9400, flash: 9450, done: 9800, exit: 9950 };
 const KEYS: [number, number][] = [[0, 1], [T.photo, 80], [T.front, 90], [T.click, 99], [T.flash, 100]];
 const TYPED = "PHOTOGRAPHER";
 const SAY = "Say cheeseee!";
+const PAD = "clamp(20px,3.4vw,48px)";
+/** Same label size in every cell, sized so "Content Creator" (the longest) fits the cell width. */
+const LABEL_SIZE = "min(calc(var(--cw) / 8.6), 6.5vh)";
 
 const countAt = (t: number) => {
   for (let i = 1; i < KEYS.length; i++) {
@@ -53,8 +57,8 @@ const displayAt = (t: number) => {
   return "CLICK!";
 };
 
-type View = { scene: number; value: number; display: string; front: boolean; snap: boolean };
-const sameView = (a: View, b: View) => a.scene === b.scene && a.value === b.value && a.display === b.display && a.front === b.front && a.snap === b.snap;
+type View = { shown: number; value: number; display: string; front: boolean; snap: boolean };
+const sameView = (a: View, b: View) => a.shown === b.shown && a.value === b.value && a.display === b.display && a.front === b.front && a.snap === b.snap;
 
 function Letters({ text, className, step = 0.04, hidden, shown }: { text: string; className?: string; step?: number; hidden: TargetAndTransition; shown: TargetAndTransition }) {
   return (
@@ -69,11 +73,29 @@ function Letters({ text, className, step = 0.04, hidden, shown }: { text: string
   );
 }
 
+/** One filled cell: wipes up, art plays muted behind, word sits bottom-left. */
+function Cell({ index, word, Art }: { index: number; word: string; Art: ComponentType }) {
+  return (
+    <motion.div className="absolute inset-0 overflow-hidden border-[1.5px] border-g300 bg-paper/45"
+      initial={{ clipPath: "inset(100% 0% 0% 0%)" }} animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
+      transition={{ duration: 0.7, ease: [0.77, 0, 0.18, 1] }}>
+      <div className="absolute inset-0 opacity-[0.5]"><Art /></div>
+      <span className="label absolute left-3 top-2.5 text-[10px] text-g500">{String(index + 1).padStart(2, "0")}</span>
+      <div className="absolute bottom-2.5 left-3 font-display leading-none text-ink"
+        style={{ fontSize: LABEL_SIZE }}>
+        {word}
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Intro() {
   const [gone, setGone] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [flash, setFlash] = useState(false);
-  const [v, setV] = useState<View>({ scene: 0, value: 1, display: "", front: false, snap: false });
+  const [v, setV] = useState<View>({ shown: 1, value: 1, display: "", front: false, snap: false });
+  const [slot, setSlot] = useState({ x: 0, y: 0, s: 0.4 });
+  const cellRef = useRef<HTMLDivElement>(null);
   const raf = useRef(0);
   const fired = useRef({ flash: false, done: false, exit: false });
 
@@ -86,10 +108,27 @@ export default function Intro() {
     setLeaving(true);
   };
 
+  /** Where the camera sits while it lives in the last cell (measured, so it works at any screen size). */
+  useEffect(() => {
+    const measure = () => {
+      const c = cellRef.current?.getBoundingClientRect();
+      if (!c) return;
+      const baseW = Math.min(window.innerWidth * 0.56, window.innerHeight * 0.86);
+      setSlot({
+        x: c.left + c.width / 2 - window.innerWidth / 2,
+        y: c.top + c.height / 2 - window.innerHeight / 2 + 6,
+        s: Math.min((c.width * 0.8) / baseW, (c.height * 0.62) / (baseW * 0.73)),
+      });
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
   useEffect(() => {
     if (prefersReducedMotion()) { markIntroDone(); setGone(true); return; }
     document.documentElement.classList.add("lenis-stopped");
-    // dev only: /?introAt=3500 jumps the timeline, add &introFreeze=1 to hold that moment (handy for checking one scene)
+    // dev only: /?introAt=3500 jumps the timeline, add &introFreeze=1 to hold that moment (handy for checking one stage)
     const dev = process.env.NODE_ENV !== "production" ? new URLSearchParams(window.location.search) : null;
     const offset = Number(dev?.get("introAt")) || 0;
     const freeze = dev?.get("introFreeze") === "1";
@@ -97,7 +136,7 @@ export default function Intro() {
     const tick = (now: number) => {
       const t = (freeze ? 0 : now - t0) + offset;
       const next: View = {
-        scene: t < T.photo ? Math.floor(t / SCENE_MS) : PHOTO,
+        shown: t < T.photo ? Math.floor(t / SCENE_MS) + 1 : CELLS,
         value: countAt(t),
         display: displayAt(t),
         front: t >= T.front,
@@ -123,83 +162,72 @@ export default function Intro() {
     "--stroke": c([163, 163, 163], [247, 181, 0], t * 0.8),
   } as CSSProperties;
 
-  const scene = SCENES[v.scene];
-  const onCamera = v.scene === PHOTO;
-  const corner = "absolute h-[34px] w-[34px] border-0 transition-colors duration-500";
-  const cornerColor = v.front ? "border-accent" : "border-g500";
-  const pad = "clamp(20px,3.4vw,48px)";
-  const wordSize = scene ? `min(13vw,24vh,${(88 / (scene.word.length * 0.52)).toFixed(2)}vw)` : undefined;
+  const onCamera = v.shown >= CELLS;
 
   return (
     <AnimatePresence onExitComplete={() => setGone(true)}>
       {!leaving && (
         <motion.div key="intro" aria-hidden exit={{ opacity: 0 }} transition={{ duration: 0.8, ease: "easeInOut" }}
           className="fixed inset-0 z-[1000] overflow-hidden bg-g200" style={vars}>
-          {/* mustard glow grows with the count */}
+          {/* soft mustard glow, kept faint */}
           <div className="pointer-events-none absolute inset-0" style={{
-            opacity: t * 0.95,
-            background: "radial-gradient(62% 62% at 82% 90%, rgba(247,181,0,.34), transparent 72%), radial-gradient(40% 40% at 8% 12%, rgba(247,181,0,.12), transparent 70%)",
+            opacity: t * 0.55,
+            background: "radial-gradient(62% 62% at 82% 95%, rgba(247,181,0,.22), transparent 72%)",
           }} />
 
           <div className="label absolute inset-x-5 top-[22px] z-[20] flex justify-between text-g600 md:inset-x-[clamp(20px,3.4vw,48px)]">
             <span>{site.firm} — Portfolio</span><span>{site.location}</span>
           </div>
-          <i className={cn(corner, cornerColor, "left-5 top-16 border-l-2 border-t-2 md:left-[clamp(20px,3.4vw,48px)]")} />
-          <i className={cn(corner, cornerColor, "right-5 top-16 border-r-2 border-t-2 md:right-[clamp(20px,3.4vw,48px)]")} />
-          <i className={cn(corner, cornerColor, "bottom-16 left-5 border-b-2 border-l-2 md:left-[clamp(20px,3.4vw,48px)]")} />
-          <i className={cn(corner, cornerColor, "bottom-16 right-5 border-b-2 border-r-2 md:right-[clamp(20px,3.4vw,48px)]")} />
 
-          {/* scene art (behind) + big word (in front) */}
-          <AnimatePresence>
-            {scene && <scene.Art key={`art-${v.scene}`} />}
-          </AnimatePresence>
-          <AnimatePresence>
-            {scene && (
-              <motion.div key={`word-${v.scene}`} exit={{ opacity: 0, y: -24 }} transition={{ duration: 0.25 }}
-                className="pointer-events-none absolute z-10 flex -translate-y-1/2 items-center" style={{ left: `calc(${pad} + 30px)`, top: "70%" }}>
-                <div className="font-display leading-none text-ink [-webkit-text-stroke:10px_var(--color-g200)] [paint-order:stroke_fill]" style={{ fontSize: wordSize }}>
-                  <Letters text={scene.word} step={0.035} className="!justify-start" hidden={{ y: "115%", opacity: 0 }} shown={{ y: 0, opacity: 1 }} />
+          {/* the divided screen: filled cells stay, empty ones wait as dashed outlines */}
+          <motion.div className="absolute z-[5] grid grid-cols-2 grid-rows-3 gap-2 [--cw:42vw] md:grid-cols-3 md:grid-rows-2 md:[--cw:28vw]"
+            style={{ top: 56, bottom: 60, left: PAD, right: PAD }}
+            animate={{ opacity: v.front ? 0.28 : 1 }} transition={{ duration: 0.6 }}>
+            {Array.from({ length: CELLS }, (_, i) => {
+              const filled = i < v.shown;
+              const scene = SCENES[i];
+              return (
+                <div key={i} ref={i === PHOTO ? cellRef : undefined} className="relative min-h-0 min-w-0">
+                  <div className={cn("absolute inset-0 border-[1.5px] border-dashed border-g300/70 transition-all duration-500", filled && i !== PHOTO && "opacity-0", filled && i === PHOTO && "border-solid border-g300 bg-paper/45")} />
+                  {filled && scene && <Cell index={i} word={scene.word} Art={scene.Art} />}
+                  {i === PHOTO && (
+                    <>
+                      <span className={cn("label absolute left-3 top-2.5 text-[10px] text-g500 transition-opacity", filled ? "opacity-100" : "opacity-0")}>06</span>
+                      <div className={cn("font-display absolute bottom-2.5 left-3 leading-none text-ink transition-opacity", filled ? "opacity-100" : "opacity-0")}
+                        style={{ fontSize: LABEL_SIZE }}>Photographer</div>
+                    </>
+                  )}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              );
+            })}
+          </motion.div>
 
-          {/* photographer: camera in the middle, zooms to the front */}
-          {onCamera && (
-            <div className="pointer-events-none absolute inset-0 z-[12] grid place-items-center">
+          {/* photographer: camera lands in the last cell, then zooms to the front */}
+          <div className="pointer-events-none absolute inset-0 z-[12] grid place-items-center">
+            {onCamera && (
               <motion.div className="w-[min(56vw,86vh)]"
-                initial={{ y: "90vh", scale: 0.45, rotate: 8, opacity: 0 }}
-                animate={v.front ? { y: "9vh", scale: 1.1, rotate: 0, opacity: 1 } : { y: "4vh", scale: 0.78, rotate: 0, opacity: 1 }}
+                initial={{ x: slot.x, y: slot.y + 140, scale: slot.s * 0.6, rotate: 8, opacity: 0 }}
+                animate={v.front
+                  ? { x: 0, y: typeof window === "undefined" ? 0 : window.innerHeight * 0.09, scale: 1.1, rotate: 0, opacity: 1 }
+                  : { x: slot.x, y: slot.y, scale: slot.s, rotate: 0, opacity: 1 }}
                 transition={v.front ? { duration: 0.9, ease: [0.16, 1, 0.3, 1] } : { type: "spring", stiffness: 90, damping: 13 }}>
                 <PhotoCamera text={v.display} pressed={v.snap} focus={v.front && !v.snap} />
               </motion.div>
-            </div>
-          )}
+            )}
+          </div>
           {onCamera && v.front && (
             <div className="pointer-events-none absolute inset-x-0 top-[7%] z-[14] flex justify-center overflow-hidden py-[.04em] font-display text-[clamp(40px,8.6vw,150px)] leading-[1.02] text-ink [-webkit-text-stroke:10px_var(--color-g200)] [paint-order:stroke_fill]">
               <Letters text={SAY} step={0.038} hidden={{ y: "115%" }} shown={{ y: 0 }} />
             </div>
           )}
 
-          {/* loading menu */}
-          <ul className={cn("label absolute bottom-[calc(74px+clamp(48px,min(7vw,14vh),110px)*0.9)] right-5 z-[20] grid justify-items-end gap-1 text-[10px] tracking-[0.16em] transition-opacity duration-500 max-md:hidden md:right-[calc(clamp(20px,3.4vw,48px)+46px)]", v.front && "opacity-0")}>
-            {MENU.map((m, i) => {
-              const on = i === v.scene, past = i < v.scene;
-              return (
-                <li key={m} className={cn("flex flex-row-reverse items-center gap-2 transition-colors duration-300", on ? "text-ink" : past ? "text-accent-d" : "text-g400")}>
-                  <i className={cn("block h-[3px] transition-all duration-300", on ? "w-6 bg-accent" : past ? "w-3 bg-accent" : "w-3 bg-g300")} />
-                  {String(i + 1).padStart(2, "0")} {m}
-                </li>
-              );
-            })}
-          </ul>
-          <button onClick={() => finish()} data-link className="label absolute bottom-[22px] z-[20] text-g500" style={{ left: `calc(${pad} + 30px)` }}>Click to skip</button>
+          <button onClick={() => finish()} data-link className="label absolute bottom-[20px] z-[20] text-g500" style={{ left: PAD }}>Click to skip</button>
 
           {/* counter */}
-          <div className={cn("absolute bottom-[74px] right-5 z-[20] font-display leading-[0.8] tabular-nums md:right-[calc(clamp(20px,3.4vw,48px)+46px)]",
-            "text-[clamp(48px,min(7vw,14vh),110px)] text-transparent [-webkit-text-stroke:2px_var(--stroke)]",
-            "bg-[linear-gradient(to_top,var(--fill)_var(--p),transparent_var(--p))] bg-clip-text")}>
-            {pad3(v.value)}<small className="ml-[.1em] align-top text-[.24em] [-webkit-text-stroke:1.5px_var(--stroke)]">%</small>
+          <div className={cn("absolute bottom-[10px] z-[20] font-display leading-[0.9] tabular-nums",
+            "text-[clamp(30px,min(4vw,7vh),56px)] text-transparent [-webkit-text-stroke:1.6px_var(--stroke)]",
+            "bg-[linear-gradient(to_top,var(--fill)_var(--p),transparent_var(--p))] bg-clip-text")} style={{ right: PAD }}>
+            {pad3(v.value)}<small className="ml-[.1em] align-top text-[.3em] [-webkit-text-stroke:1.2px_var(--stroke)]">%</small>
           </div>
 
           {flash && <div className="flash-go pointer-events-none absolute inset-0 z-[60] bg-white opacity-0" />}
