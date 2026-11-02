@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# a newer push to the same branch cancels the older run
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend (type-check + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  backend:
+    name: Backend (type-check + build + Redis smoke test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Smoke test (API + Redis rate limit)
+        env:
+          PORT: "4000"
+          REDIS_URL: redis://localhost:6379
+        run: |
+          node dist/main &
+          for i in $(seq 1 30); do curl -sf localhost:4000/api/health >/dev/null && break; sleep 1; done
+
+          echo "health:"
+          for i in $(seq 1 15); do curl -sf localhost:4000/api/health | grep -q '"redis":"up"' && break; sleep 1; done
+          curl -sf localhost:4000/api/health | tee /dev/stderr | grep '"redis":"up"'
+          echo; echo "content:"; curl -sf localhost:4000/api/content/site | grep 'Shakhaouth'
+
+          body='{"name":"CI Test","email":"ci@example.com","message":"Hello from the CI smoke test."}'
+          for i in 1 2 3 4 5; do
+            curl -sf -X POST localhost:4000/api/contact -H 'Content-Type: application/json' -d "$body" >/dev/null
+          done
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST localhost:4000/api/contact -H 'Content-Type: application/json' -d "$body")
+          echo "6th request status: $code (expected 429 from the Redis rate limit)"
+          test "$code" = "429"
