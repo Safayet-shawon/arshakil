@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { nav } from "@/data/site";
-import { useIntroDone } from "@/lib/intro";
+import { useHeroReady } from "@/lib/intro";
 import { Apos, ButtonLink } from "../ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,7 @@ const item = (i: number) => ({
 });
 
 export default function Header() {
-  const entered = useIntroDone();
+  const entered = useHeroReady();
   const [solid, setSolid] = useState(false);
   useEffect(() => {
     const on = () => setSolid(window.scrollY > 40);

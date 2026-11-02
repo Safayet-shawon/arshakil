@@ -2,18 +2,25 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * Tiny shared flag: the intro (counter -> say cheese -> photographer) flips it when it leaves,
- * and the header + hero start their entry animation from it.
+ * Shared page-entry stage:
+ *   0  intro is playing
+ *   1  intro left: the hero shows "ARCHITECT SHAKHAOUTH HOSSAIN SHAKIL" (ARCHITECT in mustard)
+ *   2  hero morphs ARCHITECT -> "AR."; portrait, text, socials and the header come in
  */
-let done = false;
+let stage = 0;
 const listeners = new Set<() => void>();
 
-export const markIntroDone = () => {
-  if (done) return;
-  done = true;
+export const advanceIntro = (to: 1 | 2) => {
+  if (stage >= to) return;
+  stage = to;
   listeners.forEach((l) => l());
 };
 
-const subscribe = (cb: () => void) => { listeners.add(cb); return () => { listeners.delete(cb); }; };
+/** Called by the intro as it fades out. */
+export const markIntroDone = () => advanceIntro(1);
 
-export const useIntroDone = () => useSyncExternalStore(subscribe, () => done, () => false);
+const subscribe = (cb: () => void) => { listeners.add(cb); return () => { listeners.delete(cb); }; };
+const useStage = () => useSyncExternalStore(subscribe, () => stage, () => 0);
+
+export const useIntroDone = () => useStage() >= 1;
+export const useHeroReady = () => useStage() >= 2;
