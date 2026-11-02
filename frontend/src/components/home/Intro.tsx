@@ -51,6 +51,10 @@ export default function Intro() {
   const exit = useCallback(() => {
     if (exited.current) return;
     exited.current = true;
+    // stop the rest of the timeline, otherwise its timers would bring the intro back after a skip
+    cancelAnimationFrame(raf.current);
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
     setPhase("exit");
     later(markIntroDone, 450);
   }, []);
@@ -106,7 +110,7 @@ export default function Intro() {
   return (
     <AnimatePresence>
       {phase !== "exit" && (
-        <motion.div key="intro" aria-hidden exit={{ y: "-100%" }} transition={{ duration: 1, ease: [0.77, 0, 0.18, 1] }}
+        <motion.div key="intro" aria-hidden onClick={exit} exit={{ y: "-100%" }} transition={{ duration: 1, ease: [0.77, 0, 0.18, 1] }}
           className="fixed inset-0 z-[1000] overflow-hidden bg-g200" style={vars}>
           {/* soft mustard glow that grows with the count */}
           <div className="pointer-events-none absolute inset-0 transition-opacity duration-200" style={{
@@ -123,7 +127,7 @@ export default function Intro() {
           <i className={cn(corner, cornerColor, "bottom-16 left-5 border-b-2 border-l-2 md:left-[clamp(20px,3.4vw,48px)]")} />
           <i className={cn(corner, cornerColor, "bottom-16 right-5 border-b-2 border-r-2 md:right-[clamp(20px,3.4vw,48px)]")} />
           <div className="label absolute bottom-[72px] left-[calc(clamp(20px,3.4vw,48px)+46px)] text-[10px] tracking-[0.18em] text-g500 max-md:hidden">ISO 100 · 1/125 · f/2.8</div>
-          <button onClick={exit} data-link className="label absolute bottom-[22px] left-5 text-g500 md:left-[clamp(20px,3.4vw,48px)]">Click to skip</button>
+          <button onClick={exit} data-link className="label absolute bottom-[22px] left-5 text-g500 md:left-[clamp(20px,3.4vw,48px)]">Click anywhere to skip</button>
 
           {/* stage A — roles + counter */}
           <motion.div className="absolute inset-0" animate={stageA ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.96 }} transition={{ duration: 0.5 }}>
