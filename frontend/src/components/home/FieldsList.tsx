@@ -9,7 +9,7 @@ import SectionHead from "../ui/SectionHead";
 export default function FieldsList() {
   return (
     <Section id="fields">
-      <SectionHead index="01" kicker="Fields of work" title={<>One eye,<br />six crafts</>} aside="06" outline />
+      <SectionHead index="01" kicker="Fields of work" title={<>One eye,<br />six crafts</>} aside="06" />
       <Reveal>
         <ul>
           {fields.map((f, i) => (

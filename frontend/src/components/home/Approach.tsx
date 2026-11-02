@@ -13,7 +13,7 @@ export default function Approach() {
         <Reveal>
           <h2 className="font-display text-[clamp(22px,3vw,44px)] leading-[1.05] text-ink">
             <Hl>{before}</Hl>
-            <em className="not-italic" style={{ color: "transparent", WebkitTextStroke: "1.5px var(--color-accent)" }}>unfamiliar</em>
+            <em className="text-outline-soft not-italic [-webkit-text-stroke:1.2px_var(--color-accent)]">unfamiliar</em>
             <Hl>{after}</Hl>
           </h2>
         </Reveal>

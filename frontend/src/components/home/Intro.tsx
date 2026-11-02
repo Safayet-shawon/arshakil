@@ -136,7 +136,7 @@ export default function Intro() {
                 <li key={r} className={cn("font-display text-[clamp(28px,min(4.8vw,9vh),80px)] leading-none transition-all duration-500",
                   i === role ? "translate-x-[18px] text-ink [-webkit-text-stroke:1.5px_var(--color-ink)]"
                     : i < role ? "text-g400 [-webkit-text-stroke:1.5px_var(--color-g400)]"
-                      : "text-outline-soft", r === "Architect" && "!text-accent-soft [-webkit-text-stroke:1.5px_var(--color-accent-soft)]")}>{r}</li>
+                      : "text-outline-soft")}>{r}</li>
               ))}
               <li className={cn("font-display text-[clamp(28px,min(4.8vw,9vh),80px)] leading-none text-outline translate-x-[18px] transition-opacity duration-400", role >= introRoles.length ? "opacity-100" : "opacity-0")}>
                 And<span className="dots text-accent [-webkit-text-stroke:0]"><span>.</span><span>.</span><span>.</span></span>
