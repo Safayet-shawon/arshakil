@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { projects } from "@/data/content";
+import { getContent } from "@/lib/server/content";
 import type { Project } from "@/types";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
@@ -27,7 +27,8 @@ function ProjectCard({ p, index }: { p: Project; index: number }) {
   );
 }
 
-export default function ArchitecturePage() {
+export default async function ArchitecturePage() {
+  const { projects } = await getContent();
   return (
     <>
       <PageHero index="01" title="Architecture" intro="Spaces shaped by light, material and silence: selected projects from Kolpo and Studio Karu." />

@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState, type FormEvent } from "react";
-import { services } from "@/data/content";
 import { sendContact } from "@/lib/api";
 import { useRequestedService } from "@/lib/request";
+import { useSite } from "../layout/SiteProvider";
 import { cn } from "@/lib/utils";
 
 type Status = { kind: "idle" | "sending" | "ok" | "error"; message?: string };
@@ -13,6 +13,7 @@ const field =
 /** Posts to the NestJS backend (POST /api/contact). "Hire me as ..." cards pre-select the service. */
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const { services } = useSite();
   const [service, setService] = useState("");
   const wanted = useRequestedService();
   useEffect(() => { if (wanted) setService(wanted); }, [wanted]);

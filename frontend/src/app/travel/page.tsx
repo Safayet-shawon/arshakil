@@ -1,25 +1,26 @@
 import type { Metadata } from "next";
-import { places, stories, videos } from "@/data/content";
+import { getContent } from "@/lib/server/content";
 import CtaBand from "@/components/ui/CtaBand";
-import Hl from "@/components/ui/Hl";
 import PageHero from "@/components/ui/PageHero";
 import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
+import T from "@/components/ui/T";
 import TravelExplorer from "@/components/travel/TravelExplorer";
 import VideoCard from "@/components/ui/VideoCard";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Travel" };
 
-export default function TravelPage() {
+export default async function TravelPage() {
+  const { places, stories, videos } = await getContent();
   return (
     <>
-      <PageHero index="04" title="Travel" intro="Pick Bangladesh or Abroad, tap a pin on the map and read the post: what to see, how to go and roughly what it costs." />
+      <PageHero index="04" title="Travel" intro="Choose Bangladesh for its cities, or Abroad for countries. Open one to see what to do there, what it costs, and the posts and videos from it." />
 
       <Section>
-        <SectionHead index="01" kicker="Places" title="Travel map" aside={String(places.length).padStart(2, "0")} />
+        <SectionHead index="01" kicker="Places" title="Where to?" aside={String(places.length).padStart(2, "0")} />
         <TravelExplorer />
       </Section>
 
@@ -39,8 +40,8 @@ export default function TravelPage() {
                 <Photo name={s.photo} alt={s.title} ratio="4/3" className={cn(i % 2 === 1 && "md:order-2")} />
                 <div>
                   <div className="label text-accent-d">{s.era} · {s.place}</div>
-                  <h3 className="font-display mt-2 text-[clamp(30px,4vw,56px)] leading-[0.95] text-ink"><Hl>{s.title}</Hl></h3>
-                  <p className="mt-3 max-w-md text-sm leading-relaxed text-g600"><Hl>{s.blurb}</Hl></p>
+                  <h3 className="font-display mt-2 text-[clamp(30px,4vw,56px)] leading-[0.95] text-ink">{s.title}</h3>
+                  <p className="mt-3 max-w-md text-sm leading-relaxed text-g600"><T>{s.blurb}</T></p>
                 </div>
               </article>
             </Reveal>

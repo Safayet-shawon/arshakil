@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { mapLink, places } from "@/data/content";
+import { placeMapUrl } from "@/lib/media";
+import { getContent } from "@/lib/server/content";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
 import PageHero from "@/components/ui/PageHero";
@@ -13,20 +14,19 @@ import VideoCard from "@/components/ui/VideoCard";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const generateStaticParams = () => places.map((p) => ({ slug: p.slug }));
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const p = places.find((x) => x.slug === slug);
+  const p = (await getContent()).places.find((x) => x.slug === slug);
   return { title: p ? p.name : "Travel" };
 }
 
-/** One place: the overview, then everything posted from it (notes and videos). Add entries to `posts` in data/content.ts. */
+/** One place: the overview, then everything posted from it (notes and videos), all managed in the admin panel. */
 export default async function PlacePage({ params }: Props) {
   const { slug } = await params;
-  const p = places.find((x) => x.slug === slug);
+  const c = await getContent();
+  const p = c.places.find((x) => x.slug === slug);
   if (!p) notFound();
-  const posts = p.posts ?? [];
+  const posts = c.placePosts.filter((x) => x.place === p.slug);
 
   return (
     <>
@@ -42,7 +42,7 @@ export default async function PlacePage({ params }: Props) {
           </ul>
           <p className="label mt-6 text-g600">Estimated cost · {p.cost}</p>
           <div className="mt-6 flex flex-wrap items-center gap-5">
-            <a href={mapLink(p.lat, p.lng)} target="_blank" rel="noreferrer" data-link className="label text-accent-d transition-colors hover:text-ink">Open in Google Maps ↗</a>
+            <a href={placeMapUrl(p.name, p.country)} target="_blank" rel="noreferrer" data-link className="label text-accent-d transition-colors hover:text-ink">Open in Google Maps ↗</a>
             <Link href="/travel" data-link className="label text-g600 transition-colors hover:text-accent-d">← All places</Link>
           </div>
         </Reveal>
@@ -55,7 +55,7 @@ export default async function PlacePage({ params }: Props) {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((post, i) => (
-              <Reveal key={post.title} delay={i * 0.07}>
+              <Reveal key={post.title + i} delay={i * 0.07}>
                 {post.youtubeId ? (
                   <VideoCard video={{ title: post.title, group: p.name, thumb: p.photo, youtubeId: post.youtubeId }} />
                 ) : (

@@ -4,13 +4,24 @@ export interface NavItem { label: string; href: string; count?: string; children
 export interface Field { slug: string; title: string; href: string; blurb: string }
 export interface Social { label: string; href: string; icon: string; handle: string }
 
-export interface Project { slug: string; title: string; year: string; location: string; type: string; summary: string; photo: string }
-export interface Photo { photo: string; title: string; category: string }
-export interface Video { title: string; group: string; thumb: string; youtubeId?: string }
+/** `featured` items are listed in the home page's "Selected work". `photo` is a /photos name or an uploaded /api/media path. */
+interface Featurable { featured?: boolean }
+export interface Project extends Featurable { slug: string; title: string; year: string; location: string; type: string; summary: string; photo: string }
+export interface Photo extends Featurable { photo: string; title: string; category: string }
+export interface Video extends Featurable { title: string; group: string; thumb: string; youtubeId?: string }
 export interface Story { title: string; place: string; era: string; blurb: string; photo: string }
-export interface Book { slug: string; title: string; subtitle: string; summary: string; pages: number; language: string; year: string; pdf: string }
-export interface Initiative { slug: string; title: string; area: string; blurb: string; photo: string; points: string[] }
+export interface Initiative extends Featurable { slug: string; title: string; area: string; blurb: string; photo: string; points: string[] }
+export interface Named { name: string }
 export interface BestOf { category: string; title: string; meta: string; year: string; href: string; photo: string }
+
+/**
+ * A book. `pdf` is a private key: it never reaches the browser (see lib/server/content.ts).
+ * Prices are in BDT. The first 5% of pages are free to read, the rest needs an access code.
+ */
+export interface Book extends Featurable {
+  slug: string; title: string; subtitle: string; summary: string; content: string;
+  pages: number; language: string; year: string; priceBdt: number; thumb: string; pdf: string;
+}
 
 /** One "Hire me as ..." card. `custom` rates are quoted after a request; `fixed` ones show a price. */
 export interface Service {
@@ -24,20 +35,41 @@ export interface Service {
   phone?: boolean;
 }
 
-/** A travel post: shown as a pin on the map and as a post card below it. */
-export interface PlacePost { title: string; text: string; youtubeId?: string }
+/** A city (Bangladesh) or a country (abroad). Its page lists the details and the posts added for it. */
 export interface Place {
-  posts?: PlacePost[];
   slug: string;
   name: string;
   region: "bangladesh" | "abroad";
   country: string;
-  lat: number;
-  lng: number;
   photo: string;
   summary: string;
   ideas: string[];
   cost: string;
+  lat?: number;
+  lng?: number;
 }
+export interface PlacePost { place: string; title: string; text: string; youtubeId?: string }
 
 export interface ContactPayload { name: string; email: string; message: string; service?: string }
+
+/** Everything the admin can edit. Defaults live in data/content.ts; saved changes override them. */
+export interface SiteContent {
+  texts: Record<string, string>;
+  projects: Project[];
+  gallery: Photo[];
+  categories: Named[];
+  videos: Video[];
+  videoGroups: Named[];
+  places: Place[];
+  placePosts: PlacePost[];
+  books: Book[];
+  initiatives: Initiative[];
+  services: Service[];
+  stories: Story[];
+}
+export type ListName = Exclude<keyof SiteContent, "texts">;
+
+/** Server-only: who may read which book, and who asked. */
+export interface AccessCode { code: string; book: string; label: string; createdAt: string }
+export interface AccessRequest { id: string; book: string; name: string; contact: string; txn: string; createdAt: string; status: "new" | "granted"; code?: string }
+export interface PrivateData { codes: AccessCode[]; requests: AccessRequest[] }

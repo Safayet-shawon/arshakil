@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { initiatives } from "@/data/content";
+import { getContent } from "@/lib/server/content";
 import { ButtonLink } from "@/components/ui/Button";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
@@ -12,17 +12,15 @@ import Section from "@/components/ui/Section";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const generateStaticParams = () => initiatives.map((n) => ({ slug: n.slug }));
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const n = initiatives.find((i) => i.slug === slug);
+  const n = (await getContent()).initiatives.find((i) => i.slug === slug);
   return { title: n ? n.title : "Social Work" };
 }
 
 export default async function InitiativePage({ params }: Props) {
   const { slug } = await params;
-  const n = initiatives.find((i) => i.slug === slug);
+  const n = (await getContent()).initiatives.find((i) => i.slug === slug);
   if (!n) notFound();
 
   return (

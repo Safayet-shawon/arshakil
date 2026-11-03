@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { socials } from "@/data/site";
-import { videos } from "@/data/content";
+import { getContent } from "@/lib/server/content";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
 import PageHero from "@/components/ui/PageHero";
@@ -11,9 +11,9 @@ import VideoCard from "@/components/ui/VideoCard";
 
 export const metadata: Metadata = { title: "Content Creation" };
 
-const groups = [...new Set(videos.map((v) => v.group))];
-
-export default function ContentPage() {
+export default async function ContentPage() {
+  const { videos, videoGroups } = await getContent();
+  const groups = videoGroups.map((g) => g.name).filter((g) => videos.some((v) => v.group === g));
   return (
     <>
       <PageHero index="03" title="Content Creation" intro="Videos, vlogs and stories: on YouTube first, and across Facebook, TikTok and Instagram." />

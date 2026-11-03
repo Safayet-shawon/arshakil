@@ -1,4 +1,4 @@
-import type { BestOf, Book, Initiative, Photo, Place, Project, Service, Story, Video } from "@/types";
+import type { BestOf, Book, Initiative, Named, Photo, Place, PlacePost, Project, Service, SiteContent, Story, Video } from "@/types";
 
 // Placeholder content. Photos are stock images in /public/photos (replace file-for-file with real ones).
 export const approach =
@@ -31,7 +31,7 @@ export const gallery: Photo[] = [
   { photo: "arch-house-2", title: "Angles", category: "Architecture" },
   { photo: "travel-beach", title: "Island Coast", category: "Travel" },
 ];
-export const galleryCategories = ["All", "Architecture", "Street", "Portrait", "Travel"];
+export const categories: Named[] = ["Architecture", "Street", "Portrait", "Travel"].map((name) => ({ name }));
 
 /** Add a real `youtubeId` to any video: its YouTube thumbnail and link are used automatically. */
 export const videos: Video[] = [
@@ -60,11 +60,7 @@ export const places: Place[] = [
   { slug: "sylhet", name: "Sylhet", region: "bangladesh", country: "Bangladesh", lat: 24.8949, lng: 91.8687, photo: "travel-road",
     summary: "Tea gardens, swamp forest and river-border hills in the north-east.",
     ideas: ["Ratargul Swamp Forest by boat", "Jaflong and the Piyain river", "Walk the tea gardens at Lakkatura"],
-    cost: "Trip cost: add your numbers (transport · stay · food)",
-    posts: [
-      { title: "Ratargul by boat", text: "Sample post: replace with your own notes, tips and photos from Sylhet." },
-      { title: "Sylhet travel vlog", text: "Sample video post: set `youtubeId` to show the real thumbnail and link." },
-    ] },
+    cost: "Trip cost: add your numbers (transport · stay · food)" },
   { slug: "coxs-bazar", name: "Cox's Bazar", region: "bangladesh", country: "Bangladesh", lat: 21.4272, lng: 92.0058, photo: "travel-beach",
     summary: "One of the longest natural sea beaches in the world.",
     ideas: ["Sunset at Laboni Point", "Drive the marine drive to Inani", "Himchari waterfall"],
@@ -96,8 +92,7 @@ export const places: Place[] = [
   { slug: "sri-lanka", name: "Sri Lanka", region: "abroad", country: "Sri Lanka", lat: 7.8731, lng: 80.7718, photo: "travel-beach",
     summary: "Tea hills, southern beaches and old colonial forts in a small island.",
     ideas: ["Train from Kandy to Ella", "Galle Fort at sunset", "Sigiriya rock at first light"],
-    cost: "Itinerary and budget: add your numbers (flights · stay · food)",
-    posts: [{ title: "Kandy to Ella by train", text: "Sample post: replace with your own notes, tips and photos from this trip." }] },
+    cost: "Itinerary and budget: add your numbers (flights · stay · food)" },
   { slug: "nepal", name: "Nepal", region: "abroad", country: "Nepal", lat: 28.3949, lng: 84.124, photo: "travel-alpine",
     summary: "Himalayan trails, Kathmandu's old squares and lakeside Pokhara.",
     ideas: ["Kathmandu Durbar Square", "Sunrise at Sarangkot, Pokhara", "A short trek in the Annapurna foothills"],
@@ -119,10 +114,12 @@ export const stories: Story[] = [
   { title: "Side Streets After Rain", place: "Bangladesh", era: "Everyday life", blurb: "History is also what's left on the pavement after the crowd goes home.", photo: "street-side" },
 ];
 
-/** Put real PDFs in /public/pdfs and point `pdf` at them. */
+/** Sample books read the private sample PDF (`pdf: "seed"`). Real books are uploaded in the admin panel. */
 export const books: Book[] = [
-  { slug: "b1", title: "Book Title One", subtitle: "A subtitle", summary: "A short description of the book: what it explores and who it is for. Replace with the real blurb.", pages: 180, language: "English", year: "2023", pdf: "/pdfs/sample-book.pdf" },
-  { slug: "b2", title: "Book Title Two", subtitle: "Another subtitle", summary: "A short description of the second book. Essays on design, place and a life in motion.", pages: 140, language: "Bangla", year: "2024", pdf: "/pdfs/sample-book.pdf" },
+  { slug: "book-title-one", title: "Book Title One", subtitle: "A subtitle", summary: "A short description of the book: what it explores and who it is for. Replace with the real blurb.",
+    content: "Chapter 1 — Placeholder\nChapter 2 — Placeholder\nChapter 3 — Placeholder", pages: 24, language: "English", year: "2023", priceBdt: 350, thumb: "author-notebook", pdf: "seed" },
+  { slug: "book-title-two", title: "Book Title Two", subtitle: "Another subtitle", summary: "A short description of the second book. Essays on design, place and a life in motion.",
+    content: "Chapter 1 — Placeholder\nChapter 2 — Placeholder", pages: 24, language: "Bangla", year: "2024", priceBdt: 250, thumb: "author-shelf", pdf: "seed" },
 ];
 
 export const initiatives: Initiative[] = [
@@ -168,3 +165,16 @@ export const about = [
   "Away from the drawing table I photograph buildings and the cities I walk through, travel across Bangladesh and abroad, write books and essays, and make videos about all of it.",
   "I also give time to social work: education support, clean-ups and neighbourhood programs. Different tools, one habit: looking carefully, then making something honest.",
 ];
+
+export const videoGroups: Named[] = [...new Set(videos.map((v) => v.group))].map((name) => ({ name }));
+
+export const placePosts: PlacePost[] = [
+  { place: "sylhet", title: "Ratargul by boat", text: "Sample post: replace with your own notes, tips and photos from Sylhet." },
+  { place: "sylhet", title: "Sylhet travel vlog", text: "Sample video post: add a YouTube video id to show the real thumbnail and link." },
+  { place: "sri-lanka", title: "Kandy to Ella by train", text: "Sample post: replace with your own notes, tips and photos from this trip." },
+];
+
+/** What the site shows until something is changed in the admin panel. */
+export const defaults: SiteContent = {
+  texts: {}, projects, gallery, categories, videos, videoGroups, places, placePosts, books, initiatives, services, stories,
+};

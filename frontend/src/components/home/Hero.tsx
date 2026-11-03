@@ -5,6 +5,7 @@ import { useIntroDone } from "@/lib/intro";
 import { site, socials } from "@/data/site";
 import { Apos, ButtonLink } from "../ui/Button";
 import RoleSwipe from "./RoleSwipe";
+import T from "../ui/T";
 import { cn } from "@/lib/utils";
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -94,7 +95,7 @@ export default function Hero() {
           </motion.div>
           <motion.p initial={from({ opacity: 0, y: 22 })} animate={entered ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.9, delay: 1.2, ease }} className="mb-[22px] mt-3 grid max-w-[340px] gap-2 text-[13px] leading-[1.55] text-g600">
-            {site.introLines.map((l) => <span key={l}>{l}</span>)}
+            {site.introLines.map((l) => <span key={l}><T>{l}</T></span>)}
           </motion.p>
           <motion.div initial={from({ opacity: 0, y: 22 })} animate={entered ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.9, delay: 1.35, ease }}>

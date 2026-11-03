@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import Hl from "./Hl";
+import T from "./T";
 import Reveal from "./Reveal";
 
 /** Top of every inner page: back link, kicker, big title, intro. */
@@ -10,8 +11,8 @@ export default function PageHero({ index, title, intro }: { index: string; title
       <Reveal>
         <Link href="/" data-link className="label text-g500 transition-colors hover:text-accent-d">← Home</Link>
         <div className="label mt-6 text-g500"><b className="text-accent-d">[ {index} ]</b> <Hl>— Fields of work</Hl></div>
-        <h1 className="font-display text-[clamp(52px,10vw,160px)] leading-[0.88] text-ink"><Hl>{title}</Hl></h1>
-        <p className="mt-5 max-w-xl text-[15px] leading-[1.65] text-g600"><Hl>{intro}</Hl></p>
+        <h1 className="font-display text-[clamp(52px,10vw,160px)] leading-[0.88] text-ink"><T>{title}</T></h1>
+        <p className="mt-5 max-w-xl text-[15px] leading-[1.65] text-g600">{typeof intro === "string" ? <T>{intro}</T> : <Hl>{intro}</Hl>}</p>
       </Reveal>
     </section>
   );

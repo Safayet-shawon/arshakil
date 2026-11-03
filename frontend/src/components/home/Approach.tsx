@@ -1,4 +1,5 @@
 import { approach } from "@/data/content";
+import T from "../ui/T";
 import Hl from "../ui/Hl";
 import Reveal from "../ui/Reveal";
 import Section from "../ui/Section";
@@ -12,9 +13,9 @@ export default function Approach() {
         <Reveal><div className="label text-g500"><b className="text-accent-d">[ 02 ]</b> <Hl>— Approach</Hl></div></Reveal>
         <Reveal>
           <h2 className="font-display text-[clamp(22px,3vw,44px)] leading-[1.05] text-ink">
-            <Hl>{before}</Hl>
+            <T>{before}</T>
             <em className="text-outline-soft not-italic [-webkit-text-stroke:1.2px_var(--color-accent)]">unfamiliar</em>
-            <Hl>{after}</Hl>
+            <T>{after}</T>
           </h2>
         </Reveal>
       </div>

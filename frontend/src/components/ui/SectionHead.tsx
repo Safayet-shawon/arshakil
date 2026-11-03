@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Hl from "./Hl";
+import T from "./T";
 import Reveal from "./Reveal";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +22,7 @@ export default function SectionHead({ index, kicker, title, aside, tone = "light
           </div>
           <h2 className={cn("font-display text-[clamp(36px,6vw,92px)] leading-[0.9]", outline ? "text-transparent" : dark ? "text-g50" : "text-ink")}
             style={outline ? { WebkitTextStroke: "1.6px var(--color-accent-soft)" } : undefined}>
-            <Hl>{title}</Hl>
+            {typeof title === "string" ? <T>{title}</T> : <Hl>{title}</Hl>}
           </h2>
         </div>
         {aside && <div className={cn("label", dark ? "text-g300" : "text-g600")}>{aside}</div>}

@@ -4,11 +4,12 @@ import Gallery from "@/components/ui/Gallery";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
-import { gallery } from "@/data/content";
+import { getContent } from "@/lib/server/content";
 
 export const metadata: Metadata = { title: "Architectural Photography" };
 
-export default function PhotographyPage() {
+export default async function PhotographyPage() {
+  const { gallery } = await getContent();
   return (
     <>
       <PageHero index="02" title="Architectural Photography" intro="Buildings, light and the people inside them, one frame at a time. Tap a frame to view it large." />

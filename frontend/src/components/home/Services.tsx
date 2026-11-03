@@ -1,4 +1,4 @@
-import { services } from "@/data/content";
+import { getContent } from "@/lib/server/content";
 import { site } from "@/data/site";
 import { usd } from "@/lib/utils";
 import Hl from "../ui/Hl";
@@ -9,7 +9,8 @@ import SectionHead from "../ui/SectionHead";
 import { cn } from "@/lib/utils";
 
 /** "Hire me as ...": fixed-rate cards show a price, custom ones are quoted after a request. */
-export default function Services() {
+export default async function Services() {
+  const { services } = await getContent();
   return (
     <Section id="services">
       <SectionHead index="04" kicker="Hire me" title="Services & Fees" aside="Available for commissions" />

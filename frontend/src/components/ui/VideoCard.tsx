@@ -1,4 +1,5 @@
 import { socials } from "@/data/site";
+import { photoSrc } from "@/lib/media";
 import type { Video } from "@/types";
 import Hl from "./Hl";
 
@@ -6,7 +7,7 @@ import Hl from "./Hl";
 export default function VideoCard({ video }: { video: Video }) {
   const id = video.youtubeId;
   const href = id ? `https://www.youtube.com/watch?v=${id}` : socials[0].href;
-  const thumb = id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : `/photos/${video.thumb}.jpg`;
+  const thumb = id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : photoSrc(video.thumb);
   return (
     <a href={href} target="_blank" rel="noreferrer" data-view className="group block">
       <div className="relative aspect-video overflow-hidden bg-g200">

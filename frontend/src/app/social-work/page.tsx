@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { initiatives } from "@/data/content";
+import { getContent } from "@/lib/server/content";
 import { ButtonLink } from "@/components/ui/Button";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
@@ -12,7 +12,8 @@ import SectionHead from "@/components/ui/SectionHead";
 
 export const metadata: Metadata = { title: "Social Work" };
 
-export default function SocialWorkPage() {
+export default async function SocialWorkPage() {
+  const { initiatives } = await getContent();
   return (
     <>
       <PageHero index="06" title="Social Work" intro="Design is only useful if it reaches people. Pick an initiative to read more about it." />

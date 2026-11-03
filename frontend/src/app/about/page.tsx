@@ -5,6 +5,7 @@ import { fields, roles, site, socials } from "@/data/site";
 import { ButtonLink } from "@/components/ui/Button";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
+import T from "@/components/ui/T";
 import Reveal from "@/components/ui/Reveal";
 import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
@@ -27,7 +28,7 @@ export default function AboutPage() {
             <div className="label mt-6 text-g500"><b className="text-accent-d">[ 00 ]</b> <Hl>— About me</Hl></div>
             <h1 className="font-display text-[clamp(44px,8vw,120px)] leading-[0.9] text-ink"><Hl>{site.fullName}</Hl></h1>
             <div className="mt-5 grid max-w-xl gap-4 text-[15px] leading-[1.7] text-g600">
-              {about.map((p) => <p key={p}><Hl>{p}</Hl></p>)}
+              {about.map((p) => <p key={p}><T>{p}</T></p>)}
             </div>
             <div className="mt-6 flex flex-wrap gap-2">
               {roles.map((r) => <span key={r} className="rounded-full border border-g300 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-g600">{r}</span>)}

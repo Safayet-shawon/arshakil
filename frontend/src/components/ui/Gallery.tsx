@@ -1,10 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import { gallery, galleryCategories } from "@/data/content";
+import { photoSrc } from "@/lib/media";
 import { cn } from "@/lib/utils";
+import { useSite } from "../layout/SiteProvider";
 
 /** Masonry gallery: category filter + a simple lightbox (click, arrow keys, Esc). */
 export default function Gallery() {
+  const { gallery, categories } = useSite();
+  const galleryCategories = ["All", ...categories.map((c) => c.name)];
   const [cat, setCat] = useState("All");
   const [open, setOpen] = useState<number | null>(null);
   const items = gallery.filter((g) => cat === "All" || g.category === cat);
@@ -38,7 +41,7 @@ export default function Gallery() {
         {items.map((g, i) => (
           <button key={g.photo} data-view onClick={() => setOpen(i)} className="group relative mb-3 block w-full overflow-hidden text-left">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/photos/${g.photo}.jpg`} alt={g.title} loading="lazy" className="block h-auto w-full transition-transform duration-700 group-hover:scale-105" />
+            <img src={photoSrc(g.photo)} alt={g.title} loading="lazy" className="block h-auto w-full transition-transform duration-700 group-hover:scale-105" />
             <span className="absolute inset-x-0 bottom-0 translate-y-2 bg-gradient-to-t from-ink/80 to-transparent p-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
               <span className="label block text-[10px] text-accent">{g.category}</span>
               <span className="font-display text-xl text-g50">{g.title}</span>
@@ -50,7 +53,7 @@ export default function Gallery() {
       {shown && (
         <div className="fixed inset-0 z-[80] flex flex-col items-center justify-center gap-4 bg-ink/95 p-4" onClick={() => setOpen(null)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`/photos/${shown.photo}.jpg`} alt={shown.title} className="max-h-[78vh] max-w-[92vw] object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
+          <img src={photoSrc(shown.photo)} alt={shown.title} className="max-h-[78vh] max-w-[92vw] object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
           <div className="text-center" onClick={(e) => e.stopPropagation()}>
             <div className="label text-accent">{shown.category} · {String(open! + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}</div>
             <div className="font-display text-3xl text-g50">{shown.title}</div>
