@@ -91,7 +91,7 @@ export default function Intro() {
                 i === role ? "translate-x-[18px] text-ink [-webkit-text-stroke:1.5px_var(--color-ink)]"
                   : i < role ? "text-g400 [-webkit-text-stroke:1.5px_var(--color-g400)]"
                     : "text-outline-soft")}>
-                {i === N - 1 && <small className="mr-[.3em] text-[.5em] text-g500 [-webkit-text-stroke:0]">and</small>}{r}
+                {r}
               </li>
             ))}
           </ul>

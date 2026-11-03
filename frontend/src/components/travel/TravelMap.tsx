@@ -22,10 +22,9 @@ export default function TravelMap({ places, world }: { places: Place[]; world: b
         L.marker([p.lat, p.lng], { icon, title: p.name })
           .addTo(map!)
           .bindTooltip(p.name, { direction: "top", offset: [0, -10] })
-          .bindPopup(`<strong>${p.name}</strong><br/><small>${p.country}</small><br/><a href="#post-${p.slug}">Read the post ↓</a>`);
+          .bindPopup(`<strong>${p.name}</strong><br/><small>${p.country}</small><br/><a href="/travel/${p.slug}">Open ${p.name} →</a>`);
       });
-      if (world) map.setView([25, 20], 2);
-      else map.fitBounds(L.latLngBounds(places.map((p) => [p.lat, p.lng] as [number, number])), { padding: [30, 30] });
+      map.fitBounds(L.latLngBounds(places.map((p) => [p.lat, p.lng] as [number, number])), { padding: [40, 40], maxZoom: world ? 4 : 9 });
     })();
     return () => { cancelled = true; map?.remove(); };
   }, [places, world]);

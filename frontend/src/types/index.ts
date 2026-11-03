@@ -25,7 +25,9 @@ export interface Service {
 }
 
 /** A travel post: shown as a pin on the map and as a post card below it. */
+export interface PlacePost { title: string; text: string; youtubeId?: string }
 export interface Place {
+  posts?: PlacePost[];
   slug: string;
   name: string;
   region: "bangladesh" | "abroad";
