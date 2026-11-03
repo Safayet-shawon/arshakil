@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { initiatives } from "@/data/content";
 import { ButtonLink } from "@/components/ui/Button";
 import CtaBand from "@/components/ui/CtaBand";
@@ -14,20 +15,20 @@ export const metadata: Metadata = { title: "Social Work" };
 export default function SocialWorkPage() {
   return (
     <>
-      <PageHero index="06" title="Social Work" intro="Design is only useful if it reaches people. Community projects, education support and neighbourhood programs." />
+      <PageHero index="06" title="Social Work" intro="Design is only useful if it reaches people. Pick an initiative to read more about it." />
       <div className="group h-[clamp(180px,32vw,420px)]"><Photo name="social-volunteers" alt="Volunteers working together" className="h-full" /></div>
 
       <Section>
         <SectionHead index="01" kicker="What we do" title="Initiatives" aside={String(initiatives.length).padStart(2, "0")} />
         <div className="grid gap-x-6 gap-y-10 md:grid-cols-3">
           {initiatives.map((n, i) => (
-            <Reveal key={n.title} delay={i * 0.08}>
-              <article className="group" data-view>
+            <Reveal key={n.slug} delay={i * 0.08}>
+              <Link href={`/social-work/${n.slug}`} data-view className="group block">
                 <Photo name={n.photo} alt={n.title} ratio="4/3" />
                 <div className="label mt-3 text-accent-d">{n.area}</div>
-                <h3 className="font-display text-3xl text-ink"><Hl>{n.title}</Hl></h3>
+                <h3 className="font-display text-3xl text-ink transition-colors group-hover:text-accent-d">{n.title} <span aria-hidden className="text-accent">↗</span></h3>
                 <p className="mt-2 text-sm leading-relaxed text-g600"><Hl>{n.blurb}</Hl></p>
-              </article>
+              </Link>
             </Reveal>
           ))}
         </div>

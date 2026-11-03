@@ -6,9 +6,14 @@ export const site = {
   /** Hero name, split in two rows. */
   heroName: [["AR.", "Shakhaouth"], ["Hossain", "Shakil"]] as const,
   fullName: "AR. Shakhaouth Hossain Shakil",
-  tagline: "Architect · Photographer · Traveller · Author · Content Creator · Social Worker",
-  intro: "Designing spaces and stories that are calm, considered and built to last. Founder of studio Kolpo, Dhaka.",
+  tagline: "Architect · Architectural Photographer · Traveller · Author · Content Creator · Social Worker",
+  /** Hero paragraphs. */
+  introLines: [
+    "Designing spaces and stories that are calm, considered, and built to last.",
+    "Co-founder of Kolpo (Dhaka) and Studio Karu (Chittagong), Founder of WaQia and Roots organic (Dhaka).",
+  ],
   email: "hello@example.com",
+  phone: "+880 1XXX-XXXXXX",
   location: "Dhaka, Bangladesh",
   firm: "Kolpo",
   timeZone: "Asia/Dhaka",
@@ -16,30 +21,27 @@ export const site = {
 };
 
 /** Words that swipe in the hero. */
-export const roles = ["Architect", "Photographer", "Traveller", "Author", "Content Creator", "Social Worker"];
+export const roles = ["Architect", "Architectural Photographer", "Traveller", "Author", "Content Creator", "Social Worker"];
 
-/** Shown on the left of the intro while the counter runs. "Photographer" is the reveal at the end. */
-export const introRoles = ["Architect", "Traveller", "Author", "Content Creator", "Social Worker"];
+/** The loader list, in order. The last one is introduced with "and". */
+export const introRoles = ["Architect", "Traveller", "Author", "Content Creator", "Social Worker", "Architectural Photographer"];
 
 export const fields: Field[] = [
-  { slug: "architecture", title: "Architecture", href: "/architecture", blurb: "Solo projects and the work of studio Kolpo." },
-  { slug: "photography", title: "Photography", href: "/photography", blurb: "Buildings, people and places, one frame at a time." },
-  { slug: "content-creation", title: "Content Creation", href: "/content-creation", blurb: "Videos and vlogs on YouTube, Facebook, TikTok and Instagram." },
-  { slug: "travel", title: "Travel", href: "/travel", blurb: "Cities, landscapes and the history behind them." },
+  { slug: "architecture", title: "Architecture", href: "/architecture", blurb: "Selected projects from Kolpo and Studio Karu." },
+  { slug: "photography", title: "Architectural Photography", href: "/photography", blurb: "Buildings, people and places, one frame at a time." },
+  { slug: "content-creation", title: "Content Creation", href: "/content-creation", blurb: "Videos and vlogs on YouTube, Facebook, Instagram and TikTok." },
+  { slug: "travel", title: "Travel", href: "/travel", blurb: "Bangladesh and abroad: maps, stories and the history behind them." },
   { slug: "author", title: "Author", href: "/author", blurb: "Books and essays, free to read and download as PDF." },
-  { slug: "social-work", title: "Social Work", href: "/social-work", blurb: "Community projects and giving back." },
+  { slug: "social-work", title: "Social Work", href: "/social-work", blurb: "Community initiatives and giving back." },
 ];
 
 export const socials: Social[] = [
   { label: "YouTube", href: "https://youtube.com/", icon: "▶", handle: "@your-channel" },
   { label: "Facebook", href: "https://facebook.com/", icon: "f", handle: "/your-page" },
-  { label: "TikTok", href: "https://tiktok.com/", icon: "♪", handle: "@your-handle" },
   { label: "Instagram", href: "https://instagram.com/", icon: "◎", handle: "@your-handle" },
+  { label: "TikTok", href: "https://tiktok.com/", icon: "♪", handle: "@your-handle" },
   { label: "LinkedIn", href: "https://linkedin.com/", icon: "in", handle: "/in/your-name" },
 ];
-
-/** The three shown in the hero. */
-export const heroSocials = [socials[0], socials[3], socials[4]];
 
 export const nav: NavItem[] = [
   { label: "Work", href: "/#work", count: "06" },

@@ -2,7 +2,7 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useState } from "react";
 import { useIntroDone } from "@/lib/intro";
-import { heroSocials, site } from "@/data/site";
+import { site, socials } from "@/data/site";
 import { Apos, ButtonLink } from "../ui/Button";
 import RoleSwipe from "./RoleSwipe";
 import { cn } from "@/lib/utils";
@@ -85,7 +85,7 @@ export default function Hero() {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[28vh] bg-gradient-to-t from-white from-[4%] to-transparent" />
 
         {/* left: role swipe + intro */}
-        <div className="absolute left-5 top-[61vh] z-[4] md:left-[clamp(20px,6.5vw,110px)] max-md:right-5 max-md:top-[62vh]">
+        <div className="absolute left-5 top-[54vh] z-[4] md:left-[clamp(20px,6.5vw,110px)] max-md:right-5 max-md:top-[56vh]">
           <motion.span initial={from({ opacity: 0, y: 22 })} animate={entered ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.9, delay: 1.05, ease }} className="mb-3 block h-[3px] w-[38px] bg-accent" />
           <motion.div initial={from({ opacity: 0, y: 22 })} animate={entered ? { opacity: 1, y: 0 } : {}}
@@ -93,8 +93,8 @@ export default function Hero() {
             <RoleSwipe />
           </motion.div>
           <motion.p initial={from({ opacity: 0, y: 22 })} animate={entered ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.9, delay: 1.2, ease }} className="mb-[22px] mt-3 max-w-[300px] text-[13px] leading-[1.55] text-g600">
-            {site.intro}
+            transition={{ duration: 0.9, delay: 1.2, ease }} className="mb-[22px] mt-3 grid max-w-[340px] gap-2 text-[13px] leading-[1.55] text-g600">
+            {site.introLines.map((l) => <span key={l}>{l}</span>)}
           </motion.p>
           <motion.div initial={from({ opacity: 0, y: 22 })} animate={entered ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.9, delay: 1.35, ease }}>
@@ -103,8 +103,8 @@ export default function Hero() {
         </div>
 
         {/* right: socials */}
-        <div className="absolute right-[clamp(20px,6.5vw,110px)] top-[64vh] z-[4] flex min-w-[150px] flex-col gap-2 max-md:hidden">
-          {heroSocials.map((s, i) => (
+        <div className="absolute right-[clamp(20px,6.5vw,110px)] bottom-[9vh] z-[4] flex min-w-[150px] flex-col gap-2 max-md:hidden">
+          {socials.map((s, i) => (
             <motion.a key={s.label} href={s.href} data-link target="_blank" rel="noreferrer"
               initial={from({ opacity: 0, x: 26 })} animate={entered ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.8, delay: 1.25 + i * 0.1, ease }} whileHover={{ x: -6 }}

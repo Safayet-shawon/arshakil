@@ -19,6 +19,7 @@ export default function Contact() {
         <p className="mx-auto my-5 max-w-[440px] text-sm leading-[1.6] text-g600"><Hl>A building, a portrait, a film, a book — tell me about it. I read every message.</Hl></p>
         <div className="flex flex-wrap justify-center gap-3">
           <ButtonLink href={`mailto:${site.email}`}>{site.email}</ButtonLink>
+          <ButtonLink href={`tel:${site.phone.replace(/[^+\d]/g, "")}`} variant="ghost" arrow="">{site.phone}</ButtonLink>
           {socials.slice(1).map((s) => (
             <ButtonLink key={s.label} href={s.href} variant="ghost" arrow="" target="_blank" rel="noreferrer">{s.label}</ButtonLink>
           ))}

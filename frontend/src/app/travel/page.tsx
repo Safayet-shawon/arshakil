@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { destinations, stories, videos } from "@/data/content";
+import { places, stories, videos } from "@/data/content";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
 import PageHero from "@/components/ui/PageHero";
@@ -7,6 +7,7 @@ import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
+import TravelExplorer from "@/components/travel/TravelExplorer";
 import VideoCard from "@/components/ui/VideoCard";
 import { cn } from "@/lib/utils";
 
@@ -15,25 +16,11 @@ export const metadata: Metadata = { title: "Travel" };
 export default function TravelPage() {
   return (
     <>
-      <PageHero index="04" title="Travel" intro="Cities, landscapes and the history behind them: documented in photographs, vlogs and short stories." />
+      <PageHero index="04" title="Travel" intro="Pick Bangladesh or Abroad, tap a pin on the map and read the post: what to see, how to go and roughly what it costs." />
 
       <Section>
-        <SectionHead index="01" kicker="Places" title="Destinations" aside={String(destinations.length).padStart(2, "0")} />
-        <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2">
-          {destinations.map((d, i) => (
-            <Reveal key={d.title} delay={(i % 2) * 0.08}>
-              <article className="group" data-view>
-                <Photo name={d.photo} alt={d.title} ratio="3/2" />
-                <div className="mt-3 flex items-baseline justify-between gap-3">
-                  <h3 className="font-display text-3xl text-ink"><Hl>{d.title}</Hl></h3>
-                  <span className="label text-g500">{d.year}</span>
-                </div>
-                <p className="label mt-1 text-g500">{d.place}</p>
-                <p className="mt-2 max-w-md text-sm leading-relaxed text-g600"><Hl>{d.note}</Hl></p>
-              </article>
-            </Reveal>
-          ))}
-        </div>
+        <SectionHead index="01" kicker="Places" title="Travel map" aside={String(places.length).padStart(2, "0")} />
+        <TravelExplorer />
       </Section>
 
       <Section className="bg-g200">
@@ -44,7 +31,7 @@ export default function TravelPage() {
       </Section>
 
       <Section>
-        <SectionHead index="03" kicker="Stories" title="History & heritage" aside={String(stories.length).padStart(2, "0")} />
+        <SectionHead index="03" kicker="Stories" title="History & heritage of Bangladesh" aside={String(stories.length).padStart(2, "0")} />
         <div className="grid gap-12">
           {stories.map((s, i) => (
             <Reveal key={s.title}>

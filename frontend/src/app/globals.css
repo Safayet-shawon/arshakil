@@ -72,6 +72,12 @@ body {
 
 @keyframes ripple { to { transform: scale(7); opacity: 0; } }
 
+/* Travel map: mustard pin and a quiet popup */
+.map-pin { display: block; width: 22px; height: 22px; border-radius: 50%; background: var(--color-accent); border: 3px solid #fff; box-shadow: 0 0 0 0 rgba(247,181,0,.5), 0 4px 10px rgba(77,79,83,.3); animation: pin-pulse 2.2s ease-out infinite; }
+@keyframes pin-pulse { to { box-shadow: 0 0 0 14px rgba(247,181,0,0), 0 4px 10px rgba(77,79,83,.3); } }
+.leaflet-popup-content-wrapper { border-radius: 12px; color: var(--color-g600); }
+.leaflet-popup-content a { color: var(--color-accent-d); font-weight: 700; }
+
 /* Custom cursor only for real pointers */
 @media (hover: hover) and (pointer: fine) {
   html.has-cursor, html.has-cursor * { cursor: none !important; }

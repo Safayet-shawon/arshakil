@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { kolpoProjects, projects } from "@/data/content";
+import { projects } from "@/data/content";
 import type { Project } from "@/types";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
@@ -30,14 +30,10 @@ function ProjectCard({ p, index }: { p: Project; index: number }) {
 export default function ArchitecturePage() {
   return (
     <>
-      <PageHero index="01" title="Architecture" intro="Spaces shaped by light, material and silence: solo projects and the work of studio Kolpo." />
+      <PageHero index="01" title="Architecture" intro="Spaces shaped by light, material and silence: selected projects from Kolpo and Studio Karu." />
       <Section>
-        <SectionHead index="01" kicker="Solo practice" title="Selected projects" aside={String(projects.length).padStart(2, "0")} />
+        <SectionHead index="01" kicker="Kolpo & Studio Karu" title="Selected projects" aside={String(projects.length).padStart(2, "0")} />
         <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2">{projects.map((p, i) => <ProjectCard key={p.slug} p={p} index={i} />)}</div>
-      </Section>
-      <Section className="bg-g200">
-        <SectionHead index="02" kicker="The studio" title="Kolpo" aside={String(kolpoProjects.length).padStart(2, "0")} />
-        <div className="grid gap-x-6 gap-y-10 md:grid-cols-3">{kolpoProjects.map((p, i) => <ProjectCard key={p.slug} p={p} index={i} />)}</div>
       </Section>
       <CtaBand text="Planning a house, a library or a small public space? Tell me about it." />
     </>

@@ -6,17 +6,17 @@ import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
 import { gallery } from "@/data/content";
 
-export const metadata: Metadata = { title: "Photography" };
+export const metadata: Metadata = { title: "Architectural Photography" };
 
 export default function PhotographyPage() {
   return (
     <>
-      <PageHero index="02" title="Photography" intro="Buildings, people and places, one frame at a time. A gallery of the work: tap a frame to view it large." />
+      <PageHero index="02" title="Architectural Photography" intro="Buildings, light and the people inside them, one frame at a time. Tap a frame to view it large." />
       <Section className="bg-ink">
         <SectionHead index="01" kicker="The gallery" title="Frames" tone="dark" aside={String(gallery.length).padStart(2, "0")} />
         <Gallery />
       </Section>
-      <CtaBand text="Need architectural, travel or editorial photography? Tell me about it." />
+      <CtaBand text="Need architectural photography for a building, a studio or a publication? Tell me about it." />
     </>
   );
 }

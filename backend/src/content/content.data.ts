@@ -4,17 +4,17 @@ import type { Field, Project, Service, SiteInfo } from "./content.types";
 export const site: SiteInfo = {
   name: "Shakil",
   fullName: "AR. Shakhaouth Hossain Shakil",
-  tagline: "Architect · Photographer · Traveller · Author · Content Creator · Social Worker",
-  intro: "Designing spaces and stories that are calm, considered and built to last. Founder of studio Kolpo, Dhaka.",
+  tagline: "Architect · Architectural Photographer · Traveller · Author · Content Creator · Social Worker",
+  intro: "Designing spaces and stories that are calm, considered and built to last. Co-founder of Kolpo (Dhaka) and Studio Karu (Chittagong), Founder of WaQia and Roots organic (Dhaka).",
   email: "hello@example.com",
   location: "Dhaka, Bangladesh",
   firm: "Kolpo",
-  roles: ["Architect", "Photographer", "Traveller", "Author", "Content Creator", "Social Worker"],
+  roles: ["Architect", "Architectural Photographer", "Traveller", "Author", "Content Creator", "Social Worker"],
 };
 
 export const fields: Field[] = [
-  { slug: "architecture", title: "Architecture", blurb: "Solo projects and the work of studio Kolpo." },
-  { slug: "photography", title: "Photography", blurb: "Buildings, people and places, one frame at a time." },
+  { slug: "architecture", title: "Architecture", blurb: "Selected projects from Kolpo and Studio Karu." },
+  { slug: "photography", title: "Architectural Photography", blurb: "Buildings, people and places, one frame at a time." },
   { slug: "content-creation", title: "Content Creation", blurb: "Videos and vlogs on YouTube, Facebook, TikTok and Instagram." },
   { slug: "travel", title: "Travel", blurb: "Cities, landscapes and the history behind them." },
   { slug: "author", title: "Author", blurb: "Books and essays, free to read and download as PDF." },
@@ -30,7 +30,7 @@ export const projects: Project[] = [
 
 export const services: Service[] = [
   { slug: "architecture", title: "Architectural Design", description: "Concept to construction for residential, commercial and cultural projects, through studio Kolpo.", priceFromUsd: 50, unit: "per sq. ft.", includes: ["Site study & brief", "Concept design", "Detailed drawings", "Site visits"] },
-  { slug: "photography", title: "Photography", description: "Architectural, travel and editorial photography.", priceFromUsd: 300, unit: "per half-day", includes: ["Pre-shoot planning", "Edited high-res images", "Usage licence"] },
+  { slug: "photography", title: "Architectural Photography", description: "Architectural, travel and editorial photography.", priceFromUsd: 300, unit: "per half-day", includes: ["Pre-shoot planning", "Edited high-res images", "Usage licence"] },
   { slug: "video", title: "Video & Content", description: "Travel films, brand stories and architectural walkthroughs.", priceFromUsd: 800, unit: "per project", includes: ["Script & storyboard", "Shoot & edit", "Colour grade", "Social cut-downs"] },
   { slug: "consulting", title: "Consulting & Talks", description: "Design consulting, workshops and speaking engagements.", priceFromUsd: 150, unit: "per hour", includes: ["Discovery call", "Written recommendations"] },
 ];
