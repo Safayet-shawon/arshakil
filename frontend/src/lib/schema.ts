@@ -1,18 +1,30 @@
-import type { ListName } from "@/types";
+import type { ListName, SiteContent } from "@/types";
 
 /**
  * What the admin panel can edit. Each list is a table of items; `fields` describe the form.
  * `options` is a fixed list or the name of another list whose `name`/`slug` values are offered.
  */
 export type FieldType = "text" | "textarea" | "number" | "image" | "select" | "bool" | "lines" | "pdf" | "readonly";
+type Item = Record<string, unknown>;
 export interface FieldDef {
   key: string; label: string; type: FieldType; hint?: string;
-  options?: string[] | { list: ListName; value: string; label: string };
+  /** Fixed choices, or another list's values; `filterBy` keeps only entries whose same-named field equals this item's. */
+  options?: string[] | { value: string; label: string }[] | { list: ListName; value: string; label: string; filterBy?: string };
+  /** Label that depends on the item being edited. */
+  labelFor?: (item: Item) => string;
+  /** Hide the field unless this is true for the item being edited. */
+  showIf?: (item: Item) => boolean;
+  /** When this field changes, these fields are cleared. */
+  resets?: string[];
+  /** Where an uploaded PDF is kept: books are private and paywalled, posts are public. */
+  folder?: "books" | "posts";
 }
 export interface ListDef {
   name: ListName; label: string; singular: string; blurb: string;
   title: (item: Record<string, unknown>) => string;
   photo?: string; featurable?: boolean; slugFrom?: string; fields: FieldDef[]; blank: Record<string, unknown>;
+  /** Fills in values an older saved item lacks, when it is opened for editing. */
+  prepare?: (item: Item, c: SiteContent) => Item;
 }
 
 const str = (k: string) => (i: Record<string, unknown>) => String(i[k] ?? "Untitled");
@@ -53,20 +65,27 @@ export const lists: ListDef[] = [
   { name: "places", label: "Travel places", singular: "place", blurb: "Bangladesh: add a new city. Abroad: add a new country. Each opens its own page with details.",
     title: str("name"), photo: "photo", featurable: false, slugFrom: "name",
     fields: [
-      { key: "region", label: "Where", type: "select", options: ["bangladesh", "abroad"] },
-      { key: "name", label: "City or country name", type: "text" }, { key: "country", label: "Country", type: "text" },
+      { key: "region", label: "Where", type: "select", options: [{ value: "bangladesh", label: "Bangladesh (a city)" }, { value: "abroad", label: "Abroad (a country)" }] },
+      { key: "name", label: "City or country name", type: "text", labelFor: (i) => (i.region === "abroad" ? "Country name" : "City name") },
       { key: "summary", label: "Short description", type: "textarea" },
       { key: "ideas", label: "Things to do (one per line)", type: "lines" }, { key: "cost", label: "Estimated cost", type: "text" },
       { key: "photo", label: "Cover photo", type: "image" },
     ], blank: { region: "bangladesh", name: "", country: "Bangladesh", summary: "", ideas: [], cost: "", photo: "" } },
 
-  { name: "placePosts", label: "Travel posts", singular: "post", blurb: "Notes and videos from a place. They appear on that place's page.",
-    title: str("title"),
+  { name: "placePosts", label: "Travel posts", singular: "post", blurb: "Blog posts for a city or country. Write them here or upload a PDF. They appear on that place's page.",
+    title: str("title"), slugFrom: "title",
+    prepare: (it, c) => (it.region ? it : { ...it, region: c.places.find((p) => p.slug === it.place)?.region ?? "bangladesh" }),
     fields: [
-      { key: "place", label: "Place", type: "select", options: { list: "places", value: "slug", label: "name" } },
-      { key: "title", label: "Title", type: "text" }, { key: "text", label: "Text", type: "textarea" },
+      { key: "region", label: "Where", type: "select", options: [{ value: "bangladesh", label: "Bangladesh" }, { value: "abroad", label: "Abroad" }], resets: ["place"] },
+      { key: "place", label: "City", type: "select", options: { list: "places", value: "slug", label: "name", filterBy: "region" },
+        labelFor: (i) => (i.region === "abroad" ? "Country" : "City") },
+      { key: "title", label: "Title", type: "text" },
+      { key: "summary", label: "Short description", type: "textarea" },
+      { key: "kind", label: "Blog", type: "select", options: [{ value: "write", label: "Write it on the website" }, { value: "pdf", label: "Upload a PDF" }] },
+      { key: "text", label: "Write the blog", type: "textarea", showIf: (i) => i.kind !== "pdf", hint: "Leave a blank line between paragraphs" },
+      { key: "pdf", label: "Blog PDF", type: "pdf", folder: "posts", showIf: (i) => i.kind === "pdf" },
       { key: "youtubeId", label: "YouTube video id (optional)", type: "text" },
-    ], blank: { place: "", title: "", text: "", youtubeId: "" } },
+    ], blank: { region: "bangladesh", place: "", title: "", summary: "", kind: "write", text: "", pdf: "", youtubeId: "" } },
 
   { name: "books", label: "Author", singular: "book", blurb: "Upload a PDF, pick a thumbnail and a price in BDT. Readers get the first 5% free and need an access code for the rest. Nobody can download the file.",
     title: str("title"), photo: "thumb", featurable: true, slugFrom: "title",

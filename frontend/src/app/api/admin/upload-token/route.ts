@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     const json = await handleUpload({
       body, request: req,
       onBeforeGenerateToken: async (pathname) => {
-        if (!pathname.startsWith("books/") || !pathname.endsWith(".pdf")) throw new Error("Only books/*.pdf");
+        if (!/^(books|posts)\/[\w.-]+\.pdf$/.test(pathname)) throw new Error("Only books/*.pdf or posts/*.pdf");
         return { allowedContentTypes: ["application/pdf"], maximumSizeInBytes: 200_000_000, addRandomSuffix: false, allowOverwrite: true };
       },
     });

@@ -48,7 +48,11 @@ export interface Place {
   lat?: number;
   lng?: number;
 }
-export interface PlacePost { place: string; title: string; text: string; youtubeId?: string }
+/** A blog post on a place's page: written on the website (`text`) or uploaded as a PDF (`pdf`). */
+export interface PlacePost {
+  slug?: string; region?: "bangladesh" | "abroad"; place: string; title: string; summary?: string;
+  kind?: "write" | "pdf"; text: string; pdf?: string; youtubeId?: string;
+}
 
 export interface ContactPayload { name: string; email: string; message: string; service?: string }
 

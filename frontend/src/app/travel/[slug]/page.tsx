@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { placeMapUrl } from "@/lib/media";
+import { placeMapUrl, postSlug } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
@@ -10,7 +10,6 @@ import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
-import VideoCard from "@/components/ui/VideoCard";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -56,14 +55,11 @@ export default async function PlacePage({ params }: Props) {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((post, i) => (
               <Reveal key={post.title + i} delay={i * 0.07}>
-                {post.youtubeId ? (
-                  <VideoCard video={{ title: post.title, group: p.name, thumb: p.photo, youtubeId: post.youtubeId }} />
-                ) : (
-                  <article className="h-full rounded-2xl border border-g200 bg-paper p-6">
-                    <h3 className="font-display text-2xl text-ink">{post.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-g600"><Hl>{post.text}</Hl></p>
-                  </article>
-                )}
+                <Link href={`/travel/${p.slug}/${postSlug(post)}`} data-link className="group block h-full rounded-2xl border border-g200 bg-paper p-6 transition-shadow hover:shadow-[0_12px_32px_rgba(77,79,83,0.12)]">
+                  <div className="label text-accent-d">{post.kind === "pdf" ? "PDF blog" : post.youtubeId ? "Video" : "Blog"}</div>
+                  <h3 className="font-display mt-2 text-2xl text-ink transition-colors group-hover:text-accent-d">{post.title} <span aria-hidden className="text-accent">↗</span></h3>
+                  <p className="mt-2 text-sm leading-relaxed text-g600"><Hl>{post.summary || post.text.slice(0, 140)}</Hl></p>
+                </Link>
               </Reveal>
             ))}
           </div>

@@ -16,10 +16,11 @@ export async function uploadImage(file: File): Promise<string> {
   return json.url as string;
 }
 
-/** Sends a book PDF straight to the private store and returns its key and page count. */
-export async function uploadPdf(file: File): Promise<{ key: string; pages: number }> {
+/** Sends a PDF straight to the private store and returns its key (and, for books, the page count). */
+export async function uploadPdf(file: File, folder: "books" | "posts" = "books"): Promise<{ key: string; pages: number }> {
   const name = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/\.pdf$/, "");
-  const blob = await upload(`books/${Date.now()}-${name}.pdf`, file, { access: "private", handleUploadUrl: "/api/admin/upload-token" });
+  const blob = await upload(`${folder}/${Date.now()}-${name}.pdf`, file, { access: "private", handleUploadUrl: "/api/admin/upload-token" });
+  if (folder === "posts") return { key: blob.pathname, pages: 0 };
   const res = await fetch(`/api/admin/pdf-info?key=${encodeURIComponent(blob.pathname)}`);
   const json = await res.json();
   if (!res.ok) throw new Error(json.error ?? "Could not read that PDF");

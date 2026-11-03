@@ -14,7 +14,7 @@ const tabs = [
 
 /** Toggle Bangladesh (cities) / Abroad (countries). Each card opens that place's own page. The admin also gets an "Add new" card. */
 export default function TravelExplorer() {
-  const { places, admin } = useSite();
+  const { places, editing: admin } = useSite();
   const [region, setRegion] = useState<"bangladesh" | "abroad">("bangladesh");
   const list = places.filter((p) => p.region === region);
   const tab = tabs.find((t) => t.key === region)!;

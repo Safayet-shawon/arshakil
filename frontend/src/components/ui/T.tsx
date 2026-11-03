@@ -4,13 +4,13 @@ import Hl from "./Hl";
 
 /**
  * Text the admin can change. The original text is the key, so there is nothing to register:
- * wrap any string in <T> and, when signed in as admin, click it to edit it in place (saved on blur).
+ * wrap any string in <T> and, while the admin is in text-editing mode (Website tab of the panel), click it to edit it in place (saved on blur).
  * Visitors see the saved text with the usual mustard punctuation.
  */
 export default function T({ children, hl = true }: { children: string; hl?: boolean }) {
-  const { texts, admin, setText } = useSite();
+  const { texts, editing, setText } = useSite();
   const value = texts[children] ?? children;
-  if (!admin) return hl ? <Hl>{value}</Hl> : <>{value}</>;
+  if (!editing) return hl ? <Hl>{value}</Hl> : <>{value}</>;
 
   const save = async (next: string) => {
     if (next === value) return;

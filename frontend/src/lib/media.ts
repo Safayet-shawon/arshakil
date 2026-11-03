@@ -6,3 +6,6 @@ export const slugify = (s: string) =>
 
 export const placeMapUrl = (name: string, country: string) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name} ${country}`)}`;
+
+/** Stable address of a travel post; posts saved before slugs existed get one from their title. */
+export const postSlug = (p: { slug?: string; title: string }) => p.slug || slugify(p.title);

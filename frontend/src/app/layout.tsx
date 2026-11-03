@@ -7,6 +7,7 @@ import Cursor from "@/components/layout/Cursor";
 import CommissionPill from "@/components/layout/CommissionPill";
 import AdminBar from "@/components/layout/AdminBar";
 import SiteProvider from "@/components/layout/SiteProvider";
+import { cookies } from "next/headers";
 import { site } from "@/data/site";
 import { isAdmin } from "@/lib/server/auth";
 import { getContent } from "@/lib/server/content";
@@ -18,10 +19,11 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [content, admin] = await Promise.all([getContent(), isAdmin()]);
+  const editing = admin && (await cookies()).get("ar_edit")?.value === "1";
   return (
     <html lang="en">
       <body>
-        <SiteProvider content={content} admin={admin}>
+        <SiteProvider content={content} admin={admin} editing={editing}>
         <SmoothScroll>
           <Header />
           <main>{children}</main>

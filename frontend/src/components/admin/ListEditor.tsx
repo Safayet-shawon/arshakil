@@ -17,13 +17,24 @@ export default function ListEditor({ def, content, save, startNew }: {
 
   useEffect(() => { if (startNew) setEditing({ index: -1, item: { ...def.blank } }); }, [startNew, def]);
 
+  // The form is a window of its own: keep the page behind it still while it is open.
+  useEffect(() => {
+    if (!editing) return;
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    return () => { document.documentElement.style.overflow = prev; };
+  }, [editing]);
+
+  // Only one item per section can be featured: choosing one switches the others off.
+  const exclusive = (next: Item[], keep: Item) => (def.featurable && keep.featured ? next.map((x) => (x === keep ? x : { ...x, featured: false })) : next);
+
   const commit = async (next: Item[]) => { setBusy(true); await save(next); setBusy(false); };
 
   const submit = async () => {
     if (!editing) return;
     const next = [...items];
     if (editing.index < 0) next.unshift(editing.item); else next[editing.index] = editing.item;
-    await commit(next);
+    await commit(exclusive(next, editing.item));
     setEditing(null);
   };
 
@@ -55,11 +66,11 @@ export default function ListEditor({ def, content, save, startNew }: {
             {def.featurable && (
               <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-g600">
                 <input type="checkbox" className="h-4 w-4 accent-[#f7b500]" checked={!!it.featured}
-                  onChange={() => commit(items.map((x, k) => (k === i ? { ...x, featured: !x.featured } : x)))} />
+                  onChange={() => { const on = !it.featured; const next = items.map((x, k) => (k === i ? { ...x, featured: on } : x)); commit(exclusive(next, next[i])); }} />
                 Featured
               </label>
             )}
-            <button onClick={() => setEditing({ index: i, item: { ...it } })} className="label text-g600 hover:text-accent-d">Edit</button>
+            <button onClick={() => setEditing({ index: i, item: def.prepare ? def.prepare({ ...it }, content) : { ...it } })} className="label text-g600 hover:text-accent-d">Edit</button>
             <button onClick={() => { if (confirm(`Delete "${def.title(it)}"?`)) commit(items.filter((_, k) => k !== i)); }} className="label text-g500 hover:text-ink">Delete</button>
           </li>
         ))}
@@ -67,13 +78,15 @@ export default function ListEditor({ def, content, save, startNew }: {
       {busy && <p className="label mt-3 text-accent-d">Saving…</p>}
 
       {editing && (
-        <div className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-ink/60 p-4" onClick={() => setEditing(null)}>
-          <div className="my-8 grid w-full max-w-[560px] gap-4 rounded-2xl bg-g100 p-6" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-display text-3xl text-ink">{editing.index < 0 ? `New ${def.singular}` : `Edit ${def.singular}`}</h3>
-            {def.fields.map((f) => (
-              <FieldInput key={f.key} def={f} item={editing.item} content={content} set={(patch) => setEditing((e) => (e ? { ...e, item: { ...e.item, ...patch } } : e))} />
-            ))}
-            <div className="flex justify-end gap-3 pt-2">
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-ink/60 p-3 sm:p-6" onClick={() => setEditing(null)}>
+          <div data-lenis-prevent className="flex max-h-[92svh] w-full max-w-[600px] flex-col overflow-hidden rounded-2xl bg-g100 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-display shrink-0 border-b border-g200 px-6 py-4 text-3xl text-ink">{editing.index < 0 ? `New ${def.singular}` : `Edit ${def.singular}`}</h3>
+            <div data-lenis-prevent className="grid min-h-0 flex-1 content-start gap-4 overflow-y-auto overscroll-contain px-6 py-5">
+              {[...def.fields].sort((a, b) => Number(b.type === "image") - Number(a.type === "image")).map((f) => (
+                <FieldInput key={f.key} def={f} item={editing.item} content={content} set={(patch) => setEditing((e) => (e ? { ...e, item: { ...e.item, ...patch } } : e))} />
+              ))}
+            </div>
+            <div className="flex shrink-0 justify-end gap-3 border-t border-g200 bg-g100 px-6 py-4">
               <button onClick={() => setEditing(null)} className="rounded-full border border-g300 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.1em] text-g600">Cancel</button>
               <button disabled={busy} onClick={submit} className="rounded-full bg-ink px-6 py-2.5 text-xs font-bold uppercase tracking-[0.1em] text-paper hover:bg-g600 disabled:opacity-60">{busy ? "Saving…" : "Save"}</button>
             </div>

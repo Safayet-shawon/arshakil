@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { listByName, lists } from "@/lib/schema";
+import { listByName } from "@/lib/schema";
 import type { ListName, PrivateData, SiteContent } from "@/types";
 import Access from "./Access";
 import ListEditor from "./ListEditor";
@@ -14,11 +14,31 @@ const RENAMES: Partial<Record<ListName, { list: ListName; key: string }>> = {
   videoGroups: { list: "videos", key: "group" },
 };
 
+/** The left menu: related lists live together in one section (e.g. Photography holds the photos and their sections). */
+const GROUPS: { key: string; label: string; lists: ListName[] }[] = [
+  { key: "projects", label: "Architecture", lists: ["projects"] },
+  { key: "gallery", label: "Architectural Photography", lists: ["gallery", "categories"] },
+  { key: "videos", label: "Content Creation", lists: ["videos", "videoGroups"] },
+  { key: "places", label: "Travel", lists: ["places", "placePosts", "stories"] },
+  { key: "books", label: "Author", lists: ["books"] },
+  { key: "initiatives", label: "Social Work", lists: ["initiatives"] },
+  { key: "services", label: "Services & Fees", lists: ["services"] },
+];
+const SUB: Partial<Record<ListName, string>> = {
+  gallery: "Photos", categories: "Sections", videos: "Videos", videoGroups: "Video groups",
+  places: "Cities & countries", placePosts: "Blog posts", stories: "History & heritage",
+};
+const PAGES: [string, string][] = [
+  ["Home", "/"], ["About", "/about"], ["Architecture", "/architecture"], ["Architectural Photography", "/photography"],
+  ["Content Creation", "/content-creation"], ["Travel", "/travel"], ["Author", "/author"], ["Social Work", "/social-work"],
+];
+const groupOf = (tab: string) => GROUPS.find((g) => g.key === tab || g.lists.includes(tab as ListName));
+
 /** Admin home: pick a section on the left, edit it on the right. Text on the pages is edited in place on the site itself. */
 export default function Panel({ startTab, startNew }: { startTab?: string; startNew?: boolean }) {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [access, setAccess] = useState<PrivateData>({ codes: [], requests: [] });
-  const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "access") ? startTab : "projects");
+  const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "access" || startTab === "website") ? startTab : "projects");
   const [note, setNote] = useState("");
 
   useEffect(() => {
@@ -55,8 +75,10 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
 
   const out = async () => { await fetch("/api/admin/logout", { method: "POST" }); location.reload(); };
   const def = listByName(tab);
+  const group = groupOf(tab);
   const pending = access.requests.filter((r) => r.status === "new").length;
 
+  const edit = (path: string) => { document.cookie = "ar_edit=1; path=/; max-age=21600"; location.href = path; };
   const tabCls = (k: string) => `block w-full rounded-lg px-3 py-2 text-left text-[13px] font-bold transition-colors ${tab === k ? "bg-ink text-paper" : "text-g600 hover:bg-g200"}`;
 
   return (
@@ -66,11 +88,12 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
           <div className="label text-accent-d">Admin</div>
           <h1 className="font-display mb-4 text-3xl text-ink">Edit the site</h1>
           <nav className="grid gap-1">
-            {lists.map((l) => <button key={l.name} onClick={() => setTab(l.name)} className={tabCls(l.name)}>{l.label}</button>)}
+            <button onClick={() => setTab("website")} className={tabCls("website")}>Website</button>
+            {GROUPS.map((g) => <button key={g.key} onClick={() => setTab(g.lists[0])} className={tabCls(group?.key === g.key ? tab : g.key)}>{g.label}</button>)}
             <button onClick={() => setTab("access")} className={tabCls("access")}>Book access{pending ? ` (${pending})` : ""}</button>
           </nav>
           <div className="mt-6 grid gap-2 border-t border-g300 pt-4 text-xs text-g600">
-            <p>To change any text, open the site while signed in and click the dashed text.</p>
+            <p>To change any text on the pages, open the Website section.</p>
             <Link href="/" className="font-bold uppercase tracking-[0.1em] text-accent-d">View the site ↗</Link>
             <button onClick={out} className="text-left font-bold uppercase tracking-[0.1em] hover:text-ink">Sign out</button>
           </div>
@@ -78,7 +101,29 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
 
         <div>
           {note && <p role="status" className="label mb-4 rounded-lg bg-accent/20 px-4 py-2 text-ink">{note}</p>}
-          {!content ? <p className="text-sm text-g600">Loading…</p>
+          {group && group.lists.length > 1 && (
+            <div className="mb-6 flex flex-wrap gap-2">
+              {group.lists.map((n) => (
+                <button key={n} onClick={() => setTab(n)}
+                  className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] transition-colors ${tab === n ? "bg-accent text-ink" : "bg-paper text-g600 hover:text-ink"}`}>{SUB[n]}</button>
+              ))}
+            </div>
+          )}
+          {tab === "website" ? (
+            <div>
+              <h2 className="font-display text-4xl text-ink">Website</h2>
+              <p className="mt-1 max-w-xl text-sm text-g600">Pick a page to open it. The text on it turns editable (dashed): click a line, type, and click away to save. Press Done in the bar at the bottom when you finish. Visitors never see any of this.</p>
+              <ul className="mt-6 grid gap-2 sm:grid-cols-2">
+                {PAGES.map(([name, path]) => (
+                  <li key={path}>
+                    <button onClick={() => edit(path)} className="flex w-full items-center justify-between rounded-xl bg-paper p-4 text-left text-sm font-bold text-ink shadow-[0_4px_16px_rgba(77,79,83,0.06)] transition-colors hover:bg-accent/20">
+                      {name}<span aria-hidden className="text-accent-d">Edit text ↗</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : !content ? <p className="text-sm text-g600">Loading…</p>
             : tab === "access" ? <Access content={content} data={access} setData={setAccess} />
               : def && <ListEditor key={def.name} def={def} content={content} save={(items) => save(def.name, items)} startNew={startNew && tab === def.name} />}
         </div>

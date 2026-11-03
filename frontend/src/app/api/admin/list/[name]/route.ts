@@ -21,6 +21,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ name: st
       it.slug = slug;
     }
   }
+  if (def.name === "places") {
+    for (const it of items as Record<string, unknown>[]) it.country = it.region === "abroad" ? String(it.name ?? "") : "Bangladesh";
+  }
   await saveList(def.name, items);
   return Response.json({ ok: true, items });
 }
