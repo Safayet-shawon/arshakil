@@ -87,3 +87,18 @@ body {
   .marquee-track, .pulse-dot, .dots > span { animation: none; }
   * { scroll-behavior: auto !important; }
 }
+
+/* assistant robot */
+.bot-lid { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); transition: transform .5s ease; }
+.bot-asleep { transform: scaleY(1); }
+.bot-blink { animation: bot-blink 5s infinite; }
+@keyframes bot-blink { 0%, 92%, 100% { transform: scaleY(0); } 95% { transform: scaleY(1); } }
+.bot-wave { transform-box: view-box; transform-origin: 74px 56px; animation: bot-wave 1.1s ease-in-out 2; }
+@keyframes bot-wave { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-40deg); } 50% { transform: rotate(10deg); } 75% { transform: rotate(-40deg); } }
+.bot-z { animation: bot-z 2.6s infinite; }
+@keyframes bot-z { 0% { opacity: 0; transform: translate(0, 6px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, -12px); } }
+.bot-bolt { animation: bot-bolt 1s infinite; }
+@keyframes bot-bolt { 50% { opacity: .25; } }
+.bot-bob { animation: bot-bob 3.2s ease-in-out infinite; }
+@keyframes bot-bob { 50% { transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .bot-blink, .bot-wave, .bot-z, .bot-bolt, .bot-bob { animation: none; } }

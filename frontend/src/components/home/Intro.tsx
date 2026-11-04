@@ -2,7 +2,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { introRoles, site } from "@/data/site";
-import { isIntroDone, markIntroDone } from "@/lib/intro";
+import { isIntroDone, markIntroDone, setIntroCharge } from "@/lib/intro";
 import { cn, lerp, pad3, prefersReducedMotion } from "@/lib/utils";
 
 /**
@@ -38,9 +38,12 @@ export default function Intro() {
     if (isIntroDone() || prefersReducedMotion() || window.self !== window.top) { markIntroDone(); setGone(true); return; }
     document.documentElement.classList.add("lenis-stopped");
     const t0 = performance.now();
+    setIntroCharge(true, 1);
     const tick = (now: number) => {
       const p = Math.min((now - t0) / COUNT_MS, 1);
-      setValue(Math.max(1, Math.round(easeInOut(p) * 100)));
+      const v = Math.max(1, Math.round(easeInOut(p) * 100));
+      setValue(v);
+      setIntroCharge(true, v);
       setRole(Math.min(N - 1, Math.floor(p * N)));
       if (p < 1) raf.current = requestAnimationFrame(tick);
       else hold.current = setTimeout(exit, HOLD_MS);

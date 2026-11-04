@@ -14,6 +14,19 @@ export const markIntroDone = () => {
   listeners.forEach((l) => l());
 };
 
+/** The loader's progress, shared so the assistant robot can "charge" along with the count. */
+let charge = { active: false, value: 0 };
+const chargeListeners = new Set<() => void>();
+export const setIntroCharge = (active: boolean, value: number) => {
+  if (charge.active === active && charge.value === value) return;
+  charge = { active, value };
+  chargeListeners.forEach((l) => l());
+};
+export const getIntroCharge = () => charge;
+const subscribeCharge = (cb: () => void) => { chargeListeners.add(cb); return () => { chargeListeners.delete(cb); }; };
+const serverCharge = { active: false, value: 0 };
+export const useIntroCharge = () => useSyncExternalStore(subscribeCharge, () => charge, () => serverCharge);
+
 /** True once the intro has played in this tab (so it is skipped when you navigate back home). */
 export const isIntroDone = () => done;
 

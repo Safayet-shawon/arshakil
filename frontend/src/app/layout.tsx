@@ -5,6 +5,7 @@ import HideOnAdmin from "@/components/layout/HideOnAdmin";
 import Footer from "@/components/layout/Footer";
 import SmoothScroll from "@/components/layout/SmoothScroll";
 import Cursor from "@/components/layout/Cursor";
+import ChatBot from "@/components/chat/ChatBot";
 import CommissionPill from "@/components/layout/CommissionPill";
 import SiteProvider from "@/components/layout/SiteProvider";
 import { cookies } from "next/headers";
@@ -29,6 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <main>{children}</main>
           <HideOnAdmin><Footer /></HideOnAdmin>
           <HideOnAdmin><CommissionPill /></HideOnAdmin>
+          <HideOnAdmin><ChatBot /></HideOnAdmin>
         </SmoothScroll>
         </SiteProvider>
         <Cursor />
