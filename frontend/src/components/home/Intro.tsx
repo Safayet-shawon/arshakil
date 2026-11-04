@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { introRoles, site } from "@/data/site";
 import { isIntroDone, markIntroDone, setIntroCharge } from "@/lib/intro";
-import { cn, lerp, pad3, prefersReducedMotion } from "@/lib/utils";
+import { cn, lerp, prefersReducedMotion } from "@/lib/utils";
 
 /**
  * Loader: the roles light up one after another on the left while the number counts 000 -> 100
@@ -99,11 +99,6 @@ export default function Intro() {
             ))}
           </ul>
 
-          <div className={cn("absolute bottom-[74px] right-5 font-display leading-[0.8] tabular-nums md:right-[calc(clamp(20px,3.4vw,48px)+46px)]",
-            "text-[clamp(64px,min(11vw,24vh),200px)] text-transparent [-webkit-text-stroke:2px_var(--stroke)]",
-            "bg-[linear-gradient(to_top,var(--fill)_var(--p),transparent_var(--p))] bg-clip-text")}>
-            {pad3(value)}<small className="ml-[.1em] align-top text-[.22em] [-webkit-text-stroke:1.5px_var(--stroke)]">%</small>
-          </div>
         </motion.div>
       )}
     </AnimatePresence>

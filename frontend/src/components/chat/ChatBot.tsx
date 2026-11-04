@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CHIPS, reply, type BotReply } from "@/lib/bot";
-import { useIntroCharge, useIntroDone } from "@/lib/intro";
+import { markIntroDone, useIntroCharge, useIntroDone } from "@/lib/intro";
 import { cn } from "@/lib/utils";
 import { useSite } from "@/components/layout/SiteProvider";
 import Robot from "./Robot";
@@ -21,7 +21,7 @@ const HELLO: Msg = {
 
 /**
  * The site's helper robot. While the loader counts 0 -> 100 it sleeps in the middle of the screen and
- * charges up; when it is full it wakes, flies to the bottom-right corner and becomes the chat button.
+ * charges up; when it is full it wakes, settles into its normal size and becomes the chat button.
  * Answers come from the site's own content (see lib/bot.ts): no AI service, nothing to pay for.
  */
 export default function ChatBot() {
@@ -43,6 +43,8 @@ export default function ChatBot() {
 
   useEffect(() => {
     setFramed(window.self !== window.top); // hidden inside the admin panel's preview
+    // the loader belongs to the first page of a visit: landing anywhere else counts as seen
+    if (window.location.pathname !== "/") markIntroDone();
     const size = () => setGeo({ w: window.innerWidth, h: window.innerHeight });
     size();
     window.addEventListener("resize", size);
@@ -83,12 +85,9 @@ export default function ChatBot() {
   const { w, h } = geo;
   const mobile = w < 768;
   const L = mobile ? 16 : Math.max(20, Math.min(48, w * 0.034));
-  const s = mobile ? Math.min((0.26 * h) / BH, 2.2) : Math.min((0.42 * h) / BH, (0.34 * w) / BW, 3.6);
-  const cx = mobile ? 0.72 * w : 0.68 * w;
-  const cy = mobile ? 0.22 * h : 0.4 * h;
-  const pose = charging
-    ? { x: cx - (w - L) + (BW * s) / 2, y: cy - (h - 20) + (BH * s) / 2, scale: s, opacity: ready ? 1 : 0 }
-    : { x: 0, y: 0, scale: 1, opacity: ready ? 1 : 0 };
+  // while charging it is big, sitting in its own corner; when full it simply settles down to normal size
+  const s = mobile ? Math.min((0.3 * h) / BH, 2) : Math.min((0.46 * h) / BH, 2.6);
+  const pose = { x: 0, y: 0, scale: charging ? s : 1, opacity: ready ? 1 : 0 };
 
   const ask = (q: string) => {
     const t = q.trim();
