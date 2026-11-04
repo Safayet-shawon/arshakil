@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { getCursorPull } from "@/lib/attention";
 import { prefersReducedMotion } from "@/lib/utils";
 
 const TRAIL = 8;
@@ -42,6 +43,12 @@ export default function Cursor() {
     };
 
     const loop = () => {
+      // the robot can drag the cursor over to itself
+      const p = getCursorPull();
+      if (p) {
+        mx += (p.x - mx) * 0.045; my += (p.y - my) * 0.045;
+        if (dot.current) dot.current.style.transform = `translate(${mx}px,${my}px)`;
+      }
       rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16;
       const t = `translate(${rx}px,${ry}px)`;
       if (ring.current) ring.current.style.transform = t;

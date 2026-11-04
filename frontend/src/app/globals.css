@@ -115,6 +115,14 @@ body {
 .bot-typeR { animation: bot-typeR .13s linear infinite; }
 @keyframes bot-typeL { 0%, 100% { transform: rotate(8deg); } 50% { transform: rotate(34deg); } }
 @keyframes bot-typeR { 0%, 100% { transform: rotate(-34deg); } 50% { transform: rotate(-8deg); } }
+.bot-knockR { animation: bot-knockR .28s ease-in-out infinite alternate; }
+@keyframes bot-knockR { from { transform: rotate(-72deg); } to { transform: rotate(-118deg); } }
+.bot-pullL { animation: bot-pullL .16s linear infinite alternate; }
+.bot-pullR { animation: bot-pullR .16s linear infinite alternate; }
+@keyframes bot-pullL { from { transform: rotate(95deg); } to { transform: rotate(112deg); } }
+@keyframes bot-pullR { from { transform: rotate(-112deg); } to { transform: rotate(-95deg); } }
+.bot-tok { animation: bot-tok 1s ease-out infinite; }
+@keyframes bot-tok { 0% { transform: scale(.3); opacity: .9; } 100% { transform: scale(2.6); opacity: 0; } }
 .bot-scaredL { animation: bot-scaredL .09s linear infinite; }
 .bot-scaredR { animation: bot-scaredR .09s linear infinite; }
 @keyframes bot-scaredL { 0%, 100% { transform: rotate(72deg); } 50% { transform: rotate(90deg); } }
@@ -141,4 +149,4 @@ body {
 @keyframes bot-z { 0% { opacity: 0; transform: translate(0, 6px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, -12px); } }
 .bot-bolt { animation: bot-bolt 1s infinite; }
 @keyframes bot-bolt { 50% { opacity: .25; } }
-@media (prefers-reduced-motion: reduce) { .bot-blink, .bot-wave, .bot-z, .bot-bolt, .bot-bob, .bot-breathe, .bot-wakelid, .bot-stretchL, .bot-stretchR, .bot-stretchbody, .bot-yawn, .bot-danceL, .bot-danceR, .bot-sweat, .bot-puff { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .bot-blink, .bot-wave, .bot-z, .bot-bolt, .bot-bob, .bot-breathe, .bot-wakelid, .bot-stretchL, .bot-stretchR, .bot-stretchbody, .bot-yawn, .bot-danceL, .bot-danceR, .bot-knockR, .bot-pullL, .bot-pullR, .bot-tok, .bot-sweat, .bot-puff { animation: none; } }

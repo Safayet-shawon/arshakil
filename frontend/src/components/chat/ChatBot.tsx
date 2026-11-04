@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CHIPS, reply, type BotReply } from "@/lib/bot";
+import { setCursorPull } from "@/lib/attention";
 import { getIntroCharge, isIntroDone, markIntroDone, useIntroCharge, useIntroDone } from "@/lib/intro";
 import { cn } from "@/lib/utils";
 import { useSite } from "@/components/layout/SiteProvider";
@@ -61,6 +62,21 @@ function Cable({ w, rx, ry, popped }: { w: number; rx: number; ry: number; poppe
   );
 }
 
+type Attn = null | "walk" | "knock" | "pull" | "return";
+const ATTN_SCALE = 1.7;
+
+/** Rings that spread from the robot's fist, as if it were knocking on the glass of the screen. */
+function Knock({ x, y }: { x: number; y: number }) {
+  return (
+    <div aria-hidden className="pointer-events-none fixed z-[63]" style={{ left: x, top: y }}>
+      {[0, 0.33, 0.66].map((d) => (
+        <i key={d} className="bot-tok absolute -ml-4 -mt-4 block h-8 w-8 rounded-full border-[3px] border-accent" style={{ animationDelay: `${d}s` }} />
+      ))}
+      <b className="font-display absolute -top-12 left-4 whitespace-nowrap rounded-full bg-ink px-3 py-1 text-sm tracking-[0.12em] text-accent">TOK TOK!</b>
+    </div>
+  );
+}
+
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -86,6 +102,9 @@ export default function ChatBot() {
   const [running, setRunning] = useState(false);
   const [scared, setScared] = useState(false);
   const [playMood, setPlayMood] = useState<Mood | null>(null);
+  const [attn, setAttn] = useState<Attn>(null);
+  const [aim, setAim] = useState({ x: 0, y: 0 });
+  const attnRun = useRef<{ stop: boolean } | null>(null);
   const [open, setOpen] = useState(false);
   const [teaser, setTeaser] = useState<string | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([HELLO]);
@@ -161,9 +180,93 @@ export default function ChatBot() {
     return () => { clearTimeout(a); clearTimeout(b); };
   }, [ready, phase, framed]);
 
+  // nobody touching the screen for a while: it comes over, knocks on the glass, waves, and drags the cursor to itself
+  useEffect(() => {
+    if (!ready || framed || intro || open) return;
+    let last = Date.now();
+    let ptr = { x: geoW.current / 2, y: window.innerHeight / 2 };
+    let cooldownUntil = 0;
+
+    const stopAttention = (calm: boolean) => {
+      const run = attnRun.current;
+      if (!run) return;
+      run.stop = true;
+      attnRun.current = null;
+      setCursorPull(null);
+      setAttn("return");
+      if (calm) {
+        setTeaser("Oh! You're back.");
+        setTimeout(() => setTeaser((t) => (t === "Oh! You're back." ? null : t)), 2500);
+      }
+      setTimeout(() => setAttn((a) => (a === "return" ? null : a)), 1500);
+    };
+
+    const startAttention = async () => {
+      const run = { stop: false };
+      attnRun.current = run;
+      const w = geoW.current, h = window.innerHeight;
+      const hw = (BW * ATTN_SCALE) / 2, hh = (BH * ATTN_SCALE) / 2;
+      // stand beside the cursor, on the roomier side, inside the screen
+      const tx = Math.max(hw + 12, Math.min(w - hw - 12, ptr.x + (ptr.x > w / 2 ? -170 : 170)));
+      const ty = Math.max(hh + 96, Math.min(h - hh - 12, ptr.y));
+      setAim({ x: tx, y: ty });
+      setTeaser(null);
+      setAttn("walk");
+      await sleep(1300);
+      if (run.stop) return;
+      // knock, knock, knock
+      setAttn("knock");
+      setTeaser("Hellooo? Anyone there?");
+      await sleep(2800);
+      if (run.stop) return;
+      // grab the cursor and tug it over
+      setAttn("pull");
+      setTeaser("Got your cursor! Look at me!");
+      const hand = { x: tx + (ptr.x > w / 2 ? -1 : 1) * (hw + 6), y: ty - hh * 0.2 };
+      setCursorPull(hand);
+      await sleep(3200);
+      if (run.stop) return;
+      setAttn("knock");
+      setTeaser("Psst… over here!");
+      await sleep(5200);
+      if (run.stop) return;
+      // it has tried enough: lets go and goes back, a little offended
+      setCursorPull(null);
+      attnRun.current = null;
+      cooldownUntil = Date.now() + 90_000;
+      setAttn("return");
+      setTeaser("Fine… I'll wait over here.");
+      setTimeout(() => setTeaser(null), 3500);
+      setTimeout(() => setAttn((a) => (a === "return" ? null : a)), 1500);
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (Math.hypot(e.clientX - ptr.x, e.clientY - ptr.y) < 4) return; // a synthetic event, not a real movement
+      ptr = { x: e.clientX, y: e.clientY };
+      last = Date.now();
+      stopAttention(true);
+    };
+    const onAny = () => { last = Date.now(); stopAttention(true); };
+    const timer = setInterval(() => {
+      if (attnRun.current || document.hidden || Date.now() < cooldownUntil) return;
+      if (Date.now() - last > 6500) startAttention();
+    }, 500);
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    for (const ev of ["wheel", "scroll", "keydown", "pointerdown", "touchstart"]) window.addEventListener(ev, onAny, { passive: true });
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("pointermove", onMove);
+      for (const ev of ["wheel", "scroll", "keydown", "pointerdown", "touchstart"]) window.removeEventListener(ev, onAny);
+      if (attnRun.current) { attnRun.current.stop = true; attnRun.current = null; }
+      setCursorPull(null);
+      setAttn(null);
+    };
+  }, [ready, framed, intro, open]);
+
   // left alone for a while, it plays: hops, spins, wiggles, rolls along the bottom
   useEffect(() => {
-    if (!ready || intro || open || framed) return;
+    if (!ready || intro || open || framed || attn) return;
     let dead = false;
     const gw = geoW.current;
     const L = gw < 768 ? 16 : Math.max(20, Math.min(48, gw * 0.034));
@@ -185,7 +288,7 @@ export default function ChatBot() {
     };
     loop();
     return () => { dead = true; setPlayMood(null); reset(); };
-  }, [ready, intro, open, framed, moveFor, reset]);
+  }, [ready, intro, open, framed, attn, moveFor, reset]);
 
   // the more it is asked, the more worn out it gets; it recovers slowly
   useEffect(() => {
@@ -230,13 +333,16 @@ export default function ChatBot() {
   const perched = open && !intro;
   // open: it lives in the left of the chat header, small
   const cs = 0.62;
+  const away = attn === "walk" || attn === "knock" || attn === "pull";
   const pose = perched
     ? { x: -panelW + 16 + BW * cs, y: -panelH + 10 + BH * cs, scale: cs, opacity: ready ? 1 : 0 }
-    : { x: up ? upX : 0, y: 0, scale: up ? upS : 1, opacity: ready ? 1 : 0 };
+    : away
+      ? { x: aim.x - (w - L) + (BW * ATTN_SCALE) / 2, y: aim.y - (h - 20) + (BH * ATTN_SCALE) / 2, scale: ATTN_SCALE, opacity: 1 }
+      : { x: up ? upX : 0, y: 0, scale: up ? upS : 1, opacity: ready ? 1 : 0 };
   const cableRx = w - L + upX - BW * upS * (1 - 78 / 84);
   const cableRy = h - 20 + upY - BH * upS * (1 - 80 / 98);
 
-  const mood: Mood = scared ? "scared" : running ? "run" : perched ? (busy ? "type" : "idle") : phase === "happy" || phase === "descend" ? "dance" : playMood ?? "idle";
+  const mood: Mood = scared ? "scared" : attn === "walk" || attn === "return" ? "run" : attn === "knock" ? "knock" : attn === "pull" ? "pull" : running ? "run" : perched ? (busy ? "type" : "idle") : phase === "happy" || phase === "descend" ? "dance" : playMood ?? "idle";
 
   const openChat = async () => {
     if (opening.current) return;
@@ -293,10 +399,11 @@ export default function ChatBot() {
       <AnimatePresence>
         {up && <Cable key="cable" w={w} rx={cableRx} ry={cableRy} popped={popped} />}
       </AnimatePresence>
+      {attn === "knock" && <Knock x={aim.x + (aim.x > w / 2 ? -1 : 1) * 0 + (BW * ATTN_SCALE) * 0.42} y={aim.y - (BH * ATTN_SCALE) * 0.38} />}
       <motion.div
         initial={false}
         animate={pose}
-        transition={phase === "descend" ? { type: "spring", stiffness: 90, damping: 9 } : up ? { duration: 0 } : { type: "spring", stiffness: running ? 70 : 90, damping: running ? 13 : 15 }}
+        transition={attn ? { type: "spring", stiffness: 55, damping: 12 } : phase === "descend" ? { type: "spring", stiffness: 90, damping: 9 } : up ? { duration: 0 } : { type: "spring", stiffness: running ? 70 : 90, damping: running ? 13 : 15 }}
         onAnimationComplete={onArrived}
         className="fixed bottom-5"
         style={{ right: L, width: BW, height: BH, transformOrigin: "100% 100%", zIndex: intro ? 1001 : perched ? 62 : 60, pointerEvents: intro || scared ? "none" : "auto" }}
@@ -305,14 +412,14 @@ export default function ChatBot() {
           <button type="button" data-link aria-label={open ? "Close the assistant" : "Open the assistant"} aria-expanded={open}
             onClick={toggle}
             className="block h-full w-full rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-accent">
-            <Robot charge={phase === "asleep" ? value : 100} awake={phase !== "asleep"} waking={waking} mood={mood} tired={tired} waving={!!teaser && !open} />
+            <Robot charge={phase === "asleep" ? value : 100} awake={phase !== "asleep"} waking={waking} mood={mood} tired={tired} waving={!!teaser && !open && !attn} free={attn === "knock" || attn === "pull"} />
           </button>
         </motion.div>
 
         <AnimatePresence>
           {teaser && !open && !intro && (
             <motion.div initial={{ opacity: 0, x: 8, scale: 0.9 }} animate={{ opacity: 1, x: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={openChat}
-              className="absolute bottom-10 right-[calc(100%+6px)] w-max max-w-[210px] origin-bottom-right cursor-pointer rounded-2xl rounded-br-sm bg-paper px-4 py-3 text-xs font-bold leading-snug text-ink shadow-[0_14px_36px_rgba(77,79,83,0.22)]">
+              className="absolute bottom-10 right-[calc(100%+6px)] w-max max-w-[210px] origin-bottom-right cursor-pointer rounded-2xl rounded-br-sm [@media(max-width:480px)]:max-w-[160px] bg-paper px-4 py-3 text-xs font-bold leading-snug text-ink shadow-[0_14px_36px_rgba(77,79,83,0.22)]">
               {teaser}
             </motion.div>
           )}

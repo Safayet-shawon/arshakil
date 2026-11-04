@@ -2,7 +2,7 @@
 import { useEffect, useId, useRef, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
-export type Mood = "idle" | "scared" | "run" | "perch" | "type" | "dance";
+export type Mood = "idle" | "scared" | "run" | "perch" | "type" | "dance" | "knock" | "pull";
 
 /**
  * The assistant: a small yellow robot on tracks with two binocular eyes.
@@ -12,16 +12,16 @@ export type Mood = "idle" | "scared" | "run" | "perch" | "type" | "dance";
  *  - moods: scared (shaking), run (arms pumping), perch (hands on the chat card), type (hammering away),
  *    dance (arms up and down); `tired` makes it sweat and then pant as the questions pile up
  */
-export default function Robot({ charge = 100, awake = true, waking = false, mood = "idle", tired = 0, waving = false, className }: {
-  charge?: number; awake?: boolean; waking?: boolean; mood?: Mood; tired?: 0 | 1 | 2; waving?: boolean; className?: string;
+export default function Robot({ charge = 100, awake = true, waking = false, mood = "idle", tired = 0, waving = false, free = false, className }: {
+  charge?: number; awake?: boolean; waking?: boolean; mood?: Mood; tired?: 0 | 1 | 2; waving?: boolean; free?: boolean; className?: string;
 }) {
   const id = useId().replace(/:/g, "");
   const svg = useRef<SVGSVGElement>(null);
   const head = useRef<SVGGElement>(null);
   const pupils = useRef<SVGGElement>(null);
   // read inside the animation loop, so changing them never restarts it (the head would snap)
-  const live = useRef({ waking, mood, tired });
-  live.current = { waking, mood, tired };
+  const live = useRef({ waking, mood, tired, free });
+  live.current = { waking, mood, tired, free };
   const c = Math.max(0, Math.min(100, charge)) / 100;
   const full = awake || c >= 1;
 
@@ -39,6 +39,8 @@ export default function Robot({ charge = 100, awake = true, waking = false, mood
     const tgt = { ux: 0, uy: 0.3, roll: 0, mag: 0 };
     const cur = live.current.waking ? { ...droop } : { ...tgt };
     const t0 = performance.now();
+    let nextGaze = 0;
+    const gaze = { ux: 0, uy: 0.2, roll: 0, mag: 1 };
     const move = (e: PointerEvent) => {
       const r = s.getBoundingClientRect();
       const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height * 0.25);
@@ -49,9 +51,18 @@ export default function Robot({ charge = 100, awake = true, waking = false, mood
     };
     let raf = 0;
     const tick = (now: number) => {
-      const { waking: w, mood: m, tired: t } = live.current;
+      const { waking: w, mood: m, tired: t, free: f } = live.current;
       // heavy head while just woken, hands-down look while typing, drooping when worn out
       let goal = w && now - t0 < 1100 ? droop : tgt;
+      if (f) {
+        // eyes free: it looks wherever it likes, in its own time
+        if (now > nextGaze) {
+          const a = Math.random() * Math.PI * 2;
+          gaze.ux = Math.cos(a); gaze.uy = Math.sin(a) * 0.8; gaze.roll = (Math.random() - 0.5) * 20;
+          nextGaze = now + 600 + Math.random() * 1100;
+        }
+        goal = gaze;
+      }
       if (m === "type") goal = { ux: 0, uy: 1, roll: 0, mag: 0.7 };
       if (m === "scared") goal = { ux: 0, uy: -0.2, roll: 0, mag: 0 };
       const extraRoll = t === 2 ? 11 : t === 1 ? 4 : 0;
@@ -75,6 +86,8 @@ export default function Robot({ charge = 100, awake = true, waking = false, mood
       case "run": return `bot-run${side}`;
       case "type": return `bot-type${side}`;
       case "dance": return `bot-dance${side}`;
+      case "knock": return side === "R" ? "bot-knockR" : "bot-danceL";
+      case "pull": return `bot-pull${side}`;
       case "perch": return tired === 2 ? `bot-slump${side}` : `bot-perch${side}`;
       default: return side === "R" && waving ? "bot-wave" : "";
     }
