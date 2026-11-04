@@ -20,7 +20,7 @@ function BookRow({ b, n }: { b: Book; n: number }) {
     <Reveal>
       <article className="grid items-center gap-8 border-b border-g300 py-10 last:border-0 md:grid-cols-[minmax(220px,340px)_1fr] md:gap-14">
         <div className={cn("relative mx-auto w-full max-w-[320px] shadow-[12px_14px_0_rgba(247,181,0,0.4)]", n % 2 === 1 && "md:order-2")}>
-          <Photo name={b.thumb} alt={b.title} ratio="3/4" />
+          <Photo name={b.thumb} alt={b.title} ratio={String(Math.min(2, Math.max(0.5, b.thumbRatio || 0.75)))} />
         </div>
 
         <div>

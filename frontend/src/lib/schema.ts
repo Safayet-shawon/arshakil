@@ -4,7 +4,7 @@ import type { ListName, SiteContent } from "@/types";
  * What the admin panel can edit. Each list is a table of items; `fields` describe the form.
  * `options` is a fixed list or the name of another list whose `name`/`slug` values are offered.
  */
-export type FieldType = "text" | "textarea" | "number" | "image" | "select" | "bool" | "lines" | "pdf" | "readonly";
+export type FieldType = "text" | "textarea" | "number" | "image" | "images" | "video" | "select" | "bool" | "lines" | "pdf" | "readonly";
 type Item = Record<string, unknown>;
 export interface FieldDef {
   key: string; label: string; type: FieldType; hint?: string;
@@ -18,6 +18,8 @@ export interface FieldDef {
   resets?: string[];
   /** Where an uploaded PDF is kept: books are private and paywalled, posts are public. */
   folder?: "books" | "posts";
+  /** For an image field: also store the picture's width / height here, so it can be shown in its own shape. */
+  ratioKey?: string;
 }
 export interface ListDef {
   name: ListName; label: string; singular: string; blurb: string;
@@ -36,8 +38,11 @@ export const lists: ListDef[] = [
       { key: "title", label: "Title", type: "text" }, { key: "year", label: "Year", type: "text" },
       { key: "location", label: "Location", type: "text" }, { key: "type", label: "Type (e.g. Residential · Kolpo)", type: "text" },
       { key: "summary", label: "Short description", type: "textarea" }, { key: "photo", label: "Thumbnail photo", type: "image" },
+      { key: "photos", label: "More photos (add as many as you like)", type: "images" },
+      { key: "video", label: "Short video (optional)", type: "video" },
+      { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
       { key: "featured", label: "Featured on the home page", type: "bool" },
-    ], blank: { title: "", year: "", location: "", type: "", summary: "", photo: "", featured: false } },
+    ], blank: { title: "", year: "", location: "", type: "", summary: "", photo: "", photos: [], video: "", youtubeId: "", featured: false } },
 
   { name: "gallery", label: "Architectural Photography", singular: "photo", blurb: "The gallery. Sections (categories) are edited under Photography sections.",
     title: str("title"), photo: "photo", featurable: true,
@@ -70,7 +75,10 @@ export const lists: ListDef[] = [
       { key: "summary", label: "Short description", type: "textarea" },
       { key: "ideas", label: "Things to do (one per line)", type: "lines" }, { key: "cost", label: "Estimated cost", type: "text" },
       { key: "photo", label: "Cover photo", type: "image" },
-    ], blank: { region: "bangladesh", name: "", country: "Bangladesh", summary: "", ideas: [], cost: "", photo: "" } },
+      { key: "photos", label: "More photos (add as many as you like)", type: "images" },
+      { key: "video", label: "Short video (optional)", type: "video" },
+      { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
+    ], blank: { region: "bangladesh", name: "", country: "Bangladesh", summary: "", ideas: [], cost: "", photo: "", photos: [], video: "", youtubeId: "" } },
 
   { name: "placePosts", label: "Travel posts", singular: "post", blurb: "Blog posts for a city or country. Write them here or upload a PDF. They appear on that place's page.",
     title: str("title"), slugFrom: "title",
@@ -84,14 +92,16 @@ export const lists: ListDef[] = [
       { key: "kind", label: "Blog", type: "select", options: [{ value: "write", label: "Write it on the website" }, { value: "pdf", label: "Upload a PDF" }] },
       { key: "text", label: "Write the blog", type: "textarea", showIf: (i) => i.kind !== "pdf", hint: "Leave a blank line between paragraphs" },
       { key: "pdf", label: "Blog PDF", type: "pdf", folder: "posts", showIf: (i) => i.kind === "pdf" },
-      { key: "youtubeId", label: "YouTube video id (optional)", type: "text" },
-    ], blank: { region: "bangladesh", place: "", title: "", summary: "", kind: "write", text: "", pdf: "", youtubeId: "" } },
+      { key: "photos", label: "Photos (add as many as you like)", type: "images" },
+      { key: "video", label: "Short video (optional)", type: "video" },
+      { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
+    ], blank: { region: "bangladesh", place: "", title: "", summary: "", kind: "write", text: "", pdf: "", photos: [], video: "", youtubeId: "" } },
 
   { name: "books", label: "Author", singular: "book", blurb: "Upload a PDF, pick a thumbnail and a price in BDT. Readers get the first 5% free and need an access code for the rest. Nobody can download the file.",
     title: str("title"), photo: "thumb", featurable: true, slugFrom: "title",
     fields: [
       { key: "title", label: "Book title", type: "text" }, { key: "subtitle", label: "Subtitle", type: "text" },
-      { key: "thumb", label: "Thumbnail", type: "image" }, { key: "priceBdt", label: "Price (BDT, ৳)", type: "number" },
+      { key: "thumb", label: "Book cover", type: "image", ratioKey: "thumbRatio", hint: "Upload the whole cover, portrait or landscape. It is shown in the cover's own shape." }, { key: "priceBdt", label: "Price (BDT, ৳)", type: "number" },
       { key: "summary", label: "Book description", type: "textarea" },
       { key: "content", label: "Book content (what is inside)", type: "textarea", hint: "Chapters or a table of contents" },
       { key: "language", label: "Language", type: "text" }, { key: "year", label: "Year", type: "text" },
@@ -104,8 +114,12 @@ export const lists: ListDef[] = [
     fields: [
       { key: "title", label: "Name", type: "text" }, { key: "area", label: "Area (e.g. Learning)", type: "text" },
       { key: "blurb", label: "Short description", type: "textarea" }, { key: "points", label: "What it does (one per line)", type: "lines" },
-      { key: "photo", label: "Photo", type: "image" }, { key: "featured", label: "Featured on the home page", type: "bool" },
-    ], blank: { title: "", area: "", blurb: "", points: [], photo: "", featured: false } },
+      { key: "photo", label: "Main photo", type: "image" },
+      { key: "photos", label: "More photos (add as many as you like)", type: "images" },
+      { key: "video", label: "Short video (optional)", type: "video" },
+      { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
+      { key: "featured", label: "Featured on the home page", type: "bool" },
+    ], blank: { title: "", area: "", blurb: "", points: [], photo: "", photos: [], video: "", youtubeId: "", featured: false } },
 
   { name: "services", label: "Services & Fees", singular: "service", blurb: "The \"Hire me as…\" cards. Custom ones are quoted after a request.",
     title: str("hire"), slugFrom: "hire",

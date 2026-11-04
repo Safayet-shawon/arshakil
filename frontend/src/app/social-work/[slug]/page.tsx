@@ -5,6 +5,7 @@ import { getContent } from "@/lib/server/content";
 import { ButtonLink } from "@/components/ui/Button";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
+import MediaBlock from "@/components/ui/MediaBlock";
 import PageHero from "@/components/ui/PageHero";
 import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
@@ -39,6 +40,7 @@ export default async function InitiativePage({ params }: Props) {
             <Link href="/social-work" data-link className="label self-center text-g600 transition-colors hover:text-accent-d">← All initiatives</Link>
           </div>
         </Reveal>
+        <div className="mt-10"><MediaBlock media={n} title={n.title} /></div>
       </Section>
       <CtaBand text="Want to support or partner on this? Tell me about it." />
     </>

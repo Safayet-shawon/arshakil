@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { FieldDef } from "@/lib/schema";
 import { photoSrc } from "@/lib/media";
 import type { SiteContent } from "@/types";
-import { uploadImage, uploadPdf } from "./upload";
+import { uploadImage, uploadPdf, uploadVideo } from "./upload";
 
 const box = "w-full rounded-xl border border-g300 bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(247,181,0,0.2)]";
 
@@ -21,12 +21,32 @@ export default function FieldInput({ def, item, set, content }: { def: FieldDef;
     if (!file) return;
     setBusy(kind === "pdf" ? "Uploading PDF…" : "Uploading photo…"); setErr("");
     try {
-      if (kind === "image") set({ [def.key]: await uploadImage(file) });
-      else {
+      if (kind === "image") {
+        const r = await uploadImage(file);
+        set({ [def.key]: r.url, ...(def.ratioKey ? { [def.ratioKey]: r.ratio } : {}) });
+      } else {
         const r = await uploadPdf(file, def.folder ?? "books");
         set(def.folder === "posts" ? { [def.key]: r.key } : { [def.key]: r.key, pages: r.pages });
       }
     } catch (e) { setErr((e as Error).message); }
+    setBusy("");
+  };
+
+  const list = Array.isArray(v) ? (v as string[]) : [];
+  const addPhotos = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setErr("");
+    const next = [...list];
+    for (let i = 0; i < files.length; i++) {
+      setBusy(`Uploading photo ${i + 1} of ${files.length}…`);
+      try { next.push((await uploadImage(files[i])).url); set({ [def.key]: [...next] }); } catch (e) { setErr((e as Error).message); }
+    }
+    setBusy("");
+  };
+  const pickVideo = async (file: File | undefined) => {
+    if (!file) return;
+    setBusy("Uploading video… this can take a minute"); setErr("");
+    try { set({ [def.key]: await uploadVideo(file) }); } catch (e) { setErr((e as Error).message); }
     setBusy("");
   };
 
@@ -38,6 +58,51 @@ export default function FieldInput({ def, item, set, content }: { def: FieldDef;
       .filter((x) => !o.filterBy || x[o.filterBy] === item[o.filterBy])
       .map((x) => ({ value: String(x[o.value]), label: String(x[o.label]) }));
   })();
+
+  if (def.type === "images") {
+    return (
+      <div className="grid gap-2 text-xs font-bold uppercase tracking-[0.08em] text-g600">
+        <span>{label}</span>
+        {list.length > 0 && (
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {list.map((src, i) => (
+              <div key={src + i} className="relative aspect-square overflow-hidden rounded-lg bg-g200">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={photoSrc(src)} alt="" className="h-full w-full object-cover" />
+                <button type="button" aria-label="Remove photo" onClick={() => set({ [def.key]: list.filter((_, k) => k !== i) })}
+                  className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-ink/80 text-sm leading-none text-paper hover:bg-ink">×</button>
+              </div>
+            ))}
+          </div>
+        )}
+        <label className="flex cursor-pointer items-center gap-3 normal-case tracking-normal">
+          <span className="rounded-full bg-accent px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-ink hover:bg-accent-soft">Add photos</span>
+          <input type="file" accept="image/*" multiple className="sr-only" onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }} />
+          {busy && <span className="text-[11px] text-accent-d">{busy}</span>}
+        </label>
+        {err && <span role="alert" className="text-[11px] normal-case tracking-normal text-g600">{err}</span>}
+      </div>
+    );
+  }
+
+  if (def.type === "video") {
+    return (
+      <div className="grid gap-2 text-xs font-bold uppercase tracking-[0.08em] text-g600">
+        <span>{label}</span>
+        {typeof v === "string" && v && <video src={`/api/media/${v}`} controls preload="metadata" className="max-h-52 w-full rounded-lg bg-g200" />}
+        <span className="flex items-center gap-3 normal-case tracking-normal">
+          <label className="cursor-pointer rounded-full bg-accent px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-ink hover:bg-accent-soft">
+            {v ? "Change video" : "Choose video"}
+            <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only" onChange={(e) => { pickVideo(e.target.files?.[0]); e.target.value = ""; }} />
+          </label>
+          {typeof v === "string" && v && <button type="button" onClick={() => set({ [def.key]: "" })} className="label text-g500 hover:text-ink">Remove</button>}
+          {busy && <span className="text-[11px] text-accent-d">{busy}</span>}
+        </span>
+        <span className="text-[11px] font-normal normal-case tracking-normal text-g500">MP4, WebM or MOV, up to 100 MB. Keep it short.</span>
+        {err && <span role="alert" className="text-[11px] normal-case tracking-normal text-g600">{err}</span>}
+      </div>
+    );
+  }
 
   if (def.type === "image") {
     return (

@@ -27,4 +27,4 @@ export async function writeJson(path: string, data: unknown) {
 export const putFile = (path: string, body: Blob | Buffer, contentType: string) =>
   put(path, body, { access: "private", contentType, allowOverwrite: true, addRandomSuffix: false });
 
-export const getFile = (path: string) => get(path, { access: "private" });
+export const getFile = (path: string, opts?: { headers?: HeadersInit }) => get(path, { access: "private", ...opts });

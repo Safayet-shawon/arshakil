@@ -1,5 +1,6 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { readJson, writeJson } from "./blob";
 
 const COOKIE = "ar_admin";
 const DAY = 60 * 60 * 24;
@@ -12,10 +13,30 @@ function same(a: string, b: string) {
   return x.length === y.length && timingSafeEqual(x, y);
 }
 
-/** Admin credentials come from the ADMIN_USER / ADMIN_PASS environment variables, never from the code. */
-export const checkLogin = (user: string, pass: string) =>
-  !!process.env.ADMIN_USER && !!process.env.ADMIN_PASS && !!secret() &&
-  same(user, process.env.ADMIN_USER) && same(pass, process.env.ADMIN_PASS);
+const CREDS = "data/admin.json";
+interface Creds { user: string; salt: string; hash: string }
+const hashPass = (pass: string, salt: string) => scryptSync(pass, salt, 32).toString("hex");
+
+/**
+ * Admin credentials start as the ADMIN_USER / ADMIN_PASS environment variables (never in the code).
+ * Once changed in the panel, the new user name and a salted hash of the password are kept in the private store and win.
+ */
+export async function checkLogin(user: string, pass: string) {
+  if (!secret()) return false;
+  const saved = await readJson<Creds | null>(CREDS, null);
+  if (saved) return same(user, saved.user) && same(hashPass(pass, saved.salt), saved.hash);
+  return !!process.env.ADMIN_USER && !!process.env.ADMIN_PASS && same(user, process.env.ADMIN_USER) && same(pass, process.env.ADMIN_PASS);
+}
+
+/** The current user name, to check the old password against when changing details. */
+export async function currentUser() {
+  return (await readJson<Creds | null>(CREDS, null))?.user ?? process.env.ADMIN_USER ?? "";
+}
+
+export async function saveLogin(user: string, pass: string) {
+  const salt = randomBytes(16).toString("hex");
+  await writeJson(CREDS, { user, salt, hash: hashPass(pass, salt) } satisfies Creds);
+}
 
 export async function startSession() {
   const exp = String(Math.floor(Date.now() / 1000) + 7 * DAY);

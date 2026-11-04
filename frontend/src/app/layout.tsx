@@ -5,7 +5,6 @@ import Footer from "@/components/layout/Footer";
 import SmoothScroll from "@/components/layout/SmoothScroll";
 import Cursor from "@/components/layout/Cursor";
 import CommissionPill from "@/components/layout/CommissionPill";
-import AdminBar from "@/components/layout/AdminBar";
 import SiteProvider from "@/components/layout/SiteProvider";
 import { cookies } from "next/headers";
 import { site } from "@/data/site";
@@ -29,7 +28,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <main>{children}</main>
           <Footer />
           <CommissionPill />
-          <AdminBar />
         </SmoothScroll>
         </SiteProvider>
         <Cursor />

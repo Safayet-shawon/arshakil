@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getContent } from "@/lib/server/content";
 import type { Project } from "@/types";
 import CtaBand from "@/components/ui/CtaBand";
@@ -14,7 +15,7 @@ export const metadata: Metadata = { title: "Architecture" };
 function ProjectCard({ p, index }: { p: Project; index: number }) {
   return (
     <Reveal delay={(index % 2) * 0.08}>
-      <article className="group" data-view>
+      <Link href={`/architecture/${p.slug}`} data-link className="group block" data-view>
         <Photo name={p.photo} alt={p.title} ratio="4/3" />
         <div className="mt-3 flex items-baseline justify-between gap-3">
           <h3 className="font-display text-3xl text-ink"><Hl>{p.title}</Hl></h3>
@@ -22,7 +23,7 @@ function ProjectCard({ p, index }: { p: Project; index: number }) {
         </div>
         <p className="label mt-1 text-g500"><Hl>{p.type} — {p.location}</Hl></p>
         <p className="mt-2 max-w-md text-sm leading-relaxed text-g600"><Hl>{p.summary}</Hl></p>
-      </article>
+      </Link>
     </Reveal>
   );
 }

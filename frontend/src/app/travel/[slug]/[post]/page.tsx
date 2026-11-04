@@ -5,6 +5,7 @@ import { postSlug } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
+import MediaBlock from "@/components/ui/MediaBlock";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 
@@ -45,11 +46,7 @@ export default async function PostPage(props: Props) {
               {paragraphs.map((t, i) => <p key={i}><Hl>{t}</Hl></p>)}
             </div>
           )}
-          {found.youtubeId && (
-            <div className="mt-8 aspect-video overflow-hidden rounded-2xl bg-g200">
-              <iframe src={`https://www.youtube-nocookie.com/embed/${found.youtubeId}`} title={found.title} allowFullScreen className="h-full w-full" />
-            </div>
-          )}
+          <div className="mt-8"><MediaBlock media={found} title={found.title} /></div>
           <Link href={`/travel/${place.slug}`} data-link className="label mt-10 inline-block text-g600 transition-colors hover:text-accent-d">← Back to {place.name}</Link>
         </div>
       </Section>

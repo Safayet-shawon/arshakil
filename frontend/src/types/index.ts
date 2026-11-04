@@ -6,11 +6,13 @@ export interface Social { label: string; href: string; icon: string; handle: str
 
 /** `featured` items are listed in the home page's "Selected work". `photo` is a /photos name or an uploaded /api/media path. */
 interface Featurable { featured?: boolean }
-export interface Project extends Featurable { slug: string; title: string; year: string; location: string; type: string; summary: string; photo: string }
+/** Extra pictures and one short video (an uploaded file and/or a YouTube id) shown on an item's own page. */
+export interface Media { photos?: string[]; video?: string; youtubeId?: string }
+export interface Project extends Featurable, Media { slug: string; title: string; year: string; location: string; type: string; summary: string; photo: string }
 export interface Photo extends Featurable { photo: string; title: string; category: string }
 export interface Video extends Featurable { title: string; group: string; thumb: string; youtubeId?: string }
 export interface Story { title: string; place: string; era: string; blurb: string; photo: string }
-export interface Initiative extends Featurable { slug: string; title: string; area: string; blurb: string; photo: string; points: string[] }
+export interface Initiative extends Featurable, Media { slug: string; title: string; area: string; blurb: string; photo: string; points: string[] }
 export interface Named { name: string }
 export interface BestOf { category: string; title: string; meta: string; year: string; href: string; photo: string }
 
@@ -20,7 +22,7 @@ export interface BestOf { category: string; title: string; meta: string; year: s
  */
 export interface Book extends Featurable {
   slug: string; title: string; subtitle: string; summary: string; content: string;
-  pages: number; language: string; year: string; priceBdt: number; thumb: string; pdf: string;
+  pages: number; language: string; year: string; priceBdt: number; thumb: string; thumbRatio?: number; pdf: string;
 }
 
 /** One "Hire me as ..." card. `custom` rates are quoted after a request; `fixed` ones show a price. */
@@ -36,7 +38,7 @@ export interface Service {
 }
 
 /** A city (Bangladesh) or a country (abroad). Its page lists the details and the posts added for it. */
-export interface Place {
+export interface Place extends Media {
   slug: string;
   name: string;
   region: "bangladesh" | "abroad";
@@ -49,9 +51,9 @@ export interface Place {
   lng?: number;
 }
 /** A blog post on a place's page: written on the website (`text`) or uploaded as a PDF (`pdf`). */
-export interface PlacePost {
+export interface PlacePost extends Media {
   slug?: string; region?: "bangladesh" | "abroad"; place: string; title: string; summary?: string;
-  kind?: "write" | "pdf"; text: string; pdf?: string; youtubeId?: string;
+  kind?: "write" | "pdf"; text: string; pdf?: string;
 }
 
 export interface ContactPayload { name: string; email: string; message: string; service?: string }

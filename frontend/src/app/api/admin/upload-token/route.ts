@@ -10,8 +10,11 @@ export async function POST(req: Request) {
     const json = await handleUpload({
       body, request: req,
       onBeforeGenerateToken: async (pathname) => {
-        if (!/^(books|posts)\/[\w.-]+\.pdf$/.test(pathname)) throw new Error("Only books/*.pdf or posts/*.pdf");
-        return { allowedContentTypes: ["application/pdf"], maximumSizeInBytes: 200_000_000, addRandomSuffix: false, allowOverwrite: true };
+        if (/^(books|posts)\/[\w.-]+\.pdf$/.test(pathname))
+          return { allowedContentTypes: ["application/pdf"], maximumSizeInBytes: 200_000_000, addRandomSuffix: false, allowOverwrite: true };
+        if (/^uploads\/vid\/[\w.-]+\.(mp4|webm|mov)$/.test(pathname))
+          return { allowedContentTypes: ["video/mp4", "video/webm", "video/quicktime"], maximumSizeInBytes: 100_000_000, addRandomSuffix: false, allowOverwrite: true };
+        throw new Error("Not an allowed upload");
       },
     });
     return Response.json(json);

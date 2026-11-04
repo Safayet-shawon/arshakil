@@ -35,7 +35,7 @@ export default function Intro() {
 
   useEffect(() => {
     // already played in this tab (e.g. coming back home from another page): skip it
-    if (isIntroDone() || prefersReducedMotion()) { markIntroDone(); setGone(true); return; }
+    if (isIntroDone() || prefersReducedMotion() || window.self !== window.top) { markIntroDone(); setGone(true); return; }
     document.documentElement.classList.add("lenis-stopped");
     const t0 = performance.now();
     const tick = (now: number) => {

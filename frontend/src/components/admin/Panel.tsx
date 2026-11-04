@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { listByName } from "@/lib/schema";
 import type { ListName, PrivateData, SiteContent } from "@/types";
 import Access from "./Access";
+import Account from "./Account";
+import WebsiteEditor from "./WebsiteEditor";
 import ListEditor from "./ListEditor";
 
 type Item = Record<string, unknown>;
@@ -28,17 +30,13 @@ const SUB: Partial<Record<ListName, string>> = {
   gallery: "Photos", categories: "Sections", videos: "Videos", videoGroups: "Video groups",
   places: "Cities & countries", placePosts: "Blog posts", stories: "History & heritage",
 };
-const PAGES: [string, string][] = [
-  ["Home", "/"], ["About", "/about"], ["Architecture", "/architecture"], ["Architectural Photography", "/photography"],
-  ["Content Creation", "/content-creation"], ["Travel", "/travel"], ["Author", "/author"], ["Social Work", "/social-work"],
-];
 const groupOf = (tab: string) => GROUPS.find((g) => g.key === tab || g.lists.includes(tab as ListName));
 
 /** Admin home: pick a section on the left, edit it on the right. Text on the pages is edited in place on the site itself. */
 export default function Panel({ startTab, startNew }: { startTab?: string; startNew?: boolean }) {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [access, setAccess] = useState<PrivateData>({ codes: [], requests: [] });
-  const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "access" || startTab === "website") ? startTab : "projects");
+  const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "access" || startTab === "website" || startTab === "account") ? startTab : "projects");
   const [note, setNote] = useState("");
 
   useEffect(() => {
@@ -78,7 +76,6 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
   const group = groupOf(tab);
   const pending = access.requests.filter((r) => r.status === "new").length;
 
-  const edit = (path: string) => { document.cookie = "ar_edit=1; path=/; max-age=21600"; location.href = path; };
   const tabCls = (k: string) => `block w-full rounded-lg px-3 py-2 text-left text-[13px] font-bold transition-colors ${tab === k ? "bg-ink text-paper" : "text-g600 hover:bg-g200"}`;
 
   return (
@@ -91,6 +88,7 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
             <button onClick={() => setTab("website")} className={tabCls("website")}>Website</button>
             {GROUPS.map((g) => <button key={g.key} onClick={() => setTab(g.lists[0])} className={tabCls(group?.key === g.key ? tab : g.key)}>{g.label}</button>)}
             <button onClick={() => setTab("access")} className={tabCls("access")}>Book access{pending ? ` (${pending})` : ""}</button>
+            <button onClick={() => setTab("account")} className={tabCls("account")}>Login details</button>
           </nav>
           <div className="mt-6 grid gap-2 border-t border-g300 pt-4 text-xs text-g600">
             <p>To change any text on the pages, open the Website section.</p>
@@ -109,21 +107,9 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
               ))}
             </div>
           )}
-          {tab === "website" ? (
-            <div>
-              <h2 className="font-display text-4xl text-ink">Website</h2>
-              <p className="mt-1 max-w-xl text-sm text-g600">Pick a page to open it. The text on it turns editable (dashed): click a line, type, and click away to save. Press Done in the bar at the bottom when you finish. Visitors never see any of this.</p>
-              <ul className="mt-6 grid gap-2 sm:grid-cols-2">
-                {PAGES.map(([name, path]) => (
-                  <li key={path}>
-                    <button onClick={() => edit(path)} className="flex w-full items-center justify-between rounded-xl bg-paper p-4 text-left text-sm font-bold text-ink shadow-[0_4px_16px_rgba(77,79,83,0.06)] transition-colors hover:bg-accent/20">
-                      {name}<span aria-hidden className="text-accent-d">Edit text ↗</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : !content ? <p className="text-sm text-g600">Loading…</p>
+          {tab === "website" ? <WebsiteEditor />
+            : tab === "account" ? <Account />
+            : !content ? <p className="text-sm text-g600">Loading…</p>
             : tab === "access" ? <Access content={content} data={access} setData={setAccess} />
               : def && <ListEditor key={def.name} def={def} content={content} save={(items) => save(def.name, items)} startNew={startNew && tab === def.name} />}
         </div>
