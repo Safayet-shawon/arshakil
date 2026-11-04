@@ -11,7 +11,7 @@ import Robot, { type Mood } from "./Robot";
 const BW = 92;
 const BH = 107;
 /** Where the robot's hands meet the top edge of the chat card, measured up from its tracks (px). */
-const PERCH = 23;
+const PERCH = 23; // (unused now that the robot lives inside the chat header)
 
 interface Msg extends Partial<BotReply> { from: "bot" | "me"; text: string; live?: boolean; note?: string }
 
@@ -95,6 +95,7 @@ export default function ChatBot() {
   const [work, setWork] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
   const seq = useRef(false);
+  const geoW = useRef(1200);
   const opening = useRef(false);
   const play = useAnimationControls();
 
@@ -108,6 +109,8 @@ export default function ChatBot() {
   const move = useCallback(async (a: Parameters<typeof play.start>[0]) => {
     try { await play.start(a); } catch { /* unmounted or interrupted */ }
   }, [play]);
+  /** Waits for an animation, but never longer than its length: an interrupted animation must not freeze a sequence. */
+  const moveFor = useCallback((a: Parameters<typeof play.start>[0], ms: number) => Promise.race([move(a), sleep(ms + 80)]), [move]);
   const reset = useCallback(() => {
     try { play.stop(); play.set({ x: 0, y: 0, rotate: 0, scale: 1, scaleY: 1 }); } catch { /* not mounted */ }
   }, [play]);
@@ -116,7 +119,7 @@ export default function ChatBot() {
     setFramed(window.self !== window.top); // hidden inside the admin panel's preview
     // the loader belongs to the first page of a visit: landing anywhere else counts as seen
     if (window.location.pathname !== "/") markIntroDone();
-    const size = () => setGeo({ w: window.innerWidth, h: window.innerHeight });
+    const size = () => { geoW.current = window.innerWidth; setGeo({ w: window.innerWidth, h: window.innerHeight }); };
     size();
     window.addEventListener("resize", size);
     setReady(true);
@@ -131,23 +134,20 @@ export default function ChatBot() {
     const fromFull = value >= 100;
     (async () => {
       try { sessionStorage.setItem("ar_bot_hi", "1"); } catch { /* ignore */ }
-      if (fromFull) { setPhase("waking"); await sleep(2700); }
+      if (fromFull) { setPhase("waking"); await sleep(1450); }
       setPhase("unplug");
       setPopped(true);
-      await move({ x: [0, -26, 6, 0], rotate: [0, -12, 5, 0], transition: { duration: 0.7 } });
+      await moveFor({ x: [0, -26, 6, 0], rotate: [0, -12, 5, 0], transition: { duration: 0.45 } }, 450);
       setPhase("happy");
-      await move({ y: [0, -36, 0, -28, 0, -18, 0], rotate: [0, -8, 8, -8, 8, 0], scaleY: [1, 1.1, 0.9, 1.08, 0.94, 1, 1], transition: { duration: 1.4 } });
+      await moveFor({ y: [0, -36, 0, -28, 0, -18, 0], rotate: [0, -8, 8, -8, 8, 0], scaleY: [1, 1.1, 0.9, 1.08, 0.94, 1, 1], transition: { duration: 0.9 } }, 900);
       setPhase("descend");
-      await Promise.all([
-        move({ y: [0, -26, 0, -22, 0, -14, 0, -8, 0], rotate: [0, -10, 10, -10, 10, -6, 6, 0], transition: { duration: 2.1 } }),
-        sleep(2100),
-      ]);
+      await moveFor({ y: [0, -26, 0, -22, 0, -14, 0, -8, 0], rotate: [0, -10, 10, -10, 10, -6, 6, 0], transition: { duration: 1.1 } }, 1100);
       setPhase("done");
       setPopped(false);
       setTeaser("Phew, free at last! Tap me to chat.");
       setTimeout(() => setTeaser(null), 8000);
     })();
-  }, [phase, awakeNow, value, move]);
+  }, [phase, awakeNow, value, move, moveFor]);
 
   // pages that start without the loader: a short hello bubble, once per visit
   useEffect(() => {
@@ -165,17 +165,18 @@ export default function ChatBot() {
   useEffect(() => {
     if (!ready || intro || open || framed) return;
     let dead = false;
-    const L = geo.w < 768 ? 16 : Math.max(20, Math.min(48, geo.w * 0.034));
-    const room = Math.max(60, Math.min(260, geo.w - L * 2 - BW - 20));
+    const gw = geoW.current;
+    const L = gw < 768 ? 16 : Math.max(20, Math.min(48, gw * 0.034));
+    const room = Math.max(60, Math.min(260, gw - L * 2 - BW - 20));
     const tricks: (() => Promise<void>)[] = [
-      async () => { setPlayMood("dance"); await move({ y: [0, -46, 0, -34, 0, -20, 0], scaleY: [1, 1.1, 0.88, 1.08, 0.9, 1.04, 1], transition: { duration: 1.7, ease: "easeOut" } }); },
-      async () => { setPlayMood("dance"); await move({ rotate: [0, 0, 360], y: [0, -42, 0], transition: { duration: 1.2, times: [0, 0.12, 1], ease: "easeInOut" } }); },
-      async () => { setPlayMood("dance"); await move({ rotate: [0, -12, 12, -10, 10, -6, 6, 0], scale: [1, 1.06, 1, 1.06, 1], transition: { duration: 1.3 } }); },
-      async () => { setPlayMood("run"); await move({ x: [0, -room, -room * 0.55, -room, 0], rotate: [0, -9, 8, -9, 8], y: [0, -5, 0, -5, 0, -5, 0, -5, 0], transition: { duration: 3.6, ease: "easeInOut" } }); },
+      async () => { setPlayMood("dance"); await moveFor({ y: [0, -46, 0, -34, 0, -20, 0], scaleY: [1, 1.1, 0.88, 1.08, 0.9, 1.04, 1], transition: { duration: 1.7, ease: "easeOut" } }, 1700); },
+      async () => { setPlayMood("dance"); await moveFor({ rotate: [0, 0, 360], y: [0, -42, 0], transition: { duration: 1.2, times: [0, 0.12, 1], ease: "easeInOut" } }, 1200); },
+      async () => { setPlayMood("dance"); await moveFor({ rotate: [0, -12, 12, -10, 10, -6, 6, 0], scale: [1, 1.06, 1, 1.06, 1], transition: { duration: 1.3 } }, 1300); },
+      async () => { setPlayMood("run"); await moveFor({ x: [0, -room, -room * 0.55, -room, 0], rotate: [0, -9, 8, -9, 8], y: [0, -5, 0, -5, 0, -5, 0, -5, 0], transition: { duration: 3.6, ease: "easeInOut" } }, 3600); },
     ];
     const loop = async () => {
       await sleep(rand(8000, 15000));
-      if (dead) return;
+      if (dead || opening.current) return;
       await tricks[Math.floor(Math.random() * tricks.length)]();
       if (dead) return;
       setPlayMood(null);
@@ -184,7 +185,7 @@ export default function ChatBot() {
     };
     loop();
     return () => { dead = true; setPlayMood(null); reset(); };
-  }, [ready, intro, open, framed, geo.w, move, reset]);
+  }, [ready, intro, open, framed, moveFor, reset]);
 
   // the more it is asked, the more worn out it gets; it recovers slowly
   useEffect(() => {
@@ -220,18 +221,22 @@ export default function ChatBot() {
   const { w, h } = geo;
   const mobile = w < 768;
   const L = mobile ? 16 : Math.max(20, Math.min(48, w * 0.034));
-  // plugged in: up and to the left of its corner, big, with a cable to the wall; afterwards normal size in the corner
+  // plugged in: big, in the bottom-right corner where the count used to be, a little to the left to leave room for the cable
   const upS = mobile ? Math.min((0.26 * h) / BH, 1.7) : Math.min((0.34 * h) / BH, 2.2);
-  const upX = mobile ? -44 : -Math.round(w * 0.1);
-  const upY = -Math.round(h * 0.3);
+  const upX = mobile ? -40 : -Math.round(w * 0.07);
+  const upY = 0;
   const panelW = Math.min(380, w - L * 2);
-  const panelH = Math.min(520, h - BH - 60);
+  const panelH = Math.min(520, h - 120);
   const perched = open && !intro;
-  const pose = { x: perched ? -18 : up ? upX : 0, y: perched ? -(panelH - PERCH) : up ? upY : 0, scale: up ? upS : 1, opacity: ready ? 1 : 0 };
+  // open: it lives in the left of the chat header, small
+  const cs = 0.62;
+  const pose = perched
+    ? { x: -panelW + 16 + BW * cs, y: -panelH + 10 + BH * cs, scale: cs, opacity: ready ? 1 : 0 }
+    : { x: up ? upX : 0, y: 0, scale: up ? upS : 1, opacity: ready ? 1 : 0 };
   const cableRx = w - L + upX - BW * upS * (1 - 78 / 84);
   const cableRy = h - 20 + upY - BH * upS * (1 - 80 / 98);
 
-  const mood: Mood = scared ? "scared" : running ? "run" : perched ? (busy ? "type" : "perch") : phase === "happy" || phase === "descend" ? "dance" : playMood ?? "idle";
+  const mood: Mood = scared ? "scared" : running ? "run" : perched ? (busy ? "type" : "idle") : phase === "happy" || phase === "descend" ? "dance" : playMood ?? "idle";
 
   const openChat = async () => {
     if (opening.current) return;
@@ -240,12 +245,18 @@ export default function ChatBot() {
     reset();
     // startled first, then it bolts for the chat
     setScared(true);
-    await move({ x: [0, -3, 3, -3, 3, 0], rotate: [0, -10, 10, -10, 10, 0], y: [0, -14, 0], scale: [1, 1.14, 1], transition: { duration: 0.6 } });
-    setScared(false);
-    setRunning(true);
-    setOpen(true);
+    try {
+      await moveFor({ x: [0, -3, 3, -3, 3, 0], rotate: [0, -10, 10, -10, 10, 0], y: [0, -14, 0], scale: [1, 1.14, 1], transition: { duration: 0.6 } }, 600);
+    } finally {
+      reset();
+      setScared(false);
+      setRunning(true);
+      setOpen(true);
+      opening.current = false;
+    }
     move({ y: [0, -6, 0, -6, 0, -6, 0], rotate: [0, -6, 6, -6, 6, -3, 0], transition: { duration: 1 } });
-    opening.current = false;
+    // if the dash never reports back, it is there anyway
+    setTimeout(() => setRunning(false), 1800);
   };
 
   const onArrived = () => {
@@ -285,10 +296,10 @@ export default function ChatBot() {
       <motion.div
         initial={false}
         animate={pose}
-        transition={phase === "descend" ? { type: "spring", stiffness: 45, damping: 8 } : up ? { duration: 0 } : { type: "spring", stiffness: running ? 70 : 90, damping: running ? 13 : 15 }}
+        transition={phase === "descend" ? { type: "spring", stiffness: 90, damping: 9 } : up ? { duration: 0 } : { type: "spring", stiffness: running ? 70 : 90, damping: running ? 13 : 15 }}
         onAnimationComplete={onArrived}
         className="fixed bottom-5"
-        style={{ right: L, width: BW, height: BH, transformOrigin: "100% 100%", zIndex: intro ? 1001 : 60, pointerEvents: intro || scared ? "none" : "auto" }}
+        style={{ right: L, width: BW, height: BH, transformOrigin: "100% 100%", zIndex: intro ? 1001 : perched ? 62 : 60, pointerEvents: intro || scared ? "none" : "auto" }}
       >
         <motion.div animate={play} style={{ transformOrigin: "50% 80%" }} className="h-full w-full">
           <button type="button" data-link aria-label={open ? "Close the assistant" : "Open the assistant"} aria-expanded={open}
@@ -315,8 +326,7 @@ export default function ChatBot() {
             exit={{ opacity: 0, y: 18, scale: 0.94, transition: { duration: 0.2 } }}
             className="fixed z-[61] flex origin-bottom-right flex-col overflow-hidden rounded-3xl bg-paper shadow-[0_24px_70px_rgba(77,79,83,0.35)]"
             style={{ right: L, bottom: 20, width: panelW, height: panelH }}>
-            <header className="flex items-center gap-3 bg-ink px-5 pb-4 pt-6 text-paper">
-              <i className="pulse-dot block h-2.5 w-2.5 rounded-full bg-accent" />
+            <header className="flex h-[84px] shrink-0 items-center gap-3 bg-ink pl-[90px] pr-4 text-paper">
               <div className="min-w-0 flex-1">
                 <p className="font-display text-xl leading-none">Ask <span className="text-accent">Shakil&apos;s</span> assistant</p>
                 <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-g300">{tired === 2 ? "Out of breath · still answering" : "Online · answers from this site"}</p>

@@ -9,8 +9,8 @@ import { cn, lerp, prefersReducedMotion } from "@/lib/utils";
  * Loader: the roles light up one after another on the left while the number counts 000 -> 100
  * (grey -> mustard), then the curtain lifts straight into the hero. Click anywhere to skip.
  */
-const COUNT_MS = 4600;
-const HOLD_MS = 3400; // the robot wakes, yawns, stretches and pulls its plug out in this time
+const COUNT_MS = 2200;
+const HOLD_MS = 1900; // the robot wakes, yawns, stretches and pulls its plug out in this time
 const N = introRoles.length;
 const easeInOut = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
 
