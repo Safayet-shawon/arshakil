@@ -8,9 +8,7 @@ import { useSyncExternalStore } from "react";
 let done = false;
 const listeners = new Set<() => void>();
 
-const KEY = "ar_intro_seen";
 export const markIntroDone = () => {
-  try { sessionStorage.setItem(KEY, "1"); } catch { /* private mode */ }
   if (done) return;
   done = true;
   listeners.forEach((l) => l());
@@ -29,11 +27,8 @@ const subscribeCharge = (cb: () => void) => { chargeListeners.add(cb); return ()
 const serverCharge = { active: false, value: 0 };
 export const useIntroCharge = () => useSyncExternalStore(subscribeCharge, () => charge, () => serverCharge);
 
-/** True once the intro has played in this tab (so it is skipped when you navigate back home). */
-export const isIntroDone = () => {
-  if (done) return true;
-  try { return sessionStorage.getItem(KEY) === "1"; } catch { return false; }
-};
+/** True once the intro has played, or the visit began on another page. Lives in memory only: a reload or a fresh visit plays the loader again, moving around inside the site does not. */
+export const isIntroDone = () => done;
 
 const subscribe = (cb: () => void) => { listeners.add(cb); return () => { listeners.delete(cb); }; };
 

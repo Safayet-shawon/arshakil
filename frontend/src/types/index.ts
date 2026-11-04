@@ -38,7 +38,7 @@ export interface Service {
 }
 
 /** A city (Bangladesh) or a country (abroad). Its page lists the details and the posts added for it. */
-export interface Place extends Media {
+export interface Place extends Featurable, Media {
   slug: string;
   name: string;
   region: "bangladesh" | "abroad";

@@ -74,7 +74,7 @@ export const lists: ListDef[] = [
     title: str("name"), fields: [{ key: "name", label: "Group name", type: "text" }], blank: { name: "" } },
 
   { name: "places", label: "Travel places", singular: "place", blurb: "Bangladesh: add a new city. Abroad: add a new country. Each opens its own page with details.",
-    title: str("name"), photo: "photo", featurable: false, slugFrom: "name",
+    title: str("name"), photo: "photo", featurable: true, slugFrom: "name",
     fields: [
       { key: "region", label: "Where", type: "select", options: [{ value: "bangladesh", label: "Bangladesh (a city)" }, { value: "abroad", label: "Abroad (a country)" }] },
       { key: "name", label: "City or country name", type: "text", labelFor: (i) => (i.region === "abroad" ? "Country name" : "City name") },
@@ -86,7 +86,8 @@ export const lists: ListDef[] = [
       { key: "videoThumb", label: "Use the video as the thumbnail", type: "bool", showIf: (i) => !!i.video && !!i.videoPoster,
         hint: "The video's first picture becomes the thumbnail, and the thumbnail photo above is then counted with the other photos." },
       { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
-    ], blank: { region: "bangladesh", name: "", country: "Bangladesh", summary: "", ideas: [], cost: "", photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "" } },
+      { key: "featured", label: "Featured on the home page", type: "bool" },
+    ], blank: { region: "bangladesh", name: "", country: "Bangladesh", summary: "", ideas: [], cost: "", photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "", featured: false } },
 
   { name: "placePosts", label: "Travel posts", singular: "post", blurb: "Blog posts for a city or country. Write them here or upload a PDF. They appear on that place's page.",
     title: str("title"), slugFrom: "title",
