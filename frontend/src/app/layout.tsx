@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/layout/Header";
+import HideOnAdmin from "@/components/layout/HideOnAdmin";
 import Footer from "@/components/layout/Footer";
 import SmoothScroll from "@/components/layout/SmoothScroll";
 import Cursor from "@/components/layout/Cursor";
@@ -24,10 +25,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <SiteProvider content={content} admin={admin} editing={editing}>
         <SmoothScroll>
-          <Header />
+          <HideOnAdmin><Header /></HideOnAdmin>
           <main>{children}</main>
-          <Footer />
-          <CommissionPill />
+          <HideOnAdmin><Footer /></HideOnAdmin>
+          <HideOnAdmin><CommissionPill /></HideOnAdmin>
         </SmoothScroll>
         </SiteProvider>
         <Cursor />

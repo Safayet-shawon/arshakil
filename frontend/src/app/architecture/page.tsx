@@ -3,6 +3,7 @@ import Link from "next/link";
 import { coverOf } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import type { Project } from "@/types";
+import Albums from "@/components/ui/Albums";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
 import PageHero from "@/components/ui/PageHero";
@@ -38,6 +39,7 @@ export default async function ArchitecturePage() {
         <SectionHead index="01" kicker="Kolpo & Studio Karu" title="Selected projects" aside={String(projects.length).padStart(2, "0")} />
         <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2">{projects.map((p, i) => <ProjectCard key={p.slug} p={p} index={i} />)}</div>
       </Section>
+      <Albums sector="architecture" />
       <CtaBand text="Planning a house, a library or a small public space? Tell me about it." />
     </>
   );

@@ -2,10 +2,11 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { listByName } from "@/lib/schema";
-import type { ListName, PrivateData, SiteContent } from "@/types";
+import type { Album, ListName, PrivateData, Sector, SiteContent } from "@/types";
 import Access from "./Access";
 import BulkUpload, { type BulkPhoto } from "./BulkUpload";
 import Account from "./Account";
+import AlbumsEditor from "./AlbumsEditor";
 import WebsiteEditor from "./WebsiteEditor";
 import ListEditor from "./ListEditor";
 
@@ -19,16 +20,17 @@ const RENAMES: Partial<Record<ListName, { list: ListName; key: string }>> = {
 
 /** The left menu: related lists live together in one section (e.g. Photography holds the photos and their sections). */
 const GROUPS: { key: string; label: string; lists: string[] }[] = [
-  { key: "projects", label: "Architecture", lists: ["projects"] },
+  { key: "projects", label: "Architecture", lists: ["projects", "albums:architecture"] },
   { key: "gallery", label: "Architectural Photography", lists: ["gallery", "categories", "bulk"] },
-  { key: "videos", label: "Content Creation", lists: ["videos", "videoGroups"] },
-  { key: "places", label: "Travel", lists: ["places", "placePosts", "stories"] },
-  { key: "books", label: "Author", lists: ["books"] },
-  { key: "initiatives", label: "Social Work", lists: ["initiatives"] },
+  { key: "videos", label: "Content Creation", lists: ["videos", "videoGroups", "albums:content-creation"] },
+  { key: "places", label: "Travel", lists: ["places", "placePosts", "stories", "albums:travel"] },
+  { key: "books", label: "Author", lists: ["books", "albums:author"] },
+  { key: "initiatives", label: "Social Work", lists: ["initiatives", "albums:social-work"] },
   { key: "services", label: "Services & Fees", lists: ["services"] },
 ];
 const SUB: Record<string, string> = {
-  gallery: "Photos", categories: "Sections", bulk: "Bulk upload", videos: "Videos", videoGroups: "Video groups",
+  gallery: "Photos", categories: "Sections", bulk: "Bulk upload",
+  "albums:architecture": "Albums", "albums:content-creation": "Albums", "albums:travel": "Albums", "albums:author": "Albums", "albums:social-work": "Albums", videos: "Videos", videoGroups: "Video groups",
   places: "Cities & countries", placePosts: "Blog posts", stories: "History & heritage",
 };
 const groupOf = (tab: string) => GROUPS.find((g) => g.key === tab || g.lists.includes(tab));
@@ -37,7 +39,7 @@ const groupOf = (tab: string) => GROUPS.find((g) => g.key === tab || g.lists.inc
 export default function Panel({ startTab, startNew }: { startTab?: string; startNew?: boolean }) {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [access, setAccess] = useState<PrivateData>({ codes: [], requests: [] });
-  const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "bulk" || startTab === "access" || startTab === "website" || startTab === "account") ? startTab : "projects");
+  const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "bulk" || startTab.startsWith("albums:") || startTab === "access" || startTab === "website" || startTab === "account") ? startTab : "projects");
   const [note, setNote] = useState("");
   const [album, setAlbum] = useState("");
 
@@ -73,6 +75,15 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
     setTimeout(() => setNote(""), 2500);
   }, [content]);
 
+  /** Albums of any sector: saves the whole list and returns it with the slugs the server gave. */
+  const saveAlbums = async (items: Album[]) => {
+    if (!content) return null;
+    const saved = await put("albums", items as unknown as Item[]);
+    if (!saved) return null;
+    setContent({ ...content, albums: saved as unknown as Album[] });
+    return saved as unknown as Album[];
+  };
+
   /** Bulk upload: add the photos to a section (creating it if new), then open that section. */
   const bulkSave = async (name: string, isNew: boolean, photos: BulkPhoto[]) => {
     if (!content) return;
@@ -98,9 +109,9 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
   const tabCls = (k: string) => `block w-full rounded-lg px-3 py-2 text-left text-[13px] font-bold transition-colors ${tab === k ? "bg-ink text-paper" : "text-g600 hover:bg-g200"}`;
 
   return (
-    <section className="min-h-[100svh] bg-g200 px-5 pb-20 pt-[clamp(100px,14vh,140px)] md:px-[clamp(20px,3.4vw,48px)]">
+    <section className="min-h-[100svh] bg-g200 px-5 pb-20 pt-8 md:px-[clamp(20px,3.4vw,48px)]">
       <div className="mx-auto grid max-w-[1200px] gap-8 md:grid-cols-[230px_1fr]">
-        <aside className="md:sticky md:top-28 md:self-start">
+        <aside className="md:sticky md:top-8 md:self-start">
           <div className="label text-accent-d">Admin</div>
           <h1 className="font-display mb-4 text-3xl text-ink">Edit the site</h1>
           <nav className="grid gap-1">
@@ -140,6 +151,7 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
             : tab === "account" ? <Account />
             : !content ? <p className="text-sm text-g600">Loading…</p>
             : tab === "access" ? <Access content={content} data={access} setData={setAccess} />
+              : tab.startsWith("albums:") ? <AlbumsEditor sector={tab.slice(7) as Sector} content={content} save={saveAlbums} />
               : tab === "bulk" ? <BulkUpload content={content} onAdd={bulkSave} />
                 : def && <ListEditor key={def.name} def={def} content={content} save={(items) => save(def.name, items)} startNew={startNew && tab === def.name}
                   show={def.name === "gallery" && album ? (it) => it.category === album : undefined}

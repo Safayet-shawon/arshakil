@@ -3,6 +3,7 @@ import Link from "next/link";
 import { coverOf } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import { ButtonLink } from "@/components/ui/Button";
+import Albums from "@/components/ui/Albums";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
 import PageHero from "@/components/ui/PageHero";
@@ -43,6 +44,7 @@ export default async function SocialWorkPage() {
           <ButtonLink href="/#contact">Get involved</ButtonLink>
         </Reveal>
       </Section>
+      <Albums sector="social-work" />
       <CtaBand text="Looking for a design partner for a community project? Tell me about it." />
     </>
   );

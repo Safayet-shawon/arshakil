@@ -24,3 +24,12 @@ export const galleryOf = (i: Cover) => {
 
 /** Address of a photography album (a section of the gallery). */
 export const albumSlug = (name: string) => slugify(name);
+
+/** The parts of the site that carry photo albums: label and page. */
+export const SECTORS: { key: import("@/types").Sector; label: string; href: string }[] = [
+  { key: "architecture", label: "Architecture", href: "/architecture" },
+  { key: "travel", label: "Travel", href: "/travel" },
+  { key: "author", label: "Author", href: "/author" },
+  { key: "social-work", label: "Social Work", href: "/social-work" },
+  { key: "content-creation", label: "Content Creation", href: "/content-creation" },
+];

@@ -176,5 +176,5 @@ export const placePosts: PlacePost[] = [
 
 /** What the site shows until something is changed in the admin panel. */
 export const defaults: SiteContent = {
-  texts: {}, projects, gallery, categories, videos, videoGroups, places, placePosts, books, initiatives, services, stories,
+  texts: {}, projects, gallery, categories, videos, videoGroups, places, placePosts, books, initiatives, services, stories, albums: [],
 };

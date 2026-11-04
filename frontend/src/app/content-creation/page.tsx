@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { socials } from "@/data/site";
 import { getContent } from "@/lib/server/content";
+import Albums from "@/components/ui/Albums";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
 import PageHero from "@/components/ui/PageHero";
@@ -47,6 +48,7 @@ export default async function ContentPage() {
           </div>
         </Section>
       ))}
+      <Albums sector="content-creation" />
       <CtaBand text="Want a video made, or want to collaborate on one?" />
     </>
   );

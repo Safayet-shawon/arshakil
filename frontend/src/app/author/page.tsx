@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getContent } from "@/lib/server/content";
 import type { Book } from "@/types";
 import { ButtonLink } from "@/components/ui/Button";
+import Albums from "@/components/ui/Albums";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
 import PageHero from "@/components/ui/PageHero";
@@ -62,6 +63,7 @@ export default async function AuthorPage() {
         <SectionHead index="01" kicker="Library" title="Books" aside={String(books.length).padStart(2, "0")} />
         {books.map((b, i) => <BookRow key={b.slug} b={b} n={i} />)}
       </Section>
+      <Albums sector="author" />
       <CtaBand text="Want a talk, a signed copy or a commissioned essay? Get in touch." />
     </>
   );

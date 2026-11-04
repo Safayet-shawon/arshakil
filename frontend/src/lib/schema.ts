@@ -149,4 +149,11 @@ export const lists: ListDef[] = [
     ], blank: { title: "", place: "", era: "", blurb: "", photo: "" } },
 ];
 
+lists.push({
+  name: "albums", label: "Albums", singular: "album", blurb: "Photo albums for each part of the site.",
+  title: str("name"), slugFrom: "name", photo: "cover",
+  fields: [{ key: "name", label: "Album name", type: "text" }, { key: "description", label: "Description", type: "textarea" }],
+  blank: { sector: "architecture", name: "", description: "", photos: [] },
+});
+
 export const listByName = (n: string) => lists.find((l) => l.name === n);

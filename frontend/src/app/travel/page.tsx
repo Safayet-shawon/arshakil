@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getContent } from "@/lib/server/content";
+import Albums from "@/components/ui/Albums";
 import CtaBand from "@/components/ui/CtaBand";
 import PageHero from "@/components/ui/PageHero";
 import Photo from "@/components/ui/Photo";
@@ -48,6 +49,7 @@ export default async function TravelPage() {
           ))}
         </div>
       </Section>
+      <Albums sector="travel" />
       <CtaBand text="Planning a trip, a talk or a story together? Let's plan it." />
     </>
   );

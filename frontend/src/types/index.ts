@@ -58,6 +58,11 @@ export interface PlacePost extends Media {
 
 export interface ContactPayload { name: string; email: string; message: string; service?: string }
 
+/** A photo album on one of the site's sectors. Its first photo is the cover. */
+export type Sector = "architecture" | "travel" | "author" | "social-work" | "content-creation";
+export interface AlbumPhoto { photo: string; title: string; description?: string }
+export interface Album { slug: string; sector: Sector; name: string; description: string; photos: AlbumPhoto[] }
+
 /** Everything the admin can edit. Defaults live in data/content.ts; saved changes override them. */
 export interface SiteContent {
   texts: Record<string, string>;
@@ -72,6 +77,7 @@ export interface SiteContent {
   initiatives: Initiative[];
   services: Service[];
   stories: Story[];
+  albums: Album[];
 }
 export type ListName = Exclude<keyof SiteContent, "texts">;
 
