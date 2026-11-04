@@ -2,9 +2,10 @@ import type { AnchorHTMLAttributes, ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type Variant = "dark" | "ghost";
+type Variant = "dark" | "ghost" | "accent";
 const styles: Record<Variant, string> = {
   dark: "bg-ink text-paper hover:bg-g600",
+  accent: "bg-accent text-ink shadow-[0_0_0_6px_rgba(247,181,0,0.22),0_12px_32px_rgba(247,181,0,0.35)] hover:bg-g50 hover:shadow-[0_0_0_8px_rgba(247,181,0,0.3),0_16px_40px_rgba(247,181,0,0.45)]",
   ghost: "border-[1.5px] border-ink text-ink hover:bg-ink hover:text-paper",
 };
 const base =
