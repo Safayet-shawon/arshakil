@@ -31,7 +31,7 @@ export const gallery: Photo[] = [
   { photo: "arch-house-2", title: "Angles", category: "Architecture" },
   { photo: "travel-beach", title: "Island Coast", category: "Travel" },
 ];
-export const categories: Named[] = ["Architecture", "Street", "Portrait", "Travel"].map((name) => ({ name }));
+export const categories: Named[] = ["Architecture", "Street", "Portrait", "Travel", "Author"].map((name) => ({ name }));
 
 /** Add a real `youtubeId` to any video: its YouTube thumbnail and link are used automatically. */
 export const videos: Video[] = [

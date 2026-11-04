@@ -2,6 +2,8 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useState } from "react";
 import { useIntroDone } from "@/lib/intro";
+import { photoSrc } from "@/lib/media";
+import { useSite } from "../layout/SiteProvider";
 import { site, socials } from "@/data/site";
 import { Apos, ButtonLink } from "../ui/Button";
 import RoleSwipe from "./RoleSwipe";
@@ -33,6 +35,8 @@ function Word({ children, delay, outline, fade, dot, skipped }: {
  */
 export default function Hero() {
   const entered = useIntroDone();
+  const { texts } = useSite();
+  const custom = texts["@hero"]; // a picture the admin uploaded instead of the original cut-out
   const [skipped, setSkipped] = useState(false);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -80,7 +84,8 @@ export default function Hero() {
           transition={{ duration: 1.7, delay: 1.55, ease, opacity: { duration: 1.2, delay: 1.55 } }}>
           <motion.div style={{ x: px, y: py }} className="h-full w-full">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={site.heroImage} alt={`Portrait of ${site.name}`} className="block h-full w-full" />
+            <img src={custom ? photoSrc(custom) : site.heroImage} alt={`Portrait of ${site.name}`}
+              className={cn("block h-full w-full", custom && "object-cover object-top [mask-image:linear-gradient(to_bottom,#000_62%,transparent)]")} />
           </motion.div>
         </motion.div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[28vh] bg-gradient-to-t from-white from-[4%] to-transparent" />

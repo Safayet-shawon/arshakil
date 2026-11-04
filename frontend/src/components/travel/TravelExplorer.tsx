@@ -5,6 +5,7 @@ import { useSite } from "../layout/SiteProvider";
 import Hl from "../ui/Hl";
 import Photo from "../ui/Photo";
 import Reveal from "../ui/Reveal";
+import { coverOf } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 const tabs = [
@@ -35,7 +36,7 @@ export default function TravelExplorer() {
         {list.map((p, i) => (
           <Reveal key={p.slug} delay={(i % 3) * 0.07}>
             <Link href={`/travel/${p.slug}`} data-view className="group block">
-              <Photo name={p.photo} alt={p.name} ratio="4/3" />
+              <Photo name={coverOf(p)} alt={p.name} ratio="4/3" />
               <div className="label mt-3 text-accent-d">{p.country}</div>
               <h3 className="font-display text-3xl text-ink transition-colors group-hover:text-accent-d">{p.name} <span aria-hidden className="text-accent">↗</span></h3>
               <p className="mt-2 text-sm leading-relaxed text-g600"><Hl>{p.summary}</Hl></p>

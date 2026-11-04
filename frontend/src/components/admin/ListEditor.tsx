@@ -8,14 +8,18 @@ import FieldInput from "./FieldInput";
 type Item = Record<string, unknown>;
 
 /** A list with Add / Edit / Delete and, where it applies, a Featured switch. Every change is saved straight away. */
-export default function ListEditor({ def, content, save, startNew }: {
+export default function ListEditor({ def, content, save, startNew, show, blankPatch }: {
   def: ListDef; content: SiteContent; save: (items: Item[]) => Promise<void>; startNew?: boolean;
+  /** Show only some items (the rest stay in the list). */
+  show?: (it: Item) => boolean;
+  /** Values a new item starts with (e.g. the section currently open). */
+  blankPatch?: Item;
 }) {
   const items = content[def.name] as unknown as Item[];
   const [editing, setEditing] = useState<{ index: number; item: Item } | null>(null);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { if (startNew) setEditing({ index: -1, item: { ...def.blank } }); }, [startNew, def]);
+  useEffect(() => { if (startNew) setEditing({ index: -1, item: { ...def.blank, ...blankPatch } }); }, [startNew, def]);
 
   // The form is a window of its own: keep the page behind it still while it is open.
   useEffect(() => {
@@ -45,13 +49,13 @@ export default function ListEditor({ def, content, save, startNew }: {
           <h2 className="font-display text-4xl text-ink">{def.label}</h2>
           <p className="mt-1 max-w-xl text-sm text-g600">{def.blurb}</p>
         </div>
-        <button data-link onClick={() => setEditing({ index: -1, item: { ...def.blank } })}
+        <button data-link onClick={() => setEditing({ index: -1, item: { ...def.blank, ...blankPatch } })}
           className="rounded-full bg-accent px-5 py-3 text-xs font-bold uppercase tracking-[0.1em] text-ink hover:bg-accent-soft">+ Add new {def.singular}</button>
       </div>
 
       <ul className="mt-6 grid gap-2">
         {items.length === 0 && <li className="rounded-xl bg-paper p-5 text-sm text-g500">Nothing here yet.</li>}
-        {items.map((it, i) => (
+        {items.map((it, i) => (show && !show(it) ? null : (
           <li key={i} className="flex items-center gap-4 rounded-xl bg-paper p-3 pr-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)]">
             {def.photo ? (
               typeof it[def.photo] === "string" && it[def.photo]
@@ -73,7 +77,7 @@ export default function ListEditor({ def, content, save, startNew }: {
             <button onClick={() => setEditing({ index: i, item: def.prepare ? def.prepare({ ...it }, content) : { ...it } })} className="label text-g600 hover:text-accent-d">Edit</button>
             <button onClick={() => { if (confirm(`Delete "${def.title(it)}"?`)) commit(items.filter((_, k) => k !== i)); }} className="label text-g500 hover:text-ink">Delete</button>
           </li>
-        ))}
+        )))}
       </ul>
       {busy && <p className="label mt-3 text-accent-d">Saving…</p>}
 

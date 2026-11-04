@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { FieldDef } from "@/lib/schema";
 import { photoSrc } from "@/lib/media";
 import type { SiteContent } from "@/types";
-import { uploadImage, uploadPdf, uploadVideo } from "./upload";
+import { uploadImage, uploadImages, uploadPdf, uploadVideo, videoPoster } from "./upload";
 
 const box = "w-full rounded-xl border border-g300 bg-paper px-4 py-2.5 text-sm text-ink outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(247,181,0,0.2)]";
 
@@ -33,20 +33,28 @@ export default function FieldInput({ def, item, set, content }: { def: FieldDef;
   };
 
   const list = Array.isArray(v) ? (v as string[]) : [];
-  const addPhotos = async (files: FileList | null) => {
-    if (!files?.length) return;
-    setErr("");
-    const next = [...list];
-    for (let i = 0; i < files.length; i++) {
-      setBusy(`Uploading photo ${i + 1} of ${files.length}…`);
-      try { next.push((await uploadImage(files[i])).url); set({ [def.key]: [...next] }); } catch (e) { setErr((e as Error).message); }
-    }
+  const addPhotos = async (files: File[]) => {
+    if (!files.length) return;
+    setErr(""); setBusy(`Uploading ${files.length} photo${files.length > 1 ? "s" : ""}…`);
+    const base = [...list];
+    const results = await uploadImages(files);
+    const urls = results.flatMap((r) => (r instanceof Error ? [] : [r.url]));
+    set({ [def.key]: [...base, ...urls] });
+    if (urls.length < files.length) setErr(`${files.length - urls.length} photo(s) could not be uploaded`);
     setBusy("");
   };
   const pickVideo = async (file: File | undefined) => {
     if (!file) return;
     setBusy("Uploading video… this can take a minute"); setErr("");
-    try { set({ [def.key]: await uploadVideo(file) }); } catch (e) { setErr((e as Error).message); }
+    try {
+      const key = await uploadVideo(file);
+      if (!def.posterKey) { set({ [def.key]: key }); }
+      else {
+        const frame = await videoPoster(file);
+        const poster = frame ? (await uploadImage(frame)).url : "";
+        set({ [def.key]: key, [def.posterKey]: poster, ...(poster ? {} : { videoThumb: false }) });
+      }
+    } catch (e) { setErr((e as Error).message); }
     setBusy("");
   };
 
@@ -77,7 +85,7 @@ export default function FieldInput({ def, item, set, content }: { def: FieldDef;
         )}
         <label className="flex cursor-pointer items-center gap-3 normal-case tracking-normal">
           <span className="rounded-full bg-accent px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-ink hover:bg-accent-soft">Add photos</span>
-          <input type="file" accept="image/*" multiple className="sr-only" onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }} />
+          <input type="file" accept="image/*" multiple className="sr-only" onChange={(e) => { const fs = Array.from(e.target.files ?? []); e.target.value = ""; addPhotos(fs); }} />
           {busy && <span className="text-[11px] text-accent-d">{busy}</span>}
         </label>
         {err && <span role="alert" className="text-[11px] normal-case tracking-normal text-g600">{err}</span>}
@@ -95,7 +103,7 @@ export default function FieldInput({ def, item, set, content }: { def: FieldDef;
             {v ? "Change video" : "Choose video"}
             <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only" onChange={(e) => { pickVideo(e.target.files?.[0]); e.target.value = ""; }} />
           </label>
-          {typeof v === "string" && v && <button type="button" onClick={() => set({ [def.key]: "" })} className="label text-g500 hover:text-ink">Remove</button>}
+          {typeof v === "string" && v && <button type="button" onClick={() => set({ [def.key]: "", ...(def.posterKey ? { [def.posterKey]: "", videoThumb: false } : {}) })} className="label text-g500 hover:text-ink">Remove</button>}
           {busy && <span className="text-[11px] text-accent-d">{busy}</span>}
         </span>
         <span className="text-[11px] font-normal normal-case tracking-normal text-g500">MP4, WebM or MOV, up to 100 MB. Keep it short.</span>

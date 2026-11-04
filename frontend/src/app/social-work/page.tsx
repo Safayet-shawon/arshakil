@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { coverOf } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import { ButtonLink } from "@/components/ui/Button";
 import CtaBand from "@/components/ui/CtaBand";
@@ -25,7 +26,7 @@ export default async function SocialWorkPage() {
           {initiatives.map((n, i) => (
             <Reveal key={n.slug} delay={i * 0.08}>
               <Link href={`/social-work/${n.slug}`} data-view className="group block">
-                <Photo name={n.photo} alt={n.title} ratio="4/3" />
+                <Photo name={coverOf(n)} alt={n.title} ratio="4/3" />
                 <div className="label mt-3 text-accent-d">{n.area}</div>
                 <h3 className="font-display text-3xl text-ink transition-colors group-hover:text-accent-d">{n.title} <span aria-hidden className="text-accent">↗</span></h3>
                 <p className="mt-2 text-sm leading-relaxed text-g600"><Hl>{n.blurb}</Hl></p>

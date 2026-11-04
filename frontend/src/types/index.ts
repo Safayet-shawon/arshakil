@@ -7,9 +7,9 @@ export interface Social { label: string; href: string; icon: string; handle: str
 /** `featured` items are listed in the home page's "Selected work". `photo` is a /photos name or an uploaded /api/media path. */
 interface Featurable { featured?: boolean }
 /** Extra pictures and one short video (an uploaded file and/or a YouTube id) shown on an item's own page. */
-export interface Media { photos?: string[]; video?: string; youtubeId?: string }
+export interface Media { photos?: string[]; video?: string; videoPoster?: string; videoThumb?: boolean; youtubeId?: string }
 export interface Project extends Featurable, Media { slug: string; title: string; year: string; location: string; type: string; summary: string; photo: string }
-export interface Photo extends Featurable { photo: string; title: string; category: string }
+export interface Photo extends Featurable { photo: string; title: string; category: string; description?: string }
 export interface Video extends Featurable { title: string; group: string; thumb: string; youtubeId?: string }
 export interface Story { title: string; place: string; era: string; blurb: string; photo: string }
 export interface Initiative extends Featurable, Media { slug: string; title: string; area: string; blurb: string; photo: string; points: string[] }

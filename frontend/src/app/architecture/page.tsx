@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { coverOf } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import type { Project } from "@/types";
 import CtaBand from "@/components/ui/CtaBand";
@@ -16,7 +17,7 @@ function ProjectCard({ p, index }: { p: Project; index: number }) {
   return (
     <Reveal delay={(index % 2) * 0.08}>
       <Link href={`/architecture/${p.slug}`} data-link className="group block" data-view>
-        <Photo name={p.photo} alt={p.title} ratio="4/3" />
+        <Photo name={coverOf(p)} alt={p.title} ratio="4/3" />
         <div className="mt-3 flex items-baseline justify-between gap-3">
           <h3 className="font-display text-3xl text-ink"><Hl>{p.title}</Hl></h3>
           <span className="label text-g500">{p.year}</span>

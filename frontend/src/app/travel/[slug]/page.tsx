@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { placeMapUrl, postSlug } from "@/lib/media";
+import { coverOf, placeMapUrl, postSlug } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
@@ -31,7 +31,7 @@ export default async function PlacePage({ params }: Props) {
   return (
     <>
       <PageHero index="04" title={p.name} intro={p.summary} />
-      <div className="group h-[clamp(200px,36vw,480px)]"><Photo name={p.photo} alt={p.name} className="h-full" /></div>
+      <div className="group h-[clamp(200px,36vw,480px)]"><Photo name={coverOf(p)} alt={p.name} className="h-full" /></div>
 
       <Section>
         <Reveal>

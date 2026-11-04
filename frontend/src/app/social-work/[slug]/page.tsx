@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { coverOf } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import { ButtonLink } from "@/components/ui/Button";
 import CtaBand from "@/components/ui/CtaBand";
@@ -27,7 +28,7 @@ export default async function InitiativePage({ params }: Props) {
   return (
     <>
       <PageHero index="06" title={n.title} intro={n.blurb} />
-      <div className="group h-[clamp(200px,36vw,480px)]"><Photo name={n.photo} alt={n.title} className="h-full" /></div>
+      <div className="group h-[clamp(200px,36vw,480px)]"><Photo name={coverOf(n)} alt={n.title} className="h-full" /></div>
       <Section>
         <Reveal>
           <div className="label text-accent-d">{n.area}</div>

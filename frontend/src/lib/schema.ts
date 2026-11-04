@@ -20,6 +20,8 @@ export interface FieldDef {
   folder?: "books" | "posts";
   /** For an image field: also store the picture's width / height here, so it can be shown in its own shape. */
   ratioKey?: string;
+  /** For a video field: also store the video's first picture here (used as a poster and, if chosen, as the thumbnail). */
+  posterKey?: string;
 }
 export interface ListDef {
   name: ListName; label: string; singular: string; blurb: string;
@@ -39,18 +41,22 @@ export const lists: ListDef[] = [
       { key: "location", label: "Location", type: "text" }, { key: "type", label: "Type (e.g. Residential · Kolpo)", type: "text" },
       { key: "summary", label: "Short description", type: "textarea" }, { key: "photo", label: "Thumbnail photo", type: "image" },
       { key: "photos", label: "More photos (add as many as you like)", type: "images" },
-      { key: "video", label: "Short video (optional)", type: "video" },
+      { key: "video", label: "Short video (optional)", type: "video", posterKey: "videoPoster" },
+      { key: "videoThumb", label: "Use the video as the thumbnail", type: "bool", showIf: (i) => !!i.video && !!i.videoPoster,
+        hint: "The video's first picture becomes the thumbnail, and the thumbnail photo above is then counted with the other photos." },
       { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
       { key: "featured", label: "Featured on the home page", type: "bool" },
-    ], blank: { title: "", year: "", location: "", type: "", summary: "", photo: "", photos: [], video: "", youtubeId: "", featured: false } },
+    ], blank: { title: "", year: "", location: "", type: "", summary: "", photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "", featured: false } },
 
-  { name: "gallery", label: "Architectural Photography", singular: "photo", blurb: "The gallery. Sections (categories) are edited under Photography sections.",
+  { name: "gallery", label: "Architectural Photography", singular: "photo", blurb: "Every photo lives in a section (an album). Add one by one here, or use Bulk upload for many at once.",
     title: str("title"), photo: "photo", featurable: true,
     fields: [
       { key: "title", label: "Title", type: "text" },
       { key: "category", label: "Section", type: "select", options: { list: "categories", value: "name", label: "name" } },
-      { key: "photo", label: "Photo", type: "image" }, { key: "featured", label: "Featured on the home page", type: "bool" },
-    ], blank: { title: "", category: "", photo: "", featured: false } },
+      { key: "photo", label: "Photo", type: "image" },
+      { key: "description", label: "Description (shown under the photo)", type: "textarea" },
+      { key: "featured", label: "Featured on the home page", type: "bool" },
+    ], blank: { title: "", category: "", photo: "", description: "", featured: false } },
 
   { name: "categories", label: "Photography sections", singular: "section", blurb: "Add, rename or remove the filter sections of the gallery. Renaming updates the photos in it.",
     title: str("name"), fields: [{ key: "name", label: "Section name", type: "text" }], blank: { name: "" } },
@@ -76,9 +82,11 @@ export const lists: ListDef[] = [
       { key: "ideas", label: "Things to do (one per line)", type: "lines" }, { key: "cost", label: "Estimated cost", type: "text" },
       { key: "photo", label: "Cover photo", type: "image" },
       { key: "photos", label: "More photos (add as many as you like)", type: "images" },
-      { key: "video", label: "Short video (optional)", type: "video" },
+      { key: "video", label: "Short video (optional)", type: "video", posterKey: "videoPoster" },
+      { key: "videoThumb", label: "Use the video as the thumbnail", type: "bool", showIf: (i) => !!i.video && !!i.videoPoster,
+        hint: "The video's first picture becomes the thumbnail, and the thumbnail photo above is then counted with the other photos." },
       { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
-    ], blank: { region: "bangladesh", name: "", country: "Bangladesh", summary: "", ideas: [], cost: "", photo: "", photos: [], video: "", youtubeId: "" } },
+    ], blank: { region: "bangladesh", name: "", country: "Bangladesh", summary: "", ideas: [], cost: "", photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "" } },
 
   { name: "placePosts", label: "Travel posts", singular: "post", blurb: "Blog posts for a city or country. Write them here or upload a PDF. They appear on that place's page.",
     title: str("title"), slugFrom: "title",
@@ -93,9 +101,9 @@ export const lists: ListDef[] = [
       { key: "text", label: "Write the blog", type: "textarea", showIf: (i) => i.kind !== "pdf", hint: "Leave a blank line between paragraphs" },
       { key: "pdf", label: "Blog PDF", type: "pdf", folder: "posts", showIf: (i) => i.kind === "pdf" },
       { key: "photos", label: "Photos (add as many as you like)", type: "images" },
-      { key: "video", label: "Short video (optional)", type: "video" },
+      { key: "video", label: "Short video (optional)", type: "video", posterKey: "videoPoster" },
       { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
-    ], blank: { region: "bangladesh", place: "", title: "", summary: "", kind: "write", text: "", pdf: "", photos: [], video: "", youtubeId: "" } },
+    ], blank: { region: "bangladesh", place: "", title: "", summary: "", kind: "write", text: "", pdf: "", photos: [], video: "", videoPoster: "", youtubeId: "" } },
 
   { name: "books", label: "Author", singular: "book", blurb: "Upload a PDF, pick a thumbnail and a price in BDT. Readers get the first 5% free and need an access code for the rest. Nobody can download the file.",
     title: str("title"), photo: "thumb", featurable: true, slugFrom: "title",
@@ -116,10 +124,12 @@ export const lists: ListDef[] = [
       { key: "blurb", label: "Short description", type: "textarea" }, { key: "points", label: "What it does (one per line)", type: "lines" },
       { key: "photo", label: "Main photo", type: "image" },
       { key: "photos", label: "More photos (add as many as you like)", type: "images" },
-      { key: "video", label: "Short video (optional)", type: "video" },
+      { key: "video", label: "Short video (optional)", type: "video", posterKey: "videoPoster" },
+      { key: "videoThumb", label: "Use the video as the thumbnail", type: "bool", showIf: (i) => !!i.video && !!i.videoPoster,
+        hint: "The video's first picture becomes the thumbnail, and the thumbnail photo above is then counted with the other photos." },
       { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
       { key: "featured", label: "Featured on the home page", type: "bool" },
-    ], blank: { title: "", area: "", blurb: "", points: [], photo: "", photos: [], video: "", youtubeId: "", featured: false } },
+    ], blank: { title: "", area: "", blurb: "", points: [], photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "", featured: false } },
 
   { name: "services", label: "Services & Fees", singular: "service", blurb: "The \"Hire me as…\" cards. Custom ones are quoted after a request.",
     title: str("hire"), slugFrom: "hire",

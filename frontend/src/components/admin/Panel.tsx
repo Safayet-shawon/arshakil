@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { listByName } from "@/lib/schema";
 import type { ListName, PrivateData, SiteContent } from "@/types";
 import Access from "./Access";
+import BulkUpload, { type BulkPhoto } from "./BulkUpload";
 import Account from "./Account";
 import WebsiteEditor from "./WebsiteEditor";
 import ListEditor from "./ListEditor";
@@ -17,27 +18,28 @@ const RENAMES: Partial<Record<ListName, { list: ListName; key: string }>> = {
 };
 
 /** The left menu: related lists live together in one section (e.g. Photography holds the photos and their sections). */
-const GROUPS: { key: string; label: string; lists: ListName[] }[] = [
+const GROUPS: { key: string; label: string; lists: string[] }[] = [
   { key: "projects", label: "Architecture", lists: ["projects"] },
-  { key: "gallery", label: "Architectural Photography", lists: ["gallery", "categories"] },
+  { key: "gallery", label: "Architectural Photography", lists: ["gallery", "categories", "bulk"] },
   { key: "videos", label: "Content Creation", lists: ["videos", "videoGroups"] },
   { key: "places", label: "Travel", lists: ["places", "placePosts", "stories"] },
   { key: "books", label: "Author", lists: ["books"] },
   { key: "initiatives", label: "Social Work", lists: ["initiatives"] },
   { key: "services", label: "Services & Fees", lists: ["services"] },
 ];
-const SUB: Partial<Record<ListName, string>> = {
-  gallery: "Photos", categories: "Sections", videos: "Videos", videoGroups: "Video groups",
+const SUB: Record<string, string> = {
+  gallery: "Photos", categories: "Sections", bulk: "Bulk upload", videos: "Videos", videoGroups: "Video groups",
   places: "Cities & countries", placePosts: "Blog posts", stories: "History & heritage",
 };
-const groupOf = (tab: string) => GROUPS.find((g) => g.key === tab || g.lists.includes(tab as ListName));
+const groupOf = (tab: string) => GROUPS.find((g) => g.key === tab || g.lists.includes(tab));
 
 /** Admin home: pick a section on the left, edit it on the right. Text on the pages is edited in place on the site itself. */
 export default function Panel({ startTab, startNew }: { startTab?: string; startNew?: boolean }) {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [access, setAccess] = useState<PrivateData>({ codes: [], requests: [] });
-  const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "access" || startTab === "website" || startTab === "account") ? startTab : "projects");
+  const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "bulk" || startTab === "access" || startTab === "website" || startTab === "account") ? startTab : "projects");
   const [note, setNote] = useState("");
+  const [album, setAlbum] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/data", { cache: "no-store" }).then((r) => r.json()).then((d) => { setContent(d.content); setAccess(d.access); });
@@ -70,6 +72,23 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
     setNote("Saved. The site is updated.");
     setTimeout(() => setNote(""), 2500);
   }, [content]);
+
+  /** Bulk upload: add the photos to a section (creating it if new), then open that section. */
+  const bulkSave = async (name: string, isNew: boolean, photos: BulkPhoto[]) => {
+    if (!content) return;
+    const next: SiteContent = { ...content };
+    if (isNew) {
+      const c = await put("categories", [...content.categories, { name }] as unknown as Item[]);
+      if (!c) return;
+      next.categories = c as unknown as SiteContent["categories"];
+    }
+    const g = await put("gallery", [...photos.map((x) => ({ ...x, category: name, featured: false })), ...content.gallery] as unknown as Item[]);
+    if (!g) return;
+    next.gallery = g as unknown as SiteContent["gallery"];
+    setContent(next); setAlbum(name); setTab("gallery");
+    setNote(`${photos.length} photo${photos.length === 1 ? "" : "s"} added to ${name}.`);
+    setTimeout(() => setNote(""), 3500);
+  };
 
   const out = async () => { await fetch("/api/admin/logout", { method: "POST" }); location.reload(); };
   const def = listByName(tab);
@@ -107,11 +126,24 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
               ))}
             </div>
           )}
-          {tab === "website" ? <WebsiteEditor />
+          {tab === "gallery" && content && (
+            <div className="mb-5 flex flex-wrap gap-2">
+              {["", ...content.categories.map((c) => c.name)].map((n) => (
+                <button key={n || "all"} onClick={() => setAlbum(n)}
+                  className={`rounded-full border px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] transition-colors ${album === n ? "border-ink bg-ink text-paper" : "border-g300 text-g600 hover:border-accent hover:text-ink"}`}>
+                  {n || "All sections"}{n && <span className="opacity-60"> · {content.gallery.filter((g) => g.category === n).length}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+          {tab === "website" ? <WebsiteEditor texts={content?.texts ?? {}} />
             : tab === "account" ? <Account />
             : !content ? <p className="text-sm text-g600">Loading…</p>
             : tab === "access" ? <Access content={content} data={access} setData={setAccess} />
-              : def && <ListEditor key={def.name} def={def} content={content} save={(items) => save(def.name, items)} startNew={startNew && tab === def.name} />}
+              : tab === "bulk" ? <BulkUpload content={content} onAdd={bulkSave} />
+                : def && <ListEditor key={def.name} def={def} content={content} save={(items) => save(def.name, items)} startNew={startNew && tab === def.name}
+                  show={def.name === "gallery" && album ? (it) => it.category === album : undefined}
+                  blankPatch={def.name === "gallery" && album ? { category: album } : undefined} />}
         </div>
       </div>
     </section>
