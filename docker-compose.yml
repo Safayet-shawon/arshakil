@@ -1,5 +1,21 @@
-# Local services. Start Redis with:  docker compose up -d redis
+# Local services. Start them with:  docker compose up -d postgres redis
 services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: arshakil
+      POSTGRES_PASSWORD: arshakil_dev
+      POSTGRES_DB: arshakil
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arshakil -d arshakil"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   redis:
     image: redis:7-alpine
     ports:
@@ -14,4 +30,5 @@ services:
       retries: 10
 
 volumes:
+  postgres-data:
   redis-data:

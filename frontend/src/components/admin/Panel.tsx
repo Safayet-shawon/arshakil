@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { listByName } from "@/lib/schema";
 import type { Album, ListName, PrivateData, Sector, SiteContent } from "@/types";
 import Access from "./Access";
-import Messages, { type Msg } from "./Messages";
+import Inquiries from "./Inquiries";
 import BulkUpload, { type BulkPhoto } from "./BulkUpload";
 import Account from "./Account";
 import AlbumsEditor from "./AlbumsEditor";
@@ -43,11 +43,11 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
   const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "bulk" || startTab.startsWith("albums:") || startTab === "access" || startTab === "messages" || startTab === "website" || startTab === "account") ? startTab : "projects");
   const [note, setNote] = useState("");
   const [album, setAlbum] = useState("");
-  const [msgs, setMsgs] = useState<Msg[] | null>(null);
+  const [unread, setUnread] = useState(0);
 
   useEffect(() => {
     fetch("/api/admin/data", { cache: "no-store" }).then((r) => r.json()).then((d) => { setContent(d.content); setAccess(d.access); });
-    fetch("/api/admin/messages", { cache: "no-store" }).then((r) => r.json()).then((d) => setMsgs(d.messages));
+    fetch("/api/admin/messages/summary", { cache: "no-store" }).then((r) => r.json()).then((d) => setUnread(d.unread ?? 0)).catch(() => {});
   }, []);
 
   const put = async (name: ListName, items: Item[]) => {
@@ -108,7 +108,6 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
   const def = listByName(tab);
   const group = groupOf(tab);
   const pending = access.requests.filter((r) => r.status === "new").length;
-  const unread = msgs?.filter((m) => !m.read).length ?? 0;
 
   const tabCls = (k: string) => `block w-full rounded-lg px-3 py-2 text-left text-[13px] font-bold transition-colors ${tab === k ? "bg-ink text-paper" : "text-g600 hover:bg-g200"}`;
 
@@ -121,7 +120,7 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
           <nav className="grid gap-1">
             <button onClick={() => setTab("website")} className={tabCls("website")}>Website</button>
             {GROUPS.map((g) => <button key={g.key} onClick={() => setTab(g.lists[0])} className={tabCls(group?.key === g.key ? tab : g.key)}>{g.label}</button>)}
-            <button onClick={() => setTab("messages")} className={`${tabCls("messages")} flex items-center justify-between`}>Messages{unread > 0 && <b className="grid h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1.5 text-[11px] text-white">{unread}</b>}</button>
+            <button onClick={() => setTab("messages")} className={`${tabCls("messages")} flex items-center justify-between`}>Inquiries{unread > 0 && <b className="grid h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1.5 text-[11px] text-white">{unread}</b>}</button>
             <button onClick={() => setTab("access")} className={tabCls("access")}>Book access{pending ? ` (${pending})` : ""}</button>
             <button onClick={() => setTab("account")} className={tabCls("account")}>Login details</button>
           </nav>
@@ -154,7 +153,7 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
           )}
           {tab === "website" ? <WebsiteEditor texts={content?.texts ?? {}} />
             : tab === "account" ? <Account />
-            : tab === "messages" ? <Messages list={msgs} setList={setMsgs} />
+            : tab === "messages" ? <Inquiries onUnread={setUnread} />
             : !content ? <p className="text-sm text-g600">Loading…</p>
             : tab === "access" ? <Access content={content} data={access} setData={setAccess} />
               : tab.startsWith("albums:") ? <AlbumsEditor sector={tab.slice(7) as Sector} content={content} save={saveAlbums} />

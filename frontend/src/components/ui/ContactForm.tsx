@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, type FormEvent } from "react";
 import { sendContact } from "@/lib/api";
+import { fieldFromService } from "@/lib/inquiry";
 import { useRequestedService } from "@/lib/request";
 import { useSite } from "../layout/SiteProvider";
 import { cn } from "@/lib/utils";
@@ -10,7 +11,7 @@ type Status = { kind: "idle" | "sending" | "ok" | "error"; message?: string };
 const field =
   "w-full rounded-xl border border-g300 bg-paper/80 px-4 py-3 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-g400 focus:border-accent focus:shadow-[0_0_0_3px_rgba(247,181,0,0.2)]";
 
-/** Posts to /api/contact (stored in the admin panel under Messages). "Hire me as ..." cards pre-select the service. */
+/** Posts to /api/contact (kept in the admin panel under Inquiries, tagged with its work field). "Hire me as ..." cards pre-select the service. */
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const { services } = useSite();
@@ -32,6 +33,7 @@ export default function ContactForm() {
       email: String(data.get("email") ?? ""),
       message: String(data.get("message") ?? ""),
       service: service || undefined,
+      field: service ? fieldFromService(services.find((s) => s.hire === service)?.slug ?? service) : undefined,
       phone: String(data.get("phone") ?? ""),
       website: String(data.get("website") ?? ""),
     });
