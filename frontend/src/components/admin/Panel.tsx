@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { listByName } from "@/lib/schema";
 import type { Album, ListName, PrivateData, Sector, SiteContent } from "@/types";
 import Access from "./Access";
+import Messages from "./Messages";
 import BulkUpload, { type BulkPhoto } from "./BulkUpload";
 import Account from "./Account";
 import AlbumsEditor from "./AlbumsEditor";
@@ -39,7 +40,7 @@ const groupOf = (tab: string) => GROUPS.find((g) => g.key === tab || g.lists.inc
 export default function Panel({ startTab, startNew }: { startTab?: string; startNew?: boolean }) {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [access, setAccess] = useState<PrivateData>({ codes: [], requests: [] });
-  const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "bulk" || startTab.startsWith("albums:") || startTab === "access" || startTab === "website" || startTab === "account") ? startTab : "projects");
+  const [tab, setTab] = useState(startTab && (listByName(startTab) || startTab === "bulk" || startTab.startsWith("albums:") || startTab === "access" || startTab === "messages" || startTab === "website" || startTab === "account") ? startTab : "projects");
   const [note, setNote] = useState("");
   const [album, setAlbum] = useState("");
 
@@ -117,6 +118,7 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
           <nav className="grid gap-1">
             <button onClick={() => setTab("website")} className={tabCls("website")}>Website</button>
             {GROUPS.map((g) => <button key={g.key} onClick={() => setTab(g.lists[0])} className={tabCls(group?.key === g.key ? tab : g.key)}>{g.label}</button>)}
+            <button onClick={() => setTab("messages")} className={tabCls("messages")}>Messages</button>
             <button onClick={() => setTab("access")} className={tabCls("access")}>Book access{pending ? ` (${pending})` : ""}</button>
             <button onClick={() => setTab("account")} className={tabCls("account")}>Login details</button>
           </nav>
@@ -149,6 +151,7 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
           )}
           {tab === "website" ? <WebsiteEditor texts={content?.texts ?? {}} />
             : tab === "account" ? <Account />
+            : tab === "messages" ? <Messages />
             : !content ? <p className="text-sm text-g600">Loading…</p>
             : tab === "access" ? <Access content={content} data={access} setData={setAccess} />
               : tab.startsWith("albums:") ? <AlbumsEditor sector={tab.slice(7) as Sector} content={content} save={saveAlbums} />

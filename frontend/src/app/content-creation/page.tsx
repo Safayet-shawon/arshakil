@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import { socials } from "@/data/site";
 import { getContent } from "@/lib/server/content";
@@ -10,7 +11,7 @@ import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
 import VideoCard from "@/components/ui/VideoCard";
 
-export const metadata: Metadata = { title: "Content Creation" };
+export const metadata: Metadata = pageMeta({ title: "Content Creation", description: "Travel films, vlogs and brand stories by Shakil on YouTube, Facebook, Instagram and TikTok.", path: "/content-creation" });
 
 export default async function ContentPage() {
   const { videos, videoGroups } = await getContent();

@@ -56,7 +56,7 @@ export interface PlacePost extends Media {
   kind?: "write" | "pdf"; text: string; pdf?: string;
 }
 
-export interface ContactPayload { name: string; email: string; message: string; service?: string }
+export interface ContactPayload { name: string; email: string; message: string; service?: string; website?: string }
 
 /** A photo album on one of the site's sectors. Its first photo is the cover. */
 export type Sector = "architecture" | "travel" | "author" | "social-work" | "content-creation";

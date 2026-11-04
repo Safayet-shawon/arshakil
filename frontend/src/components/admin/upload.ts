@@ -2,16 +2,19 @@ import { upload } from "@vercel/blob/client";
 
 const slug = (f: File) => f.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/\.[a-z0-9]+$/, "");
 
-/** Shrinks a photo in the browser (max 1800px, JPEG) so it fits one request, then stores it. Returns its /api/media path and shape. */
+/** Shrinks a photo in the browser (max 1800px, WebP, or JPEG where the browser cannot make WebP) so it fits one request, then stores it. Returns its /api/media path and shape. */
 export async function uploadImage(file: File): Promise<{ url: string; ratio: number }> {
   const bmp = await createImageBitmap(file);
   const k = Math.min(1, 1800 / Math.max(bmp.width, bmp.height));
   const c = document.createElement("canvas");
   c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
   c.getContext("2d")!.drawImage(bmp, 0, 0, c.width, c.height);
-  const blob = await new Promise<Blob>((ok, no) => c.toBlob((b) => (b ? ok(b) : no(new Error("Could not read the image"))), "image/jpeg", 0.85));
+  const toBlob = (type: string) => new Promise<Blob | null>((ok) => c.toBlob(ok, type, 0.85));
+  let blob = await toBlob("image/webp");
+  if (!blob || blob.type !== "image/webp") blob = await toBlob("image/jpeg");
+  if (!blob) throw new Error("Could not read the image");
   const body = new FormData();
-  body.append("file", new File([blob], "photo.jpg", { type: "image/jpeg" }));
+  body.append("file", new File([blob], blob.type === "image/webp" ? "photo.webp" : "photo.jpg", { type: blob.type }));
   const res = await fetch("/api/admin/upload", { method: "POST", body });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error ?? "Upload failed");

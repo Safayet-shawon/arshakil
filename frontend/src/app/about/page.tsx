@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { about } from "@/data/content";
@@ -10,7 +11,7 @@ import Reveal from "@/components/ui/Reveal";
 import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
 
-export const metadata: Metadata = { title: "About" };
+export const metadata: Metadata = pageMeta({ title: "About", description: "About AR. Shakhaouth Hossain Shakil: architect, co-founder of Kolpo and Studio Karu, photographer, traveller, author, content creator and social worker in Dhaka, Bangladesh.", path: "/about" });
 
 export default function AboutPage() {
   return (

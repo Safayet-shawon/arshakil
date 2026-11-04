@@ -10,7 +10,7 @@ type Status = { kind: "idle" | "sending" | "ok" | "error"; message?: string };
 const field =
   "w-full rounded-xl border border-g300 bg-paper/80 px-4 py-3 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-g400 focus:border-accent focus:shadow-[0_0_0_3px_rgba(247,181,0,0.2)]";
 
-/** Posts to the NestJS backend (POST /api/contact). "Hire me as ..." cards pre-select the service. */
+/** Posts to /api/contact (stored in the admin panel under Messages). "Hire me as ..." cards pre-select the service. */
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const { services } = useSite();
@@ -28,6 +28,7 @@ export default function ContactForm() {
       email: String(data.get("email") ?? ""),
       message: String(data.get("message") ?? ""),
       service: service || undefined,
+      website: String(data.get("website") ?? ""),
     });
     setStatus({ kind: res.ok ? "ok" : "error", message: res.message });
     if (res.ok) { form.reset(); setService(""); }
@@ -35,6 +36,8 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={onSubmit} className="mx-auto mt-10 grid w-full max-w-[560px] gap-3 text-left">
+      {/* hidden trap for bots: people never see or fill it */}
+      <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
       <select value={service} onChange={(e) => setService(e.target.value)} aria-label="What would you like to hire me for?" className={cn(field, "appearance-none")}>
         <option value="">General message</option>
         {services.map((s) => <option key={s.slug} value={s.hire}>Hire me as {s.hire}</option>)}

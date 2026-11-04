@@ -1,7 +1,8 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { postSlug } from "@/lib/media";
+import { coverOf, photoSrc, postSlug } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
@@ -20,8 +21,12 @@ async function find({ params }: Props) {
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const { found } = await find(props);
-  return { title: found ? found.title : "Travel" };
+  const { place, found } = await find(props);
+  if (!found || !place) return { title: "Travel" };
+  const { slug, post } = await props.params;
+  const text = (found.text || "").replace(/\s+/g, " ").trim();
+  const cover = found.photos?.[0] || coverOf(place);
+  return pageMeta({ title: found.title, description: found.summary || text || `${found.title}: a travel post from ${place.name}.`, path: `/travel/${slug}/${post}`, image: photoSrc(cover) });
 }
 
 /** One travel blog post: written on the site, or an uploaded PDF shown in the page. */

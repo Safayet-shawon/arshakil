@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import { getContent } from "@/lib/server/content";
 import type { Book } from "@/types";
@@ -12,7 +13,7 @@ import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Author" };
+export const metadata: Metadata = pageMeta({ title: "Author", description: "Books and essays by Shakil: read the first pages free online, then unlock the full book with an access code.", path: "/author" });
 
 function BookRow({ b, n }: { b: Book; n: number }) {
   const specs = [["Pages", String(b.pages || "—")], ["Language", b.language], ["Format", "Read online"], ["Price", `৳ ${b.priceBdt}`]];

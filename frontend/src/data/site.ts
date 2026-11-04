@@ -17,7 +17,7 @@ export const site = {
   location: "Dhaka, Bangladesh",
   firm: "Kolpo",
   timeZone: "Asia/Dhaka",
-  heroImage: "/images/hero-portrait.png",
+  heroImage: "/images/hero-portrait.webp",
 };
 
 /** Words that swipe in the hero. */

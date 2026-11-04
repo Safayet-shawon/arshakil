@@ -37,6 +37,7 @@ export default function Footer() {
           <a href={`mailto:${site.email}`} data-link className="transition-colors hover:text-accent">{site.email}</a>
           <Link href="/about" data-link className="transition-colors hover:text-accent">About me</Link>
           <Link href="/#contact" data-link className="transition-colors hover:text-accent">Send a message</Link>
+          <Link href="/privacy" data-link className="transition-colors hover:text-accent">Privacy policy</Link>
         </div>
       </div>
       <div className="flex flex-wrap justify-between gap-3 py-5 text-[11px] font-bold uppercase tracking-[0.14em]">

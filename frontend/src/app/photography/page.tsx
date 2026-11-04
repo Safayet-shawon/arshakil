@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import CtaBand from "@/components/ui/CtaBand";
@@ -9,7 +10,7 @@ import SectionHead from "@/components/ui/SectionHead";
 import { albumSlug, photoSrc } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 
-export const metadata: Metadata = { title: "Architectural Photography" };
+export const metadata: Metadata = pageMeta({ title: "Architectural Photography", description: "Architectural photography by Shakil: buildings, streets, portraits and travel, in albums you can browse and view large.", path: "/photography" });
 
 /** The gallery as albums: a cover for each, then the first few frames of every album with a link to see them all. */
 export default async function PhotographyPage() {
@@ -29,7 +30,7 @@ export default async function PhotographyPage() {
             <Reveal key={a.slug} delay={(i % 4) * 0.06}>
               <Link href={`/photography/${a.slug}`} data-link className="group relative block aspect-[4/5] overflow-hidden rounded-2xl bg-g200">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photoSrc(a.items[0].photo)} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <img src={photoSrc(a.items[0].photo)} alt={`${a.name} photography album cover`} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <span className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/10 to-transparent" />
                 <span className="absolute inset-x-0 bottom-0 p-4">
                   <span className="font-display block text-[clamp(26px,3vw,38px)] leading-none text-g50">{a.name}</span>

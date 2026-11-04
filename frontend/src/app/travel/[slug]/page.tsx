@@ -1,7 +1,8 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { coverOf, placeMapUrl, postSlug } from "@/lib/media";
+import { coverOf, photoSrc, placeMapUrl, postSlug } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
@@ -17,7 +18,7 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const p = (await getContent()).places.find((x) => x.slug === slug);
-  return { title: p ? p.name : "Travel" };
+  return p ? pageMeta({ title: p.name, description: `${p.summary} ${p.ideas.join(". ")}`, path: `/travel/${slug}`, image: photoSrc(coverOf(p)) }) : { title: "Travel" };
 }
 
 /** One place: the overview, then everything posted from it (notes and videos), all managed in the admin panel. */

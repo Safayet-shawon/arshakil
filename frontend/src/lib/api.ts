@@ -1,6 +1,6 @@
 import type { ContactPayload } from "@/types";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 export async function sendContact(payload: ContactPayload): Promise<{ ok: boolean; message: string }> {
   try {

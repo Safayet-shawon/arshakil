@@ -1,7 +1,8 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { coverOf } from "@/lib/media";
+import { coverOf, photoSrc } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import { ButtonLink } from "@/components/ui/Button";
 import CtaBand from "@/components/ui/CtaBand";
@@ -17,7 +18,7 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const n = (await getContent()).initiatives.find((i) => i.slug === slug);
-  return { title: n ? n.title : "Social Work" };
+  return n ? pageMeta({ title: n.title, description: `${n.blurb} ${n.points.join(". ")}`, path: `/social-work/${slug}`, image: photoSrc(coverOf(n)) }) : { title: "Social Work" };
 }
 
 export default async function InitiativePage({ params }: Props) {

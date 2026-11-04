@@ -1,7 +1,8 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { coverOf } from "@/lib/media";
+import { coverOf, photoSrc } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 import CtaBand from "@/components/ui/CtaBand";
 import Hl from "@/components/ui/Hl";
@@ -16,7 +17,7 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const p = (await getContent()).projects.find((x) => x.slug === slug);
-  return { title: p ? p.title : "Architecture" };
+  return p ? pageMeta({ title: p.title, description: `${p.summary} ${p.type}, ${p.location}, ${p.year}.`, path: `/architecture/${slug}`, image: photoSrc(coverOf(p)) }) : { title: "Architecture" };
 }
 
 /** One project: the main photo, the details, then every extra photo and the short video. */

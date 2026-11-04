@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { coverOf } from "@/lib/media";
@@ -12,7 +13,7 @@ import Reveal from "@/components/ui/Reveal";
 import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
 
-export const metadata: Metadata = { title: "Architecture" };
+export const metadata: Metadata = pageMeta({ title: "Architecture", description: "Selected architecture projects by AR. Shakhaouth Hossain Shakil through Kolpo (Dhaka) and Studio Karu (Chittagong): homes, libraries, workplaces and public places.", path: "/architecture" });
 
 function ProjectCard({ p, index }: { p: Project; index: number }) {
   return (

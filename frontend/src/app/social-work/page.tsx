@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { coverOf } from "@/lib/media";
@@ -12,7 +13,7 @@ import Reveal from "@/components/ui/Reveal";
 import Section from "@/components/ui/Section";
 import SectionHead from "@/components/ui/SectionHead";
 
-export const metadata: Metadata = { title: "Social Work" };
+export const metadata: Metadata = pageMeta({ title: "Social Work", description: "Community initiatives by Shakil: education support, clean-up days and neighbourhood programs.", path: "/social-work" });
 
 export default async function SocialWorkPage() {
   const { initiatives } = await getContent();

@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import { getContent } from "@/lib/server/content";
 import Albums from "@/components/ui/Albums";
@@ -12,7 +13,7 @@ import TravelExplorer from "@/components/travel/TravelExplorer";
 import VideoCard from "@/components/ui/VideoCard";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Travel" };
+export const metadata: Metadata = pageMeta({ title: "Travel", description: "Travel notes from Bangladesh and abroad: maps, things to do, estimated costs and the history behind each place.", path: "/travel" });
 
 export default async function TravelPage() {
   const { places, stories, videos } = await getContent();

@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -5,7 +6,7 @@ import CtaBand from "@/components/ui/CtaBand";
 import Gallery from "@/components/ui/Gallery";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
-import { albumSlug } from "@/lib/media";
+import { albumSlug, photoSrc } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
 
 type Props = { params: Promise<{ album: string }> };
@@ -18,8 +19,10 @@ async function find({ params }: Props) {
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const { cat } = await find(props);
-  return { title: cat ? `${cat.name} — Photography` : "Photography" };
+  const { cat, items } = await find(props);
+  if (!cat) return { title: "Photography" };
+  const { album } = await props.params;
+  return pageMeta({ title: `${cat.name} photography`, description: `${cat.name} photographs by Shakil: ${items.length} frame${items.length === 1 ? "" : "s"}, each viewable large.`, path: `/photography/${album}`, image: items[0] ? photoSrc(items[0].photo) : undefined });
 }
 
 /** Every frame of one album. */
