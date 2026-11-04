@@ -22,12 +22,17 @@ export default function ContactForm() {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
+    if (!String(data.get("email") ?? "").trim() && !String(data.get("phone") ?? "").trim()) {
+      setStatus({ kind: "error", message: "Please give an email address or a phone number so I can reply." });
+      return;
+    }
     setStatus({ kind: "sending" });
     const res = await sendContact({
       name: String(data.get("name") ?? ""),
       email: String(data.get("email") ?? ""),
       message: String(data.get("message") ?? ""),
       service: service || undefined,
+      phone: String(data.get("phone") ?? ""),
       website: String(data.get("website") ?? ""),
     });
     setStatus({ kind: res.ok ? "ok" : "error", message: res.message });
@@ -44,8 +49,9 @@ export default function ContactForm() {
       </select>
       <div className="grid gap-3 sm:grid-cols-2">
         <input name="name" required minLength={2} maxLength={80} placeholder="Your name" aria-label="Your name" className={field} />
-        <input name="email" type="email" required maxLength={120} placeholder="Email" aria-label="Email" className={field} />
+        <input name="email" type="email" maxLength={120} placeholder="Email" aria-label="Email" className={field} />
       </div>
+      <input name="phone" type="tel" maxLength={30} placeholder="Phone or WhatsApp (email or phone, either is fine)" aria-label="Phone number" className={field} />
       <textarea name="message" required minLength={10} maxLength={2000} rows={4} aria-label="Message" className={cn(field, "resize-none")}
         placeholder={service ? "Tell me about the project: what you need, where, your budget and timeline" : "Tell me about it"} />
       <div className="flex items-center justify-between gap-4">
