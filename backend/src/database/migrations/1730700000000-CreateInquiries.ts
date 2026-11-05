@@ -1,12 +1,12 @@
 import type { MigrationInterface, QueryRunner } from "typeorm";
 
-/** Creates the inquiries table (the owner's inbox / history). Mirrors inquiry.entity.ts. Needs PostgreSQL 13+ (built-in gen_random_uuid()). */
+/** Safe to run on a database where development mode already created the table. Creates the inquiries table (the owner's inbox / history). Mirrors inquiry.entity.ts. Needs PostgreSQL 13+ (built-in gen_random_uuid()). */
 export class CreateInquiries1730700000000 implements MigrationInterface {
   name = "CreateInquiries1730700000000";
 
   async up(q: QueryRunner): Promise<void> {
     await q.query(`
-      CREATE TABLE "inquiries" (
+      CREATE TABLE IF NOT EXISTS "inquiries" (
         "id"           uuid         NOT NULL DEFAULT gen_random_uuid(),
         "kind"         varchar(16)  NOT NULL,
         "field"        varchar(32)  NOT NULL DEFAULT 'other',
@@ -28,12 +28,12 @@ export class CreateInquiries1730700000000 implements MigrationInterface {
         CONSTRAINT "chk_inquiries_email_status" CHECK ("email_status" IN ('pending','sent','failed','skipped')),
         CONSTRAINT "chk_inquiries_contact" CHECK ("email" IS NOT NULL OR "phone" IS NOT NULL)
       )`);
-    await q.query(`CREATE INDEX "idx_inquiries_created" ON "inquiries" ("created_at")`);
-    await q.query(`CREATE INDEX "idx_inquiries_field_created" ON "inquiries" ("field", "created_at")`);
-    await q.query(`CREATE INDEX "idx_inquiries_status" ON "inquiries" ("status")`);
+    await q.query(`CREATE INDEX IF NOT EXISTS "idx_inquiries_created" ON "inquiries" ("created_at")`);
+    await q.query(`CREATE INDEX IF NOT EXISTS "idx_inquiries_field_created" ON "inquiries" ("field", "created_at")`);
+    await q.query(`CREATE INDEX IF NOT EXISTS "idx_inquiries_status" ON "inquiries" ("status")`);
   }
 
   async down(q: QueryRunner): Promise<void> {
-    await q.query(`DROP TABLE "inquiries"`);
+    await q.query(`DROP TABLE IF EXISTS "inquiries"`);
   }
 }

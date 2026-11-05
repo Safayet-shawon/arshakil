@@ -5,6 +5,12 @@ import { CreateInquiries1730700000000 } from "./migrations/1730700000000-CreateI
 
 const isProd = process.env.NODE_ENV === "production";
 
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL is not set. Copy backend/.env.example to backend/.env (then `docker compose up -d postgres` from the repo root), or set it in the environment.",
+  );
+}
+
 /**
  * PostgreSQL via TypeORM. Set DATABASE_URL (e.g. postgres://user:pass@localhost:5432/arshakil).
  *

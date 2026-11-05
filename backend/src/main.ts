@@ -1,3 +1,5 @@
+// Load backend/.env first, before anything reads process.env. Variables already set by the shell, Docker or systemd win.
+import "dotenv/config";
 import "reflect-metadata";
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
