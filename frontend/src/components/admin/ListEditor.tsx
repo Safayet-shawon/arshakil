@@ -1,4 +1,5 @@
 "use client";
+import { Reorder } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import type { ListDef } from "@/lib/schema";
 import { photoSrc } from "@/lib/media";
@@ -34,44 +35,26 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
 
   const commit = async (next: Item[]) => { setBusy(true); await save(next); setBusy(false); };
 
-  // order: grab a row's handle and drop it where it should go (or use the arrows); the site shows items in this order
-  const [drag, setDrag] = useState<number | null>(null);
-  const [over, setOver] = useState<number | null>(null);
-  const rows = useRef<Record<number, HTMLLIElement | null>>({});
-  const [dy, setDy] = useState(0);
-  const startY = useRef(0);
-  const move = (from: number, to: number) => {
-    if (from === to || to < 0 || to >= items.length) return;
+  // Order: grab any row and drag it. It comes loose and follows the mouse, the other rows slide apart to leave a gap,
+  // and letting go drops it there. Works with a mouse, a trackpad or a finger. The site shows items in this order.
+  const visible = items.map((x, k) => (show && !show(x) ? -1 : k)).filter((k) => k >= 0);
+  const [order, setOrder] = useState<number[]>(visible);
+  const orderRef = useRef(order);
+  orderRef.current = order;
+  const sig = visible.join(",");
+  useEffect(() => { setOrder(visible); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [items, sig]);
+  const drop = () => {
+    const now = orderRef.current;
+    if (now.every((k, n) => k === visible[n])) return;
+    // the rows shown take the places the shown rows had; hidden rows (another album, say) stay where they are
     const next = [...items];
-    const [it] = next.splice(from, 1);
-    next.splice(to, 0, it);
+    now.forEach((k, n) => { next[visible[n]] = items[k]; });
     commit(next);
   };
-  const rowAt = (y: number) => {
-    let best: number | null = null, bestD = Infinity;
-    for (const [k, el] of Object.entries(rows.current)) {
-      if (!el) continue;
-      const r = el.getBoundingClientRect();
-      const d = y >= r.top && y <= r.bottom ? 0 : Math.min(Math.abs(y - r.top), Math.abs(y - r.bottom));
-      if (d < bestD) { bestD = d; best = Number(k); }
-    }
-    return best;
+  const edge = (e: MouseEvent | TouchEvent | PointerEvent) => {
+    const y = "clientY" in e ? e.clientY : 0;
+    if (y && y < 90) window.scrollBy(0, -14); else if (y > window.innerHeight - 90) window.scrollBy(0, 14);
   };
-  const dragMove = (e: React.PointerEvent) => {
-    if (drag === null) return;
-    setDy(e.clientY - startY.current);
-    setOver(rowAt(e.clientY));
-    // near the top or bottom edge of the window the page scrolls along
-    if (e.clientY < 90) window.scrollBy(0, -16); else if (e.clientY > window.innerHeight - 90) window.scrollBy(0, 16);
-  };
-  const dragEnd = (e: React.PointerEvent) => {
-    if (drag === null) return;
-    const to = rowAt(e.clientY);
-    if (to !== null) move(drag, to);
-    setDrag(null); setOver(null); setDy(0);
-  };
-  // among the rows currently shown (a filtered view), the nearest visible neighbour
-  const visible = items.map((x, k) => (show && !show(x) ? -1 : k)).filter((k) => k >= 0);
 
   const submit = async () => {
     if (!editing) return;
@@ -92,46 +75,47 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
           className="rounded-full bg-accent px-5 py-3 text-xs font-bold uppercase tracking-[0.1em] text-ink hover:bg-accent-soft">+ Add new {def.singular}</button>
       </div>
 
-      <ul className="mt-6 grid gap-2">
-        {items.length === 0 && <li className="rounded-xl bg-paper p-5 text-sm text-g500">Nothing here yet.</li>}
-        {items.map((it, i) => (show && !show(it) ? null : (
-          <li key={i} ref={(el) => { rows.current[i] = el; }} style={drag === i ? { transform: `translateY(${dy}px) scale(1.01)`, position: "relative", zIndex: 30 } : undefined}
-            className={`flex items-center gap-3 rounded-xl bg-paper p-3 pr-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)] ${drag === i ? "cursor-grabbing shadow-[0_16px_36px_rgba(77,79,83,0.35)] ring-2 ring-accent" : "transition-shadow"} ${over === i && drag !== null && drag !== i ? "border-t-4 border-accent" : ""}`}>
-            <span className="grid h-7 min-w-7 shrink-0 place-items-center rounded-full bg-g100 px-1.5 text-[11px] font-bold text-g600">{visible.indexOf(i) + 1}</span>
-            <span className="flex shrink-0 flex-col items-center text-g400">
-              <button aria-label="Move up" disabled={visible.indexOf(i) <= 0} onClick={() => move(i, visible[visible.indexOf(i) - 1])} className="px-1 text-[10px] leading-none hover:text-ink disabled:opacity-25">▲</button>
-              <span title="Drag to reorder" data-grab onPointerDown={(e) => { e.preventDefault(); (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); startY.current = e.clientY; setDy(0); setDrag(i); setOver(i); }} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={() => { setDrag(null); setOver(null); setDy(0); }} style={{ touchAction: "none" }} className="cursor-grab select-none px-1 text-lg leading-none active:cursor-grabbing">⠿</span>
-              <button aria-label="Move down" disabled={visible.indexOf(i) >= visible.length - 1} onClick={() => move(i, visible[visible.indexOf(i) + 1])} className="px-1 text-[10px] leading-none hover:text-ink disabled:opacity-25">▼</button>
-            </span>
-            {def.photo ? (
-              typeof it[def.photo] === "string" && it[def.photo]
-                // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={photoSrc(it[def.photo] as string)} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
-                : <span className="h-14 w-14 shrink-0 rounded-lg bg-g200" />
-            ) : null}
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-bold text-ink">{def.title(it)}</span>
-              {def.name === "books" && <span className="label text-g500">৳ {String(it.priceBdt)} · {String(it.pages || 0)} pages</span>}
-            </span>
-            {def.featurable && (
-              <span className="flex flex-col gap-1 text-[11px] font-bold uppercase tracking-[0.08em] text-g600">
-                <label className="flex items-center gap-1.5" title="Shows in the home page's Selected work (one per section)">
-                  <input type="checkbox" className="h-4 w-4 accent-[#f7b500]" checked={!!it.featured}
-                    onChange={() => { const on = !it.featured; const next = items.map((x, k) => (k === i ? { ...x, featured: on } : x)); commit(exclusive(next, next[i])); }} />
-                  Front page
-                </label>
-                <label className="flex items-center gap-1.5" title="Shows in the carousel at the top of its own section">
-                  <input type="checkbox" className="h-4 w-4 accent-[#f7b500]" checked={!!it.featuredSection}
-                    onChange={() => commit(items.map((x, k) => (k === i ? { ...x, featuredSection: !x.featuredSection } : x)))} />
-                  Section
-                </label>
+      {items.length === 0 && <p className="mt-6 rounded-xl bg-paper p-5 text-sm text-g500">Nothing here yet.</p>}
+      <Reorder.Group as="ul" axis="y" values={order} onReorder={setOrder} className="mt-6 grid gap-2">
+        {order.map((i, n) => {
+          const it = items[i];
+          if (!it) return null;
+          return (
+            <Reorder.Item as="li" key={i} value={i} onDragEnd={drop} onDrag={(e) => edge(e as PointerEvent)}
+              whileDrag={{ scale: 1.015, zIndex: 30, boxShadow: "0 18px 40px rgba(77,79,83,0.35)" }}
+              transition={{ type: "spring", stiffness: 600, damping: 40 }}
+              className="flex cursor-grab select-none items-center gap-3 rounded-xl bg-paper p-3 pr-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)] active:cursor-grabbing">
+              <span title="Drag the row to reorder" className="grid h-7 min-w-7 shrink-0 place-items-center rounded-full bg-g100 px-1.5 text-[11px] font-bold text-g600">{n + 1}</span>
+              {def.photo ? (
+                typeof it[def.photo] === "string" && it[def.photo]
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={photoSrc(it[def.photo] as string)} alt="" draggable={false} className="pointer-events-none h-14 w-14 shrink-0 rounded-lg object-cover" />
+                  : <span className="h-14 w-14 shrink-0 rounded-lg bg-g200" />
+              ) : null}
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-bold text-ink">{def.title(it)}</span>
+                {def.name === "books" && <span className="label text-g500">৳ {String(it.priceBdt)} · {String(it.pages || 0)} pages</span>}
               </span>
-            )}
-            <button onClick={() => setEditing({ index: i, item: def.prepare ? def.prepare({ ...it }, content) : { ...it } })} className="label text-g600 hover:text-accent-d">Edit</button>
-            <button onClick={() => { if (confirm(`Delete "${def.title(it)}"?`)) commit(items.filter((_, k) => k !== i)); }} className="label text-g500 hover:text-ink">Delete</button>
-          </li>
-        )))}
-      </ul>
+              {def.featurable && (
+                <span className="flex cursor-default flex-col gap-1 text-[11px] font-bold uppercase tracking-[0.08em] text-g600">
+                  <label className="flex cursor-pointer items-center gap-1.5" title="Shows in the home page's Selected work (one per section)">
+                    <input type="checkbox" className="h-4 w-4 cursor-pointer accent-[#f7b500]" checked={!!it.featured}
+                      onChange={() => { const on = !it.featured; const next = items.map((x, k) => (k === i ? { ...x, featured: on } : x)); commit(exclusive(next, next[i])); }} />
+                    Front page
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-1.5" title="Shows in the carousel at the top of its own section">
+                    <input type="checkbox" className="h-4 w-4 cursor-pointer accent-[#f7b500]" checked={!!it.featuredSection}
+                      onChange={() => commit(items.map((x, k) => (k === i ? { ...x, featuredSection: !x.featuredSection } : x)))} />
+                    Section
+                  </label>
+                </span>
+              )}
+              <button onClick={() => setEditing({ index: i, item: def.prepare ? def.prepare({ ...it }, content) : { ...it } })} className="label cursor-pointer text-g600 hover:text-accent-d">Edit</button>
+              <button onClick={() => { if (confirm(`Delete "${def.title(it)}"?`)) commit(items.filter((_, k) => k !== i)); }} className="label cursor-pointer text-g500 hover:text-ink">Delete</button>
+            </Reorder.Item>
+          );
+        })}
+      </Reorder.Group>
 
       {editing && (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-ink/60 p-3 sm:p-6" onClick={() => setEditing(null)}>
