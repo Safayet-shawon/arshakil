@@ -32,7 +32,13 @@ export default function FeaturedCarousel({ slides, label }: { slides: Slide[]; l
   const card = (s: Slide) => (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {s.photo && <img src={photoSrc(s.photo)} alt={s.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />}
+      {s.photo && (
+        <>
+          {/* the same picture, blurred, fills the sides; the sharp one sits in front, whole, so no project is ever cut off */}
+          <img src={photoSrc(s.photo)} alt="" aria-hidden loading="lazy" decoding="async" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-90 blur-2xl" />
+          <img src={photoSrc(s.photo)} alt={s.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]" />
+        </>
+      )}
       <span className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
       <span className="absolute inset-x-0 bottom-0 p-4 md:p-6">
         <span className="label block text-accent">{s.kicker}</span>
@@ -45,16 +51,16 @@ export default function FeaturedCarousel({ slides, label }: { slides: Slide[]; l
   return (
     <section aria-label={label} className="px-5 pb-[clamp(20px,3vw,40px)] md:px-[clamp(20px,3.4vw,48px)]"
       onPointerEnter={() => setPaused(true)} onPointerLeave={() => setPaused(false)}>
-      <div className="label mx-auto mb-3 flex items-center justify-between text-g500 sm:max-w-[min(100%,92svh)]">
+      <div className="label mb-3 flex items-center justify-between text-g500">
         <span><b className="text-accent-d">★</b> {label}</span>
         {n > 1 && <span>{String(at + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}</span>}
       </div>
-      <div className="relative mx-auto sm:max-w-[min(100%,92svh)]">
+      <div className="relative">
         <div ref={track} data-lenis-prevent-wheel
           onScroll={(e) => { const el = e.currentTarget; setAt(Math.round(el.scrollLeft / el.clientWidth)); }}
           className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-3xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {slides.map((s) => (
-            <div key={s.href + s.title} className="relative aspect-[16/10] w-full shrink-0 snap-center sm:aspect-[2/1]">
+            <div key={s.href + s.title} className="relative h-[clamp(240px,44vh,440px)] w-full shrink-0 snap-center">
               {s.external
                 ? <a href={s.href} target="_blank" rel="noreferrer" data-view className="group absolute inset-0 block overflow-hidden bg-g200">{card(s)}</a>
                 : <Link href={s.href} data-view className="group absolute inset-0 block overflow-hidden bg-g200">{card(s)}</Link>}
