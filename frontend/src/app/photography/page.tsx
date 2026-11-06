@@ -50,7 +50,7 @@ export default async function PhotographyPage() {
           {albums.map((a) => (
             <div key={a.slug} id={a.slug}>
               <div className="mb-5 flex items-end justify-between gap-4 border-b border-white/15 pb-3">
-                <h3 className="font-display text-[clamp(32px,4.4vw,60px)] leading-none text-g50">{a.name}</h3>
+                <h3 className="font-display text-[clamp(28px,3.4vw,46px)] leading-none text-g50">{a.name}</h3>
                 <Link href={`/photography/${a.slug}`} data-link className="label whitespace-nowrap text-accent transition-colors hover:text-g50">See all {a.items.length} →</Link>
               </div>
               <Gallery items={a.items.slice(0, 6)} layout="mosaic" />

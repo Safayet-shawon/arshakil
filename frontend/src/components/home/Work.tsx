@@ -37,7 +37,7 @@ export default function Work() {
                 <span className={cn("label tracking-[0.12em] transition-colors", active === i ? "text-accent" : "text-g300")}>{String(i + 1).padStart(2, "0")}</span>
                 <span>
                   <span className="label block text-[10px] text-accent">{b.category}</span>
-                  <span className="font-display text-[clamp(24px,3.4vw,50px)] leading-none text-g50">{b.title}</span>
+                  <span className="font-display text-[clamp(22px,2.7vw,38px)] leading-none text-g50">{b.title}</span>
                 </span>
                 <span className="label tracking-[0.12em] text-g300 max-md:hidden">{b.meta}</span>
                 <span className="label text-right tracking-[0.12em] text-g300 max-md:hidden">{b.year}</span>

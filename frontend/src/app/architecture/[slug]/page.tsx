@@ -29,7 +29,7 @@ export default async function ProjectPage({ params }: Props) {
   return (
     <>
       <PageHero index="01" title={p.title} intro={p.summary} />
-      <div className="group h-[clamp(200px,36vw,480px)]"><Photo name={coverOf(p)} alt={p.title} className="h-full" /></div>
+      <div className="group h-[clamp(160px,26vw,340px)]"><Photo name={coverOf(p)} alt={p.title} className="h-full" /></div>
       <Section>
         <Reveal>
           <div className="label text-accent-d">{p.type} · {p.location} · {p.year}</div>

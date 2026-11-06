@@ -14,13 +14,13 @@ export default function SectionHead({ index, kicker, title, aside, tone = "light
   const dark = tone === "dark";
   return (
     <Reveal>
-      <div className={cn("relative mb-[clamp(24px,3.4vw,44px)] flex items-end justify-between gap-5 border-b-[1.5px] pb-4",
+      <div className={cn("relative mb-[clamp(18px,2.6vw,32px)] flex items-end justify-between gap-5 border-b-[1.5px] pb-4",
         dark ? "border-white/25" : "border-g300")}>
         <div>
           <div className={cn("label", dark ? "text-g300" : "text-g500")}>
             <b className={dark ? "text-accent" : "text-accent-d"}>[ {index} ]</b> <Hl>— {kicker}</Hl>
           </div>
-          <h2 className={cn("font-display text-[clamp(36px,6vw,92px)] leading-[0.9]", outline ? "text-transparent" : dark ? "text-g50" : "text-ink")}
+          <h2 className={cn("font-display text-[clamp(30px,4.6vw,68px)] leading-[0.9]", outline ? "text-transparent" : dark ? "text-g50" : "text-ink")}
             style={outline ? { WebkitTextStroke: "1.6px var(--color-accent-soft)" } : undefined}>
             {typeof title === "string" ? <T>{title}</T> : <Hl>{title}</Hl>}
           </h2>

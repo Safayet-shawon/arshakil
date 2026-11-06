@@ -64,7 +64,7 @@ export default function Hero() {
         <motion.h1 aria-label={site.fullName} style={{ x: sx, y: sy }}
           className="font-display pointer-events-none absolute inset-x-0 top-[12vh] z-[3] select-none text-center leading-[0.9] whitespace-nowrap md:top-[13vh]">
           {[row1, row2].map((row, r) => (
-            <span key={r} className="block overflow-hidden py-[.05em] text-[clamp(34px,min(12.4vw,18vh),230px)]">
+            <span key={r} className="block overflow-hidden py-[.05em] text-[clamp(30px,min(10.4vw,15vh),190px)]">
               {row.map((w, i) => (
                 <span key={w} className={i ? "ml-[.22em]" : ""} aria-hidden>
                   <Word skipped={skipped} delay={0.45 + r * 0.25 + i * 0.15} outline={r === 1 && i === 0} fade={i === 1} dot={w === "AR."}>

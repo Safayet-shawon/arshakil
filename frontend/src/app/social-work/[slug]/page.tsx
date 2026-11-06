@@ -29,11 +29,11 @@ export default async function InitiativePage({ params }: Props) {
   return (
     <>
       <PageHero index="06" title={n.title} intro={n.blurb} />
-      <div className="group h-[clamp(200px,36vw,480px)]"><Photo name={coverOf(n)} alt={n.title} className="h-full" /></div>
+      <div className="group h-[clamp(160px,26vw,340px)]"><Photo name={coverOf(n)} alt={n.title} className="h-full" /></div>
       <Section>
         <Reveal>
           <div className="label text-accent-d">{n.area}</div>
-          <h2 className="font-display mt-2 text-[clamp(30px,4vw,56px)] leading-[0.95] text-ink">What this initiative does</h2>
+          <h2 className="font-display mt-2 text-[clamp(26px,3.2vw,44px)] leading-[0.95] text-ink">What this initiative does</h2>
           <ul className="mt-6 grid max-w-2xl gap-3 text-sm leading-relaxed text-g600">
             {n.points.map((p) => <li key={p}><span className="text-accent">— </span><Hl>{p}</Hl></li>)}
           </ul>

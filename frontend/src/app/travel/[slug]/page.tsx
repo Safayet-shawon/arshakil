@@ -32,12 +32,12 @@ export default async function PlacePage({ params }: Props) {
   return (
     <>
       <PageHero index="04" title={p.name} intro={p.summary} />
-      <div className="group h-[clamp(200px,36vw,480px)]"><Photo name={coverOf(p)} alt={p.name} className="h-full" /></div>
+      <div className="group h-[clamp(160px,26vw,340px)]"><Photo name={coverOf(p)} alt={p.name} className="h-full" /></div>
 
       <Section>
         <Reveal>
           <div className="label text-accent-d">{p.region === "bangladesh" ? "Bangladesh" : `Abroad · ${p.country}`}</div>
-          <h2 className="font-display mt-2 text-[clamp(30px,4vw,56px)] leading-[0.95] text-ink">Things to do</h2>
+          <h2 className="font-display mt-2 text-[clamp(26px,3.2vw,44px)] leading-[0.95] text-ink">Things to do</h2>
           <ul className="mt-6 grid max-w-2xl gap-3 text-sm leading-relaxed text-g600">
             {p.ideas.map((x) => <li key={x}><span className="text-accent">— </span><Hl>{x}</Hl></li>)}
           </ul>

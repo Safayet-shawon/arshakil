@@ -44,7 +44,7 @@ export default async function TravelPage() {
                 <Photo name={s.photo} alt={s.title} ratio="4/3" className={cn(i % 2 === 1 && "md:order-2")} />
                 <div>
                   <div className="label text-accent-d">{s.era} · {s.place}</div>
-                  <h3 className="font-display mt-2 text-[clamp(30px,4vw,56px)] leading-[0.95] text-ink">{s.title}</h3>
+                  <h3 className="font-display mt-2 text-[clamp(26px,3.2vw,44px)] leading-[0.95] text-ink">{s.title}</h3>
                   <p className="mt-3 max-w-md text-sm leading-relaxed text-g600"><T>{s.blurb}</T></p>
                 </div>
               </article>

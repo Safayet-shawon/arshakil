@@ -24,7 +24,7 @@ export default function RoleSwipe() {
   }, [i]);
 
   return (
-    <h2 aria-label={roles.join(", ")} className="font-display block h-[1.18em] overflow-hidden text-[clamp(26px,min(3.1vw,6vh),64px)] leading-[1.18] text-ink">
+    <h2 aria-label={roles.join(", ")} className="font-display block h-[1.18em] overflow-hidden text-[clamp(22px,min(2.6vw,5vh),50px)] leading-[1.18] text-ink">
       <span className="block" style={{
         transform: `translateY(${-i * LINE}em)`,
         transition: jump ? "none" : "transform .8s var(--ease-in-out-expo)",
