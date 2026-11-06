@@ -34,19 +34,18 @@ export default function WebsiteEditor({ texts }: { texts: Record<string, string>
   const num = (k: string, d: number) => { const n = Number(texts[k]); return texts[k] !== undefined && texts[k] !== "" && Number.isFinite(n) ? n : d; };
   const startMode: Frame["mode"] = texts["@hero.mode"] === "full" ? "full" : "portrait";
   const [frame, setFrame] = useState<Frame>({ mode: startMode, x: num("@hero.x", DEFAULT[startMode].x), y: num("@hero.y", DEFAULT[startMode].y), zoom: num("@hero.zoom", 100) });
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [loadingPreview, setLoadingPreview] = useState(false);
   const drag = useRef<{ x: number; y: number; fx: number; fy: number } | null>(null);
 
-  /** Change how the picture sits: the preview moves at once, the site is updated a moment after you stop. */
-  const setLook = (patch: Partial<Frame>) => {
-    const f = { ...frame, ...patch };
-    setFrame(f);
-    clearTimeout(timer.current);
-    timer.current = setTimeout(async () => {
-      setBusy("Saving…");
-      await Promise.all([saveKey("@hero.mode", f.mode), saveKey("@hero.x", String(Math.round(f.x))), saveKey("@hero.y", String(Math.round(f.y))), saveKey("@hero.zoom", String(Math.round(f.zoom)))]);
-      setReload((n) => n + 1); setBusy("");
-    }, 450);
+  const [dirty, setDirty] = useState(false);
+
+  /** Moving the picture only changes the small preview. Nothing is saved until "Save position". */
+  const setLook = (patch: Partial<Frame>) => { setFrame((f) => ({ ...f, ...patch })); setDirty(true); };
+  const saveLook = async () => {
+    setBusy("Saving…");
+    await Promise.all([saveKey("@hero.mode", frame.mode), saveKey("@hero.x", String(Math.round(frame.x))), saveKey("@hero.y", String(Math.round(frame.y))), saveKey("@hero.zoom", String(Math.round(frame.zoom)))]);
+    setDirty(false); setLoadingPreview(true); setReload((n) => n + 1); setBusy("Saved ✓");
+    setTimeout(() => setBusy(""), 2000);
   };
   const pickMode = (mode: Frame["mode"]) => setLook({ mode, ...DEFAULT[mode] });
 
@@ -61,11 +60,11 @@ export default function WebsiteEditor({ texts }: { texts: Record<string, string>
     setBusy("Uploading…");
     try {
       const { url } = await uploadImage(file);
-      await saveHero(url); setHero(url); setReload((n) => n + 1);
+      await saveHero(url); setHero(url); setLoadingPreview(true); setReload((n) => n + 1);
     } catch (e) { setBusy((e as Error).message); return; }
     setBusy("");
   };
-  const reset = async () => { setBusy("Saving…"); await saveHero(""); setHero(""); setReload((n) => n + 1); setBusy(""); };
+  const reset = async () => { setBusy("Saving…"); await saveHero(""); setHero(""); setLoadingPreview(true); setReload((n) => n + 1); setBusy(""); };
 
   return (
     <div>
@@ -82,7 +81,7 @@ export default function WebsiteEditor({ texts }: { texts: Record<string, string>
             <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; change(f); }} />
           </label>
           {hero && <button onClick={reset} className="label text-g500 hover:text-ink">Use the original</button>}
-          {busy && <span className="text-xs text-accent-d">{busy}</span>}
+          {busy && busy !== "Saved ✓" && busy !== "Saving…" && <span className="text-xs text-accent-d">{busy}</span>}
         </div>
 
         {hero && (
@@ -111,7 +110,7 @@ export default function WebsiteEditor({ texts }: { texts: Record<string, string>
                 )}
                 <div className="font-display pointer-events-none absolute inset-x-0 top-[10%] text-center text-[clamp(18px,3vw,32px)] leading-[0.9] text-ink">AR. SHAKHAOUTH<br />HOSSAIN SHAKIL</div>
               </div>
-              <p className="mt-2 text-[11px] text-g500">Drag the picture to move it. This is a small copy of the home page top.</p>
+              <p className="mt-2 text-[11px] text-g500">Drag the picture to move it, then press Save position. The big preview below refreshes after saving.</p>
             </div>
 
             <div className="grid content-start gap-4">
@@ -130,7 +129,13 @@ export default function WebsiteEditor({ texts }: { texts: Record<string, string>
                   <input type="range" min={min} max={max} value={frame[k]} onChange={(e) => setLook({ [k]: Number(e.target.value) })} className="w-full accent-[#f7b500]" />
                 </label>
               ))}
-              <button onClick={() => setLook({ ...DEFAULT[frame.mode] })} className="label justify-self-start text-g500 hover:text-ink">Reset position</button>
+              <div className="flex flex-wrap items-center gap-3">
+                <button onClick={saveLook} disabled={!dirty || busy === "Saving…"}
+                  className="rounded-full bg-ink px-6 py-2.5 text-xs font-bold uppercase tracking-[0.1em] text-paper hover:bg-g600 disabled:opacity-40">{busy === "Saving…" ? "Saving…" : "Save position"}</button>
+                <button onClick={() => setLook({ ...DEFAULT[frame.mode] })} className="label text-g500 hover:text-ink">Reset position</button>
+                {dirty && <span className="text-xs text-accent-d">Not saved yet</span>}
+                {busy === "Saved ✓" && <span className="text-xs font-bold text-accent-d">Saved ✓</span>}
+              </div>
             </div>
           </div>
         )}
@@ -144,7 +149,10 @@ export default function WebsiteEditor({ texts }: { texts: Record<string, string>
         ))}
       </div>
       <div className="mt-5 overflow-hidden rounded-2xl border border-g300 bg-paper">
-        {ready && <iframe key={page + reload} src={page} title="Website" className="h-[74svh] w-full" />}
+        <div className="relative">
+          {loadingPreview && <div className="absolute inset-0 z-10 grid place-items-center bg-paper/80 text-xs font-bold uppercase tracking-[0.12em] text-g600">Updating preview…</div>}
+          {ready && <iframe key={page + reload} src={page} title="Website" onLoad={() => setLoadingPreview(false)} className="h-[74svh] w-full" />}
+        </div>
       </div>
     </div>
   );

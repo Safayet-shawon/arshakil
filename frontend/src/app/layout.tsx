@@ -58,7 +58,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <HideOnAdmin><ChatBot /></HideOnAdmin>
         </SmoothScroll>
         </SiteProvider>
-        <Cursor />
+        <HideOnAdmin><Cursor /></HideOnAdmin>
         <Analytics />
       </body>
     </html>

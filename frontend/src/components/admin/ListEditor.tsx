@@ -38,6 +38,8 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
   const [drag, setDrag] = useState<number | null>(null);
   const [over, setOver] = useState<number | null>(null);
   const rows = useRef<Record<number, HTMLLIElement | null>>({});
+  const [dy, setDy] = useState(0);
+  const startY = useRef(0);
   const move = (from: number, to: number) => {
     if (from === to || to < 0 || to >= items.length) return;
     const next = [...items];
@@ -57,6 +59,7 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
   };
   const dragMove = (e: React.PointerEvent) => {
     if (drag === null) return;
+    setDy(e.clientY - startY.current);
     setOver(rowAt(e.clientY));
     // near the top or bottom edge of the window the page scrolls along
     if (e.clientY < 90) window.scrollBy(0, -16); else if (e.clientY > window.innerHeight - 90) window.scrollBy(0, 16);
@@ -65,7 +68,7 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
     if (drag === null) return;
     const to = rowAt(e.clientY);
     if (to !== null) move(drag, to);
-    setDrag(null); setOver(null);
+    setDrag(null); setOver(null); setDy(0);
   };
   // among the rows currently shown (a filtered view), the nearest visible neighbour
   const visible = items.map((x, k) => (show && !show(x) ? -1 : k)).filter((k) => k >= 0);
@@ -92,12 +95,12 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
       <ul className="mt-6 grid gap-2">
         {items.length === 0 && <li className="rounded-xl bg-paper p-5 text-sm text-g500">Nothing here yet.</li>}
         {items.map((it, i) => (show && !show(it) ? null : (
-          <li key={i} ref={(el) => { rows.current[i] = el; }}
-            className={`flex items-center gap-3 rounded-xl bg-paper p-3 pr-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)] transition-[opacity,box-shadow] ${drag === i ? "opacity-50 shadow-[0_12px_30px_rgba(77,79,83,0.25)]" : ""} ${over === i && drag !== null && drag !== i ? "ring-2 ring-accent" : ""}`}>
+          <li key={i} ref={(el) => { rows.current[i] = el; }} style={drag === i ? { transform: `translateY(${dy}px) scale(1.01)`, position: "relative", zIndex: 30 } : undefined}
+            className={`flex items-center gap-3 rounded-xl bg-paper p-3 pr-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)] ${drag === i ? "cursor-grabbing shadow-[0_16px_36px_rgba(77,79,83,0.35)] ring-2 ring-accent" : "transition-shadow"} ${over === i && drag !== null && drag !== i ? "border-t-4 border-accent" : ""}`}>
             <span className="grid h-7 min-w-7 shrink-0 place-items-center rounded-full bg-g100 px-1.5 text-[11px] font-bold text-g600">{visible.indexOf(i) + 1}</span>
             <span className="flex shrink-0 flex-col items-center text-g400">
               <button aria-label="Move up" disabled={visible.indexOf(i) <= 0} onClick={() => move(i, visible[visible.indexOf(i) - 1])} className="px-1 text-[10px] leading-none hover:text-ink disabled:opacity-25">▲</button>
-              <span title="Drag to reorder" data-grab onPointerDown={(e) => { e.preventDefault(); (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); setDrag(i); setOver(i); }} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={() => { setDrag(null); setOver(null); }} style={{ touchAction: "none" }} className="cursor-grab select-none px-1 text-lg leading-none active:cursor-grabbing">⠿</span>
+              <span title="Drag to reorder" data-grab onPointerDown={(e) => { e.preventDefault(); (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); startY.current = e.clientY; setDy(0); setDrag(i); setOver(i); }} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={() => { setDrag(null); setOver(null); setDy(0); }} style={{ touchAction: "none" }} className="cursor-grab select-none px-1 text-lg leading-none active:cursor-grabbing">⠿</span>
               <button aria-label="Move down" disabled={visible.indexOf(i) >= visible.length - 1} onClick={() => move(i, visible[visible.indexOf(i) + 1])} className="px-1 text-[10px] leading-none hover:text-ink disabled:opacity-25">▼</button>
             </span>
             {def.photo ? (
