@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { listByName } from "@/lib/schema";
 import type { Album, ListName, PrivateData, Sector, SiteContent } from "@/types";
 import Access from "./Access";
@@ -56,9 +56,25 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
     return (await res.json()).items as Item[];
   };
 
-  const save = useCallback(async (name: ListName, items: Item[]) => {
-    if (!content) return;
-    const next: SiteContent = { ...content };
+  // Saving is instant on screen: the list changes at once, the server catches up behind it, one save after another.
+  const live = useRef<SiteContent | null>(null);
+  live.current = content;
+  const chain = useRef<Promise<unknown>>(Promise.resolve());
+  const inflight = useRef<Record<string, number>>({});
+  const [toast, setToast] = useState<{ text: string; kind: "saving" | "ok" | "err" } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const save = useCallback((name: ListName, items: Item[]) => {
+    const content = live.current;
+    if (!content) return Promise.resolve();
+    clearTimeout(toastTimer.current);
+    const shown = { ...content, [name]: items } as unknown as SiteContent;
+    live.current = shown;
+    setContent(shown);
+    setToast({ text: "Saving…", kind: "saving" });
+    inflight.current[name] = (inflight.current[name] ?? 0) + 1;
+    const job = chain.current.then(async () => {
+      const next: SiteContent = { ...content };
     const rename = RENAMES[name];
     if (rename) {
       const old = content[name] as unknown as { name: string }[];
@@ -71,12 +87,17 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
       }
     }
     const saved = await put(name, items);
-    if (!saved) return;
+    inflight.current[name]--;
+    if (!saved) { setToast({ text: "Could not save. Try again.", kind: "err" }); setContent(content); live.current = content; return; }
     (next as unknown as Record<string, unknown>)[name] = saved;
-    setContent(next);
-    setNote("Saved. The site is updated.");
-    setTimeout(() => setNote(""), 2500);
-  }, [content]);
+    // the server's copy (it adds the addresses of new items) replaces ours once no newer save of this list is waiting
+    if (inflight.current[name] === 0) setContent((c) => (c ? { ...c, [name]: saved, ...(rename ? { [rename.list]: (next as unknown as Record<string, unknown>)[rename.list] ?? (c as unknown as Record<string, unknown>)[rename.list] } : {}) } as SiteContent : c));
+    setToast({ text: "Saved", kind: "ok" });
+    toastTimer.current = setTimeout(() => setToast(null), 1800);
+    });
+    chain.current = job.catch(() => {});
+    return Promise.resolve();
+  }, []);
 
   /** Albums of any sector: saves the whole list and returns it with the slugs the server gave. */
   const saveAlbums = async (items: Album[]) => {
@@ -133,7 +154,6 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
         </aside>
 
         <div>
-          {note && <p role="status" className="label mb-4 rounded-lg bg-accent/20 px-4 py-2 text-ink">{note}</p>}
           {group && group.lists.length > 1 && (
             <div className="mb-6 flex flex-wrap gap-2">
               {group.lists.map((n) => (
@@ -141,6 +161,11 @@ export default function Panel({ startTab, startNew }: { startTab?: string; start
                   className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] transition-colors ${tab === n ? "bg-accent text-ink" : "bg-paper text-g600 hover:text-ink"}`}>{SUB[n]}</button>
               ))}
             </div>
+          )}
+          {(toast || note) && (
+            <p role="status" className={`fixed bottom-5 right-5 z-[120] rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.1em] shadow-[0_10px_30px_rgba(77,79,83,0.3)] ${toast?.kind === "err" ? "bg-red-600 text-white" : toast?.kind === "ok" ? "bg-accent text-ink" : "bg-ink text-paper"}`}>
+              {toast ? `${toast.kind === "ok" ? "✓ " : ""}${toast.text}` : note}
+            </p>
           )}
           {tab === "gallery" && content && (
             <div className="mb-5 flex flex-wrap gap-2">

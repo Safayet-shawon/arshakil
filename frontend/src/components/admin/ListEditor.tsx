@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ListDef } from "@/lib/schema";
 import { photoSrc } from "@/lib/media";
 import type { SiteContent } from "@/types";
@@ -34,15 +34,38 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
 
   const commit = async (next: Item[]) => { setBusy(true); await save(next); setBusy(false); };
 
-  // order: drag a row (or use the arrows) and drop it where it should be; the site shows items in this order
+  // order: grab a row's handle and drop it where it should go (or use the arrows); the site shows items in this order
   const [drag, setDrag] = useState<number | null>(null);
   const [over, setOver] = useState<number | null>(null);
+  const rows = useRef<Record<number, HTMLLIElement | null>>({});
   const move = (from: number, to: number) => {
     if (from === to || to < 0 || to >= items.length) return;
     const next = [...items];
     const [it] = next.splice(from, 1);
     next.splice(to, 0, it);
     commit(next);
+  };
+  const rowAt = (y: number) => {
+    let best: number | null = null, bestD = Infinity;
+    for (const [k, el] of Object.entries(rows.current)) {
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      const d = y >= r.top && y <= r.bottom ? 0 : Math.min(Math.abs(y - r.top), Math.abs(y - r.bottom));
+      if (d < bestD) { bestD = d; best = Number(k); }
+    }
+    return best;
+  };
+  const dragMove = (e: React.PointerEvent) => {
+    if (drag === null) return;
+    setOver(rowAt(e.clientY));
+    // near the top or bottom edge of the window the page scrolls along
+    if (e.clientY < 90) window.scrollBy(0, -16); else if (e.clientY > window.innerHeight - 90) window.scrollBy(0, 16);
+  };
+  const dragEnd = (e: React.PointerEvent) => {
+    if (drag === null) return;
+    const to = rowAt(e.clientY);
+    if (to !== null) move(drag, to);
+    setDrag(null); setOver(null);
   };
   // among the rows currently shown (a filtered view), the nearest visible neighbour
   const visible = items.map((x, k) => (show && !show(x) ? -1 : k)).filter((k) => k >= 0);
@@ -69,12 +92,12 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
       <ul className="mt-6 grid gap-2">
         {items.length === 0 && <li className="rounded-xl bg-paper p-5 text-sm text-g500">Nothing here yet.</li>}
         {items.map((it, i) => (show && !show(it) ? null : (
-          <li key={i} draggable onDragStart={() => setDrag(i)} onDragOver={(e) => { e.preventDefault(); if (over !== i) setOver(i); }}
-            onDrop={(e) => { e.preventDefault(); if (drag !== null) move(drag, i); setDrag(null); setOver(null); }} onDragEnd={() => { setDrag(null); setOver(null); }}
-            className={`flex items-center gap-3 rounded-xl bg-paper p-3 pr-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)] transition-opacity ${drag === i ? "opacity-40" : ""} ${over === i && drag !== null && drag !== i ? "ring-2 ring-accent" : ""}`}>
+          <li key={i} ref={(el) => { rows.current[i] = el; }}
+            className={`flex items-center gap-3 rounded-xl bg-paper p-3 pr-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)] transition-[opacity,box-shadow] ${drag === i ? "opacity-50 shadow-[0_12px_30px_rgba(77,79,83,0.25)]" : ""} ${over === i && drag !== null && drag !== i ? "ring-2 ring-accent" : ""}`}>
+            <span className="grid h-7 min-w-7 shrink-0 place-items-center rounded-full bg-g100 px-1.5 text-[11px] font-bold text-g600">{visible.indexOf(i) + 1}</span>
             <span className="flex shrink-0 flex-col items-center text-g400">
               <button aria-label="Move up" disabled={visible.indexOf(i) <= 0} onClick={() => move(i, visible[visible.indexOf(i) - 1])} className="px-1 text-[10px] leading-none hover:text-ink disabled:opacity-25">▲</button>
-              <span title="Drag to reorder" className="cursor-grab select-none text-lg leading-none active:cursor-grabbing">⠿</span>
+              <span title="Drag to reorder" data-grab onPointerDown={(e) => { e.preventDefault(); (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); setDrag(i); setOver(i); }} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={() => { setDrag(null); setOver(null); }} style={{ touchAction: "none" }} className="cursor-grab select-none px-1 text-lg leading-none active:cursor-grabbing">⠿</span>
               <button aria-label="Move down" disabled={visible.indexOf(i) >= visible.length - 1} onClick={() => move(i, visible[visible.indexOf(i) + 1])} className="px-1 text-[10px] leading-none hover:text-ink disabled:opacity-25">▼</button>
             </span>
             {def.photo ? (
@@ -106,7 +129,6 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
           </li>
         )))}
       </ul>
-      {busy && <p className="label mt-3 text-accent-d">Saving…</p>}
 
       {editing && (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-ink/60 p-3 sm:p-6" onClick={() => setEditing(null)}>

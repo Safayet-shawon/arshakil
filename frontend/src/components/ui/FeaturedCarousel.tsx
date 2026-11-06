@@ -34,10 +34,10 @@ export default function FeaturedCarousel({ slides, label }: { slides: Slide[]; l
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {s.photo && <img src={photoSrc(s.photo)} alt={s.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />}
       <span className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
-      <span className="absolute inset-x-0 bottom-0 p-5 md:p-8">
+      <span className="absolute inset-x-0 bottom-0 p-4 md:p-6">
         <span className="label block text-accent">{s.kicker}</span>
-        <span className="font-display mt-1 block text-[clamp(30px,5vw,68px)] leading-[0.95] text-g50">{s.title}</span>
-        <span className="label mt-3 inline-block text-g200 transition-colors group-hover:text-accent">Open ↗</span>
+        <span className="font-display mt-1 block text-[clamp(24px,3.4vw,46px)] leading-[0.95] text-g50">{s.title}</span>
+        <span className="label mt-2 inline-block text-g200 transition-colors group-hover:text-accent">Open ↗</span>
       </span>
     </>
   );
@@ -54,7 +54,7 @@ export default function FeaturedCarousel({ slides, label }: { slides: Slide[]; l
           onScroll={(e) => { const el = e.currentTarget; setAt(Math.round(el.scrollLeft / el.clientWidth)); }}
           className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-3xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {slides.map((s) => (
-            <div key={s.href + s.title} className="relative aspect-[4/3] w-full shrink-0 snap-center sm:aspect-[16/8]">
+            <div key={s.href + s.title} className="relative aspect-[16/10] max-h-[clamp(210px,36vh,360px)] w-full shrink-0 snap-center sm:aspect-[16/6]">
               {s.external
                 ? <a href={s.href} target="_blank" rel="noreferrer" data-view className="group absolute inset-0 block overflow-hidden bg-g200">{card(s)}</a>
                 : <Link href={s.href} data-view className="group absolute inset-0 block overflow-hidden bg-g200">{card(s)}</Link>}
