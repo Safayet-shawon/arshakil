@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { photoSrc } from "@/lib/media";
 import { site } from "@/data/site";
+import HeroPreview from "./HeroPreview";
 import { uploadImage } from "./upload";
 
 const PAGES: [string, string][] = [
@@ -38,6 +39,7 @@ export default function WebsiteEditor({ texts }: { texts: Record<string, string>
   const drag = useRef<{ x: number; y: number; fx: number; fy: number } | null>(null);
 
   const [dirty, setDirty] = useState(false);
+  const [device, setDevice] = useState<"desktop" | "phone">("desktop");
 
   /** Moving the picture only changes the small preview. Nothing is saved until "Save position". */
   const setLook = (patch: Partial<Frame>) => { setFrame((f) => ({ ...f, ...patch })); setDirty(true); };
@@ -85,32 +87,19 @@ export default function WebsiteEditor({ texts }: { texts: Record<string, string>
         </div>
 
         {hero && (
-          <div className="mt-5 grid gap-5 md:grid-cols-[minmax(0,420px)_1fr]">
-            {/* a small copy of the hero: drag the picture to move it */}
-            <div>
-              <div data-grab onPointerDown={(e) => { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); drag.current = { x: e.clientX, y: e.clientY, fx: frame.x, fy: frame.y }; }}
-                onPointerMove={(e) => {
-                  const d = drag.current; if (!d) return;
-                  const w = (e.currentTarget as HTMLElement).clientWidth, h = (e.currentTarget as HTMLElement).clientHeight;
-                  setLook({ x: clamp(d.fx - ((e.clientX - d.x) / w) * 100, 0, 100), y: clamp(d.fy - ((e.clientY - d.y) / h) * 100, 0, 100) });
-                }}
-                onPointerUp={() => { drag.current = null; }} style={{ touchAction: "none" }}
-                className="relative aspect-[16/10] cursor-grab select-none overflow-hidden rounded-xl border border-g300 bg-gradient-to-b from-white to-g100 active:cursor-grabbing">
-                {frame.mode === "full" ? (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photoSrc(hero)} alt="" draggable={false} className="pointer-events-none absolute inset-0 h-full w-full object-cover" style={{ objectPosition: `${frame.x}% ${frame.y}%`, transform: `scale(${frame.zoom / 100})`, transformOrigin: `${frame.x}% ${frame.y}%` }} />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/55 via-white/20 to-white/60" />
-                  </>
-                ) : (
-                  <div className="pointer-events-none absolute left-1/2 top-[28%] h-[100%] -translate-x-1/2 opacity-70" style={{ aspectRatio: "1176/1338" }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photoSrc(hero)} alt="" draggable={false} className="h-full w-full object-cover [mask-image:linear-gradient(to_bottom,#000_62%,transparent)]" style={{ objectPosition: `${frame.x}% ${frame.y}%`, transform: `scale(${frame.zoom / 100})`, transformOrigin: `${frame.x}% ${frame.y}%` }} />
-                  </div>
-                )}
-                <div className="font-display pointer-events-none absolute inset-x-0 top-[10%] text-center text-[clamp(18px,3vw,32px)] leading-[0.9] text-ink">AR. SHAKHAOUTH<br />HOSSAIN SHAKIL</div>
+          <div className="mt-5 grid gap-5 md:grid-cols-[minmax(0,540px)_1fr]">
+            {/* the home page top at true size, on a computer or on a phone: drag the picture to move it */}
+            <div className={device === "phone" ? "mx-auto w-full max-w-[230px]" : "w-full"}>
+              <HeroPreview src={hero} frame={frame} device={device}
+                onMove={(dx, dy) => { setDirty(true); setFrame((f) => ({ ...f, x: clamp(f.x + dx, 0, 100), y: clamp(f.y + dy, 0, 100) })); }} />
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex gap-1.5">
+                  {([["desktop", "Computer"], ["phone", "Phone"]] as const).map(([d, label]) => (
+                    <button key={d} onClick={() => setDevice(d)} className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] ${device === d ? "bg-ink text-paper" : "bg-g100 text-g600 hover:text-ink"}`}>{label}</button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-g500">This is exactly how visitors will see it. Drag the picture, then Save.</p>
               </div>
-              <p className="mt-2 text-[11px] text-g500">Drag the picture to move it, then press Save position. The big preview below refreshes after saving.</p>
             </div>
 
             <div className="grid content-start gap-4">
