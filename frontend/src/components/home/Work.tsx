@@ -49,11 +49,11 @@ export default function Work() {
 
       <motion.div aria-hidden style={{ x: sx, y: sy }} animate={{ opacity: hover ? 1 : 0, scale: hover ? 1 : 0.9 }} transition={{ duration: 0.14, ease: "easeOut" }}
         className="pointer-events-none fixed left-0 top-0 z-[60] w-max overflow-hidden rounded-md bg-g600 shadow-[0_30px_60px_rgba(0,0,0,0.25)] max-md:hidden">
-        <AnimatePresence initial={false}>
+        <AnimatePresence initial={false} mode="popLayout">
           {hover?.photo && (
             // shown whole, in its own shape: tall, wide or square, nothing is cut off
             <motion.img key={hover.photo} src={photoSrc(hover.photo)} alt="" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }} className="block h-auto max-h-[56vh] w-auto max-w-[min(360px,32vw)]" />
+              transition={{ duration: 0.22, ease: "easeOut" }} className="block h-auto max-h-[56vh] w-auto max-w-[min(360px,32vw)]" />
           )}
         </AnimatePresence>
       </motion.div>

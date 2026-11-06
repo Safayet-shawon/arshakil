@@ -20,13 +20,13 @@ function ProjectCard({ p, index }: { p: Project; index: number }) {
   return (
     <Reveal delay={(index % 2) * 0.08}>
       <Link href={`/architecture/${p.slug}`} data-link className="group block" data-view>
-        <Photo name={coverOf(p)} alt={p.title} ratio="4/3" />
+        <Photo name={coverOf(p)} alt={p.title} ratio="3/2" />
         <div className="mt-3 flex items-baseline justify-between gap-3">
-          <h3 className="font-display text-3xl text-ink"><Hl>{p.title}</Hl></h3>
+          <h3 className="font-display text-[clamp(22px,2vw,28px)] leading-none text-ink"><Hl>{p.title}</Hl></h3>
           <span className="label text-g500">{p.year}</span>
         </div>
         <p className="label mt-1 text-g500"><Hl>{p.type} — {p.location}</Hl></p>
-        <p className="mt-2 max-w-md text-sm leading-relaxed text-g600"><Hl>{p.summary}</Hl></p>
+        <p className="mt-2 line-clamp-2 max-w-md text-[13px] leading-relaxed text-g600"><Hl>{p.summary}</Hl></p>
       </Link>
     </Reveal>
   );
@@ -40,7 +40,7 @@ export default async function ArchitecturePage() {
       <SectionFeatured sector="architecture" />
       <Section>
         <SectionHead index="01" kicker="Kolpo & Studio Karu" title="Selected projects" aside={String(projects.length).padStart(2, "0")} />
-        <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2">{projects.map((p, i) => <ProjectCard key={p.slug} p={p} index={i} />)}</div>
+        <div className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">{projects.map((p, i) => <ProjectCard key={p.slug} p={p} index={i} />)}</div>
       </Section>
       <Albums sector="architecture" />
       <CtaBand text="Planning a house, a library or a small public space? Tell me about it." />
