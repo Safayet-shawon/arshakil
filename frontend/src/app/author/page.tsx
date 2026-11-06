@@ -1,3 +1,4 @@
+import SectionFeatured from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import { getContent } from "@/lib/server/content";
@@ -59,6 +60,7 @@ export default async function AuthorPage() {
   return (
     <>
       <PageHero index="05" title="Author" intro="Books and essays on design, place and a life in motion. Read the first pages free; ask for access to read the whole book." />
+      <SectionFeatured sector="author" />
       <div className="group h-[clamp(160px,28vw,360px)]"><Photo name="author-notebook" alt="Notebook and pen" className="h-full" /></div>
       <Section>
         <SectionHead index="01" kicker="Library" title="Books" aside={String(books.length).padStart(2, "0")} />

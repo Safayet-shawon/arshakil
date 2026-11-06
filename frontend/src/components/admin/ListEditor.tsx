@@ -34,6 +34,19 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
 
   const commit = async (next: Item[]) => { setBusy(true); await save(next); setBusy(false); };
 
+  // order: drag a row (or use the arrows) and drop it where it should be; the site shows items in this order
+  const [drag, setDrag] = useState<number | null>(null);
+  const [over, setOver] = useState<number | null>(null);
+  const move = (from: number, to: number) => {
+    if (from === to || to < 0 || to >= items.length) return;
+    const next = [...items];
+    const [it] = next.splice(from, 1);
+    next.splice(to, 0, it);
+    commit(next);
+  };
+  // among the rows currently shown (a filtered view), the nearest visible neighbour
+  const visible = items.map((x, k) => (show && !show(x) ? -1 : k)).filter((k) => k >= 0);
+
   const submit = async () => {
     if (!editing) return;
     const next = [...items];
@@ -56,7 +69,14 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
       <ul className="mt-6 grid gap-2">
         {items.length === 0 && <li className="rounded-xl bg-paper p-5 text-sm text-g500">Nothing here yet.</li>}
         {items.map((it, i) => (show && !show(it) ? null : (
-          <li key={i} className="flex items-center gap-4 rounded-xl bg-paper p-3 pr-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)]">
+          <li key={i} draggable onDragStart={() => setDrag(i)} onDragOver={(e) => { e.preventDefault(); if (over !== i) setOver(i); }}
+            onDrop={(e) => { e.preventDefault(); if (drag !== null) move(drag, i); setDrag(null); setOver(null); }} onDragEnd={() => { setDrag(null); setOver(null); }}
+            className={`flex items-center gap-3 rounded-xl bg-paper p-3 pr-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)] transition-opacity ${drag === i ? "opacity-40" : ""} ${over === i && drag !== null && drag !== i ? "ring-2 ring-accent" : ""}`}>
+            <span className="flex shrink-0 flex-col items-center text-g400">
+              <button aria-label="Move up" disabled={visible.indexOf(i) <= 0} onClick={() => move(i, visible[visible.indexOf(i) - 1])} className="px-1 text-[10px] leading-none hover:text-ink disabled:opacity-25">▲</button>
+              <span title="Drag to reorder" className="cursor-grab select-none text-lg leading-none active:cursor-grabbing">⠿</span>
+              <button aria-label="Move down" disabled={visible.indexOf(i) >= visible.length - 1} onClick={() => move(i, visible[visible.indexOf(i) + 1])} className="px-1 text-[10px] leading-none hover:text-ink disabled:opacity-25">▼</button>
+            </span>
             {def.photo ? (
               typeof it[def.photo] === "string" && it[def.photo]
                 // eslint-disable-next-line @next/next/no-img-element
@@ -68,11 +88,18 @@ export default function ListEditor({ def, content, save, startNew, show, blankPa
               {def.name === "books" && <span className="label text-g500">৳ {String(it.priceBdt)} · {String(it.pages || 0)} pages</span>}
             </span>
             {def.featurable && (
-              <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-g600">
-                <input type="checkbox" className="h-4 w-4 accent-[#f7b500]" checked={!!it.featured}
-                  onChange={() => { const on = !it.featured; const next = items.map((x, k) => (k === i ? { ...x, featured: on } : x)); commit(exclusive(next, next[i])); }} />
-                Featured
-              </label>
+              <span className="flex flex-col gap-1 text-[11px] font-bold uppercase tracking-[0.08em] text-g600">
+                <label className="flex items-center gap-1.5" title="Shows in the home page's Selected work (one per section)">
+                  <input type="checkbox" className="h-4 w-4 accent-[#f7b500]" checked={!!it.featured}
+                    onChange={() => { const on = !it.featured; const next = items.map((x, k) => (k === i ? { ...x, featured: on } : x)); commit(exclusive(next, next[i])); }} />
+                  Front page
+                </label>
+                <label className="flex items-center gap-1.5" title="Shows in the carousel at the top of its own section">
+                  <input type="checkbox" className="h-4 w-4 accent-[#f7b500]" checked={!!it.featuredSection}
+                    onChange={() => commit(items.map((x, k) => (k === i ? { ...x, featuredSection: !x.featuredSection } : x)))} />
+                  Section
+                </label>
+              </span>
             )}
             <button onClick={() => setEditing({ index: i, item: def.prepare ? def.prepare({ ...it }, content) : { ...it } })} className="label text-g600 hover:text-accent-d">Edit</button>
             <button onClick={() => { if (confirm(`Delete "${def.title(it)}"?`)) commit(items.filter((_, k) => k !== i)); }} className="label text-g500 hover:text-ink">Delete</button>

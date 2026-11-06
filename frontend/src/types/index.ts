@@ -5,7 +5,8 @@ export interface Field { slug: string; title: string; href: string; blurb: strin
 export interface Social { label: string; href: string; icon: string; handle: string }
 
 /** `featured` items are listed in the home page's "Selected work". `photo` is a /photos name or an uploaded /api/media path. */
-interface Featurable { featured?: boolean }
+/** `featured`: one per section, shown in the home page's Selected work. `featuredSection`: any number, shown as a carousel at the top of its own section. */
+interface Featurable { featured?: boolean; featuredSection?: boolean }
 /** Extra pictures and one short video (an uploaded file and/or a YouTube id) shown on an item's own page. */
 export interface Media { photos?: string[]; video?: string; videoPoster?: string; videoThumb?: boolean; youtubeId?: string }
 export interface Project extends Featurable, Media { slug: string; title: string; year: string; location: string; type: string; summary: string; photo: string }

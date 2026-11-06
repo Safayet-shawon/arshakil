@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { photoSrc } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import type { Photo } from "@/types";
+import Lightbox from "./Lightbox";
 
 /**
  * Photos of one album with a simple lightbox (click, arrow keys, Esc).
@@ -11,18 +12,8 @@ import type { Photo } from "@/types";
 export default function Gallery({ items, layout = "masonry" }: { items: Photo[]; layout?: "mosaic" | "masonry" }) {
   const [open, setOpen] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (open === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(null);
-      if (e.key === "ArrowRight") setOpen((o) => (o === null ? o : (o + 1) % items.length));
-      if (e.key === "ArrowLeft") setOpen((o) => (o === null ? o : (o - 1 + items.length) % items.length));
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, items.length]);
+  const lightItems = useMemo(() => items.map((g) => ({ src: photoSrc(g.photo), title: g.title, kicker: g.category, description: g.description })), [items]);
 
-  const shown = open !== null ? items[open] : null;
   const mosaic = layout === "mosaic";
   const big = mosaic && items.length >= 3;
   // with one big frame, the last row is filled edge to edge: 4 frames -> the last one spans 3 columns, 5 -> 2
@@ -47,20 +38,7 @@ export default function Gallery({ items, layout = "masonry" }: { items: Photo[];
         ? <div className={cn("grid auto-rows-[clamp(120px,19vw,260px)] gap-3", cols)}>{items.map(tile)}</div>
         : <div className="columns-2 gap-3 md:columns-3 xl:columns-4">{items.map(tile)}</div>}
 
-      {shown && (
-        <div className="fixed inset-0 z-[80] flex flex-col items-center justify-center gap-4 bg-ink/95 p-4" onClick={() => setOpen(null)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photoSrc(shown.photo)} alt={shown.title} className="max-h-[74vh] max-w-[92vw] object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
-          <div className="max-w-xl text-center" onClick={(e) => e.stopPropagation()}>
-            <div className="label text-accent">{shown.category} · {String(open! + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}</div>
-            <div className="font-display text-3xl text-g50">{shown.title}</div>
-            {shown.description && <p className="mt-1 text-sm leading-relaxed text-g300">{shown.description}</p>}
-          </div>
-          <button data-link aria-label="Close" onClick={() => setOpen(null)} className="absolute right-5 top-5 rounded-full border border-white/30 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-g50 hover:border-accent hover:text-accent">Close</button>
-          <button data-link aria-label="Previous" onClick={(e) => { e.stopPropagation(); setOpen((open! - 1 + items.length) % items.length); }} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-white/30 px-4 py-3 text-g50 hover:border-accent hover:text-accent">←</button>
-          <button data-link aria-label="Next" onClick={(e) => { e.stopPropagation(); setOpen((open! + 1) % items.length); }} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/30 px-4 py-3 text-g50 hover:border-accent hover:text-accent">→</button>
-        </div>
-      )}
+      <Lightbox items={lightItems} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />
     </>
   );
 }

@@ -45,7 +45,7 @@ export const lists: ListDef[] = [
       { key: "videoThumb", label: "Use the video as the thumbnail", type: "bool", showIf: (i) => !!i.video && !!i.videoPoster,
         hint: "The video's first picture becomes the thumbnail, and the thumbnail photo above is then counted with the other photos." },
       { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
-      { key: "featured", label: "Featured on the home page", type: "bool" },
+      { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
     ], blank: { title: "", year: "", location: "", type: "", summary: "", photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "", featured: false } },
 
   { name: "gallery", label: "Architectural Photography", singular: "photo", blurb: "Every photo lives in a section (an album). Add one by one here, or use Bulk upload for many at once.",
@@ -55,7 +55,7 @@ export const lists: ListDef[] = [
       { key: "category", label: "Section", type: "select", options: { list: "categories", value: "name", label: "name" } },
       { key: "photo", label: "Photo", type: "image" },
       { key: "description", label: "Description (shown under the photo)", type: "textarea" },
-      { key: "featured", label: "Featured on the home page", type: "bool" },
+      { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
     ], blank: { title: "", category: "", photo: "", description: "", featured: false } },
 
   { name: "categories", label: "Photography sections", singular: "section", blurb: "Add, rename or remove the filter sections of the gallery. Renaming updates the photos in it.",
@@ -67,7 +67,7 @@ export const lists: ListDef[] = [
       { key: "title", label: "Title", type: "text" },
       { key: "group", label: "Group", type: "select", options: { list: "videoGroups", value: "name", label: "name" } },
       { key: "youtubeId", label: "YouTube video id", type: "text", hint: "Its thumbnail is used automatically" },
-      { key: "thumb", label: "Custom thumbnail (optional)", type: "image" }, { key: "featured", label: "Featured on the home page", type: "bool" },
+      { key: "thumb", label: "Custom thumbnail (optional)", type: "image" }, { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
     ], blank: { title: "", group: "", youtubeId: "", thumb: "", featured: false } },
 
   { name: "videoGroups", label: "Video groups", singular: "group", blurb: "Sections of the Content Creation page. Renaming updates the videos in it.",
@@ -86,7 +86,7 @@ export const lists: ListDef[] = [
       { key: "videoThumb", label: "Use the video as the thumbnail", type: "bool", showIf: (i) => !!i.video && !!i.videoPoster,
         hint: "The video's first picture becomes the thumbnail, and the thumbnail photo above is then counted with the other photos." },
       { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
-      { key: "featured", label: "Featured on the home page", type: "bool" },
+      { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
     ], blank: { region: "bangladesh", name: "", country: "Bangladesh", summary: "", ideas: [], cost: "", photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "", featured: false } },
 
   { name: "placePosts", label: "Travel posts", singular: "post", blurb: "Blog posts for a city or country. Write them here or upload a PDF. They appear on that place's page.",
@@ -115,7 +115,7 @@ export const lists: ListDef[] = [
       { key: "content", label: "Book content (what is inside)", type: "textarea", hint: "Chapters or a table of contents" },
       { key: "language", label: "Language", type: "text" }, { key: "year", label: "Year", type: "text" },
       { key: "pdf", label: "Book PDF", type: "pdf" }, { key: "pages", label: "Pages (filled from the PDF)", type: "readonly" },
-      { key: "featured", label: "Featured on the home page", type: "bool" },
+      { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
     ], blank: { title: "", subtitle: "", thumb: "", priceBdt: 300, summary: "", content: "", language: "English", year: "", pdf: "", pages: 0, featured: false } },
 
   { name: "initiatives", label: "Social Work", singular: "initiative", blurb: "Each initiative opens its own page.",
@@ -129,7 +129,7 @@ export const lists: ListDef[] = [
       { key: "videoThumb", label: "Use the video as the thumbnail", type: "bool", showIf: (i) => !!i.video && !!i.videoPoster,
         hint: "The video's first picture becomes the thumbnail, and the thumbnail photo above is then counted with the other photos." },
       { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
-      { key: "featured", label: "Featured on the home page", type: "bool" },
+      { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
     ], blank: { title: "", area: "", blurb: "", points: [], photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "", featured: false } },
 
   { name: "services", label: "Services & Fees", singular: "service", blurb: "The \"Hire me as…\" cards. Custom ones are quoted after a request.",

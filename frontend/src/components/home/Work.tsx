@@ -48,11 +48,12 @@ export default function Work() {
       </Reveal>
 
       <motion.div aria-hidden style={{ x: sx, y: sy }} animate={{ opacity: hover ? 1 : 0, scale: hover ? 1 : 0.9 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="pointer-events-none fixed left-0 top-0 z-[60] aspect-[4/5] w-[min(300px,30vw)] overflow-hidden rounded-md bg-g600 shadow-[0_30px_60px_rgba(0,0,0,0.25)] max-md:hidden">
+        className="pointer-events-none fixed left-0 top-0 z-[60] w-max overflow-hidden rounded-md bg-g600 shadow-[0_30px_60px_rgba(0,0,0,0.25)] max-md:hidden">
         <AnimatePresence initial={false}>
           {hover?.photo && (
-            <motion.img key={hover.photo} src={photoSrc(hover.photo)} alt="" initial={{ opacity: 0, scale: 1.08 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }} className="absolute inset-0 h-full w-full object-cover" />
+            // shown whole, in its own shape: tall, wide or square, nothing is cut off
+            <motion.img key={hover.photo} src={photoSrc(hover.photo)} alt="" initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }} className="block h-auto max-h-[56vh] w-auto max-w-[min(360px,32vw)]" />
           )}
         </AnimatePresence>
       </motion.div>

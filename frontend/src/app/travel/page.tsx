@@ -1,3 +1,4 @@
+import SectionFeatured from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import { getContent } from "@/lib/server/content";
@@ -20,6 +21,7 @@ export default async function TravelPage() {
   return (
     <>
       <PageHero index="04" title="Travel" intro="Choose Bangladesh for its cities, or Abroad for countries. Open one to see what to do there, what it costs, and the posts and videos from it." />
+      <SectionFeatured sector="travel" />
 
       <Section>
         <SectionHead index="01" kicker="Places" title="Where to?" aside={String(places.length).padStart(2, "0")} />

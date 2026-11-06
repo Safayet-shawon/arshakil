@@ -1,3 +1,4 @@
+import SectionFeatured from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -20,6 +21,7 @@ export default async function SocialWorkPage() {
   return (
     <>
       <PageHero index="06" title="Social Work" intro="Design is only useful if it reaches people. Pick an initiative to read more about it." />
+      <SectionFeatured sector="social-work" />
       <div className="group h-[clamp(180px,32vw,420px)]"><Photo name="social-volunteers" alt="Volunteers working together" className="h-full" /></div>
 
       <Section>

@@ -1,3 +1,4 @@
+import { PhotoFeatured } from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,6 +23,7 @@ export default async function PhotographyPage() {
   return (
     <>
       <PageHero index="02" title="Architectural Photography" intro="Buildings, light and the people inside them, one frame at a time. Open an album to see every frame." />
+      <PhotoFeatured />
 
       <Section>
         <SectionHead index="01" kicker="The albums" title="Browse by album" aside={String(albums.length).padStart(2, "0")} />

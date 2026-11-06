@@ -76,18 +76,26 @@ export default function Hero() {
           ))}
         </motion.h1>
 
+        {/* a picture uploaded in the admin panel fills the whole hero */}
+        {custom && (
+          <div className="absolute inset-0 z-[1]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photoSrc(custom)} alt={`Portrait of ${site.name}`} fetchPriority="high" className="block h-full w-full object-cover object-center" />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/20 to-white/60" />
+          </div>
+        )}
+
         {/* portrait — rises last, sits behind the name at reduced opacity */}
-        <motion.div className="absolute left-1/2 top-[39vh] z-[2] h-[92vh] max-md:top-[28vh] max-md:h-[72vh]"
+        {!custom && <motion.div className="absolute left-1/2 top-[39vh] z-[2] h-[92vh] max-md:top-[28vh] max-md:h-[72vh]"
           style={{ aspectRatio: "1176/1338", x: "-50%" }}
           initial={from({ opacity: 0, y: "18vh", filter: "blur(12px)" })}
           animate={entered ? { opacity: 0.62, y: 0, filter: "blur(0px)" } : {}}
           transition={{ duration: 1.7, delay: 1.55, ease, opacity: { duration: 1.2, delay: 1.55 } }}>
           <motion.div style={{ x: px, y: py }} className="h-full w-full">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={custom ? photoSrc(custom) : site.heroImage} alt={`Portrait of ${site.name}`}
-              className={cn("block h-full w-full", custom && "object-cover object-top [mask-image:linear-gradient(to_bottom,#000_62%,transparent)]")} />
+            <img src={site.heroImage} alt={`Portrait of ${site.name}`} className="block h-full w-full" />
           </motion.div>
-        </motion.div>
+        </motion.div>}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[28vh] bg-gradient-to-t from-white from-[4%] to-transparent" />
 
         {/* left: role swipe + intro */}
