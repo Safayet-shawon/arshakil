@@ -60,14 +60,14 @@ export default function Cursor() {
         mx += (p.x - mx) * 0.045; my += (p.y - my) * 0.045;
         if (dot.current) dot.current.style.transform = `translate(${mx}px,${my}px)`;
       }
-      rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16;
+      rx += (mx - rx) * 0.4; ry += (my - ry) * 0.4;
       const t = `translate(${rx}px,${ry}px)`;
       if (ring.current) ring.current.style.transform = t;
       if (label.current) label.current.style.transform = t;
       if (hand.current) hand.current.style.transform = t;
       let px = rx, py = ry;
       pts.forEach((p, i) => {
-        p.x += (px - p.x) * 0.35; p.y += (py - p.y) * 0.35;
+        p.x += (px - p.x) * 0.6; p.y += (py - p.y) * 0.6;
         const el = trail.current[i];
         if (el) el.style.transform = `translate(${p.x}px,${p.y}px) scale(${1 - (i / TRAIL) * 0.6})`;
         px = p.x; py = p.y;
