@@ -150,3 +150,11 @@ body {
 .bot-bolt { animation: bot-bolt 1s infinite; }
 @keyframes bot-bolt { 50% { opacity: .25; } }
 @media (prefers-reduced-motion: reduce) { .bot-blink, .bot-wave, .bot-z, .bot-bolt, .bot-bob, .bot-breathe, .bot-wakelid, .bot-stretchL, .bot-stretchR, .bot-stretchbody, .bot-yawn, .bot-danceL, .bot-danceR, .bot-knockR, .bot-pullL, .bot-pullR, .bot-tok, .bot-sweat, .bot-puff { animation: none; } }
+
+/* loader on phones: plain solid words (the outlined ones look jagged when small), one line each */
+@media (max-width: 767px) {
+  .intro-role { -webkit-text-stroke: 0 !important; font-size: clamp(20px, 6.2vw, 30px) !important; letter-spacing: .01em; white-space: nowrap; }
+  .intro-role[data-s="now"] { color: var(--color-ink) !important; }
+  .intro-role[data-s="done"] { color: var(--color-g400) !important; }
+  .intro-role[data-s="next"] { color: var(--color-g300) !important; }
+}

@@ -37,6 +37,11 @@ export default function Hero() {
   const entered = useIntroDone();
   const { texts } = useSite();
   const custom = texts["@hero"]; // a picture the admin uploaded instead of the original cut-out
+  // how it is laid out, set in the admin panel: "portrait" (the original place, behind the name) or "full" (the whole hero)
+  const full = custom && texts["@hero.mode"] === "full";
+  const num = (k: string, d: number) => { const n = Number(texts[k]); return texts[k] !== undefined && texts[k] !== "" && Number.isFinite(n) ? n : d; };
+  const hx = num("@hero.x", 50), hy = num("@hero.y", full ? 30 : 0), hz = num("@hero.zoom", 100);
+  const framing = { objectPosition: `${hx}% ${hy}%`, transform: `scale(${hz / 100})`, transformOrigin: `${hx}% ${hy}%` };
   const [skipped, setSkipped] = useState(false);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -64,7 +69,7 @@ export default function Hero() {
         <motion.h1 aria-label={site.fullName} style={{ x: sx, y: sy }}
           className="font-display pointer-events-none absolute inset-x-0 top-[12vh] z-[3] select-none text-center leading-[0.9] whitespace-nowrap md:top-[13vh]">
           {[row1, row2].map((row, r) => (
-            <span key={r} className="block overflow-hidden py-[.05em] text-[clamp(34px,min(12.4vw,18vh),230px)]">
+            <span key={r} className="block overflow-hidden py-[.05em] text-[clamp(30px,min(10.4vw,15vh),190px)]">
               {row.map((w, i) => (
                 <span key={w} className={i ? "ml-[.22em]" : ""} aria-hidden>
                   <Word skipped={skipped} delay={0.45 + r * 0.25 + i * 0.15} outline={r === 1 && i === 0} fade={i === 1} dot={w === "AR."}>
@@ -76,18 +81,28 @@ export default function Hero() {
           ))}
         </motion.h1>
 
+        {/* a picture uploaded in the admin panel fills the whole hero */}
+        {full && (
+          <div className="absolute inset-0 z-[1] overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photoSrc(custom)} alt={`Portrait of ${site.name}`} fetchPriority="high" style={framing} className="block h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/20 to-white/60" />
+          </div>
+        )}
+
         {/* portrait — rises last, sits behind the name at reduced opacity */}
-        <motion.div className="absolute left-1/2 top-[39vh] z-[2] h-[92vh] max-md:top-[28vh] max-md:h-[72vh]"
+        {!full && <motion.div className="absolute left-1/2 top-[39vh] z-[2] h-[92vh] max-md:top-[28vh] max-md:h-[72vh]"
           style={{ aspectRatio: "1176/1338", x: "-50%" }}
           initial={from({ opacity: 0, y: "18vh", filter: "blur(12px)" })}
           animate={entered ? { opacity: 0.62, y: 0, filter: "blur(0px)" } : {}}
           transition={{ duration: 1.7, delay: 1.55, ease, opacity: { duration: 1.2, delay: 1.55 } }}>
           <motion.div style={{ x: px, y: py }} className="h-full w-full">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={custom ? photoSrc(custom) : site.heroImage} alt={`Portrait of ${site.name}`}
-              className={cn("block h-full w-full", custom && "object-cover object-top [mask-image:linear-gradient(to_bottom,#000_62%,transparent)]")} />
+            {custom
+              ? <img src={photoSrc(custom)} alt={`Portrait of ${site.name}`} fetchPriority="high" style={framing} className="block h-full w-full object-cover [mask-image:linear-gradient(to_bottom,#000_62%,transparent)]" />
+              : <img src={site.heroImage} alt={`Portrait of ${site.name}`} className="block h-full w-full" />}
           </motion.div>
-        </motion.div>
+        </motion.div>}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[28vh] bg-gradient-to-t from-white from-[4%] to-transparent" />
 
         {/* left: role swipe + intro */}

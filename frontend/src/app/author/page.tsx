@@ -1,3 +1,4 @@
+import SectionFeatured from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import { getContent } from "@/lib/server/content";
@@ -27,7 +28,7 @@ function BookRow({ b, n }: { b: Book; n: number }) {
 
         <div>
           <div className="label text-accent-d">Book {String(n + 1).padStart(2, "0")} · {b.year}</div>
-          <h3 className="font-display mt-1 text-[clamp(34px,4vw,60px)] leading-[0.95] text-ink"><Hl>{b.title}</Hl></h3>
+          <h3 className="font-display mt-1 text-[clamp(28px,3.2vw,46px)] leading-[0.95] text-ink"><Hl>{b.title}</Hl></h3>
           <p className="mt-1 text-g500"><Hl>{b.subtitle}</Hl></p>
           <p className="mt-4 max-w-lg text-sm leading-[1.7] text-g600"><Hl>{b.summary}</Hl></p>
           {inside.length > 0 && (
@@ -59,7 +60,8 @@ export default async function AuthorPage() {
   return (
     <>
       <PageHero index="05" title="Author" intro="Books and essays on design, place and a life in motion. Read the first pages free; ask for access to read the whole book." />
-      <div className="group h-[clamp(160px,28vw,360px)]"><Photo name="author-notebook" alt="Notebook and pen" className="h-full" /></div>
+      <SectionFeatured sector="author" />
+      <div className="group h-[clamp(140px,22vw,280px)]"><Photo name="author-notebook" alt="Notebook and pen" className="h-full" /></div>
       <Section>
         <SectionHead index="01" kicker="Library" title="Books" aside={String(books.length).padStart(2, "0")} />
         {books.map((b, i) => <BookRow key={b.slug} b={b} n={i} />)}

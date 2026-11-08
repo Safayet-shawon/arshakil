@@ -27,7 +27,7 @@ export default function AboutPage() {
           <Reveal delay={0.1}>
             <Link href="/" data-link className="label text-g500 transition-colors hover:text-accent-d">← Home</Link>
             <div className="label mt-6 text-g500"><b className="text-accent-d">[ 00 ]</b> <Hl>— About me</Hl></div>
-            <h1 className="font-display text-[clamp(44px,8vw,120px)] leading-[0.9] text-ink"><Hl>{site.fullName}</Hl></h1>
+            <h1 className="font-display text-[clamp(38px,6vw,92px)] leading-[0.9] text-ink"><Hl>{site.fullName}</Hl></h1>
             <div className="mt-5 grid max-w-xl gap-4 text-[15px] leading-[1.7] text-g600">
               {about.map((p) => <p key={p}><T>{p}</T></p>)}
             </div>

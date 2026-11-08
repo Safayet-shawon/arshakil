@@ -35,7 +35,7 @@ export default async function Albums({ sector }: { sector: Sector }) {
                   </div>
                 </div>
                 <div className="mt-5 flex items-baseline justify-between gap-3">
-                  <h3 className="font-display text-[clamp(26px,2.6vw,36px)] leading-none text-ink transition-colors group-hover:text-accent-d">{a.name}</h3>
+                  <h3 className="font-display text-[clamp(22px,2.1vw,30px)] leading-none text-ink transition-colors group-hover:text-accent-d">{a.name}</h3>
                   <span className="label whitespace-nowrap text-g500">{a.photos.length} photo{a.photos.length === 1 ? "" : "s"}</span>
                 </div>
                 {a.description && <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-g600">{a.description}</p>}

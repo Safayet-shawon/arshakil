@@ -1,3 +1,4 @@
+import SectionFeatured from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import { socials } from "@/data/site";
@@ -19,6 +20,7 @@ export default async function ContentPage() {
   return (
     <>
       <PageHero index="03" title="Content Creation" intro="Videos, vlogs and stories: on YouTube first, and across Facebook, TikTok and Instagram." />
+      <SectionFeatured sector="content-creation" />
 
       <Section>
         <SectionHead index="01" kicker="Channels" title="Follow along" aside="04" />

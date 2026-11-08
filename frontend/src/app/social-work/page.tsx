@@ -1,3 +1,4 @@
+import SectionFeatured from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -20,7 +21,8 @@ export default async function SocialWorkPage() {
   return (
     <>
       <PageHero index="06" title="Social Work" intro="Design is only useful if it reaches people. Pick an initiative to read more about it." />
-      <div className="group h-[clamp(180px,32vw,420px)]"><Photo name="social-volunteers" alt="Volunteers working together" className="h-full" /></div>
+      <SectionFeatured sector="social-work" />
+      <div className="group h-[clamp(150px,24vw,320px)]"><Photo name="social-volunteers" alt="Volunteers working together" className="h-full" /></div>
 
       <Section>
         <SectionHead index="01" kicker="What we do" title="Initiatives" aside={String(initiatives.length).padStart(2, "0")} />
@@ -40,7 +42,7 @@ export default async function SocialWorkPage() {
 
       <Section className="bg-g200 text-center">
         <Reveal>
-          <h2 className="font-display text-[clamp(32px,5vw,72px)] leading-[0.95] text-ink"><Hl>Want to volunteer, donate or partner?</Hl></h2>
+          <h2 className="font-display text-[clamp(28px,3.8vw,54px)] leading-[0.95] text-ink"><Hl>Want to volunteer, donate or partner?</Hl></h2>
           <p className="mx-auto my-4 max-w-md text-sm leading-relaxed text-g600"><Hl>Every project starts with a conversation. Say hello and we will find a way to help together.</Hl></p>
           <ButtonLink href="/#contact">Get involved</ButtonLink>
         </Reveal>

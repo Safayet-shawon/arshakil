@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { photoSrc } from "@/lib/media";
 import { site } from "@/data/site";
 import { uploadImage } from "./upload";
@@ -12,8 +12,14 @@ const PAGES: [string, string][] = [
 /** The home page's main picture is kept as a saved "text" under this key (see components/home/Hero.tsx). */
 export const HERO_KEY = "@hero";
 
-const saveHero = (value: string) =>
-  fetch("/api/admin/text", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ key: HERO_KEY, value }) });
+const saveKey = (key: string, value: string) =>
+  fetch("/api/admin/text", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ key, value }) });
+const saveHero = (value: string) => saveKey(HERO_KEY, value);
+
+/** How the hero picture sits: where it is cut (x, y in %) and how close it is (zoom in %). */
+type Frame = { mode: "portrait" | "full"; x: number; y: number; zoom: number };
+const DEFAULT: Record<Frame["mode"], Omit<Frame, "mode">> = { portrait: { x: 50, y: 0, zoom: 100 }, full: { x: 50, y: 30, zoom: 100 } };
+const clamp = (n: number, a: number, b: number) => Math.min(b, Math.max(a, n));
 
 /**
  * The site's pages inside the panel. Text turns editable (dashed) only in here: the switch is a cookie that is on
@@ -25,6 +31,24 @@ export default function WebsiteEditor({ texts }: { texts: Record<string, string>
   const [hero, setHero] = useState(texts[HERO_KEY] ?? "");
   const [busy, setBusy] = useState("");
   const [reload, setReload] = useState(0);
+  const num = (k: string, d: number) => { const n = Number(texts[k]); return texts[k] !== undefined && texts[k] !== "" && Number.isFinite(n) ? n : d; };
+  const startMode: Frame["mode"] = texts["@hero.mode"] === "full" ? "full" : "portrait";
+  const [frame, setFrame] = useState<Frame>({ mode: startMode, x: num("@hero.x", DEFAULT[startMode].x), y: num("@hero.y", DEFAULT[startMode].y), zoom: num("@hero.zoom", 100) });
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const drag = useRef<{ x: number; y: number; fx: number; fy: number } | null>(null);
+
+  /** Change how the picture sits: the preview moves at once, the site is updated a moment after you stop. */
+  const setLook = (patch: Partial<Frame>) => {
+    const f = { ...frame, ...patch };
+    setFrame(f);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(async () => {
+      setBusy("Saving…");
+      await Promise.all([saveKey("@hero.mode", f.mode), saveKey("@hero.x", String(Math.round(f.x))), saveKey("@hero.y", String(Math.round(f.y))), saveKey("@hero.zoom", String(Math.round(f.zoom)))]);
+      setReload((n) => n + 1); setBusy("");
+    }, 450);
+  };
+  const pickMode = (mode: Frame["mode"]) => setLook({ mode, ...DEFAULT[mode] });
 
   useEffect(() => {
     document.cookie = "ar_edit=1; path=/";
@@ -47,19 +71,69 @@ export default function WebsiteEditor({ texts }: { texts: Record<string, string>
     <div>
       <h2 className="font-display text-4xl text-ink">Website</h2>
 
-      <div className="mt-5 flex flex-wrap items-center gap-4 rounded-2xl bg-paper p-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={hero ? photoSrc(hero) : site.heroImage} alt="" className="h-20 w-16 rounded-lg bg-g200 object-cover object-top" />
-        <div className="min-w-[200px] flex-1">
-          <div className="text-sm font-bold text-ink">Hero picture</div>
-          <div className="text-xs text-g600">The picture of you at the top of the home page.</div>
+      <div className="mt-5 rounded-2xl bg-paper p-4 shadow-[0_4px_16px_rgba(77,79,83,0.06)]">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="min-w-[200px] flex-1">
+            <div className="text-sm font-bold text-ink">Hero picture</div>
+            <div className="text-xs text-g600">The picture at the top of the home page. Upload one, then place it exactly where you like.</div>
+          </div>
+          <label className="cursor-pointer rounded-full bg-accent px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-ink hover:bg-accent-soft">
+            {hero ? "Change picture" : "Upload picture"}
+            <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; change(f); }} />
+          </label>
+          {hero && <button onClick={reset} className="label text-g500 hover:text-ink">Use the original</button>}
+          {busy && <span className="text-xs text-accent-d">{busy}</span>}
         </div>
-        <label className="cursor-pointer rounded-full bg-accent px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-ink hover:bg-accent-soft">
-          Change hero picture
-          <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; change(f); }} />
-        </label>
-        {hero && <button onClick={reset} className="label text-g500 hover:text-ink">Use the original</button>}
-        {busy && <span className="text-xs text-accent-d">{busy}</span>}
+
+        {hero && (
+          <div className="mt-5 grid gap-5 md:grid-cols-[minmax(0,420px)_1fr]">
+            {/* a small copy of the hero: drag the picture to move it */}
+            <div>
+              <div data-grab onPointerDown={(e) => { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); drag.current = { x: e.clientX, y: e.clientY, fx: frame.x, fy: frame.y }; }}
+                onPointerMove={(e) => {
+                  const d = drag.current; if (!d) return;
+                  const w = (e.currentTarget as HTMLElement).clientWidth, h = (e.currentTarget as HTMLElement).clientHeight;
+                  setLook({ x: clamp(d.fx - ((e.clientX - d.x) / w) * 100, 0, 100), y: clamp(d.fy - ((e.clientY - d.y) / h) * 100, 0, 100) });
+                }}
+                onPointerUp={() => { drag.current = null; }} style={{ touchAction: "none" }}
+                className="relative aspect-[16/10] cursor-grab select-none overflow-hidden rounded-xl border border-g300 bg-gradient-to-b from-white to-g100 active:cursor-grabbing">
+                {frame.mode === "full" ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photoSrc(hero)} alt="" draggable={false} className="pointer-events-none absolute inset-0 h-full w-full object-cover" style={{ objectPosition: `${frame.x}% ${frame.y}%`, transform: `scale(${frame.zoom / 100})`, transformOrigin: `${frame.x}% ${frame.y}%` }} />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/55 via-white/20 to-white/60" />
+                  </>
+                ) : (
+                  <div className="pointer-events-none absolute left-1/2 top-[28%] h-[100%] -translate-x-1/2 opacity-70" style={{ aspectRatio: "1176/1338" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photoSrc(hero)} alt="" draggable={false} className="h-full w-full object-cover [mask-image:linear-gradient(to_bottom,#000_62%,transparent)]" style={{ objectPosition: `${frame.x}% ${frame.y}%`, transform: `scale(${frame.zoom / 100})`, transformOrigin: `${frame.x}% ${frame.y}%` }} />
+                  </div>
+                )}
+                <div className="font-display pointer-events-none absolute inset-x-0 top-[10%] text-center text-[clamp(18px,3vw,32px)] leading-[0.9] text-ink">AR. SHAKHAOUTH<br />HOSSAIN SHAKIL</div>
+              </div>
+              <p className="mt-2 text-[11px] text-g500">Drag the picture to move it. This is a small copy of the home page top.</p>
+            </div>
+
+            <div className="grid content-start gap-4">
+              <div>
+                <div className="label mb-2 text-g500">How it sits</div>
+                <div className="flex flex-wrap gap-2">
+                  {([["portrait", "Portrait (as before)"], ["full", "Full background"]] as const).map(([m, label]) => (
+                    <button key={m} onClick={() => pickMode(m)}
+                      className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] transition-colors ${frame.mode === m ? "bg-ink text-paper" : "bg-g100 text-g600 hover:text-ink"}`}>{label}</button>
+                  ))}
+                </div>
+              </div>
+              {([["x", "Left ↔ right", 0, 100], ["y", "Up ↕ down", 0, 100], ["zoom", "Zoom", 100, 250]] as const).map(([k, label, min, max]) => (
+                <label key={k} className="grid gap-1 text-xs text-g600">
+                  <span className="flex justify-between"><b className="text-ink">{label}</b><span>{Math.round(frame[k])}{k === "zoom" ? "%" : ""}</span></span>
+                  <input type="range" min={min} max={max} value={frame[k]} onChange={(e) => setLook({ [k]: Number(e.target.value) })} className="w-full accent-[#f7b500]" />
+                </label>
+              ))}
+              <button onClick={() => setLook({ ...DEFAULT[frame.mode] })} className="label justify-self-start text-g500 hover:text-ink">Reset position</button>
+            </div>
+          </div>
+        )}
       </div>
 
       <p className="mt-6 max-w-xl text-sm text-g600">Choose a page. Click any dashed text, change it and click away: it saves and shows on the live site straight away.</p>

@@ -86,11 +86,11 @@ export default function Intro() {
           <i className={cn(corner, "right-5 top-16 border-r-2 border-t-2 md:right-[clamp(20px,3.4vw,48px)]")} />
           <i className={cn(corner, "bottom-16 left-5 border-b-2 border-l-2 md:left-[clamp(20px,3.4vw,48px)]")} />
           <i className={cn(corner, "bottom-16 right-5 border-b-2 border-r-2 md:right-[clamp(20px,3.4vw,48px)]")} />
-          <span className="label absolute bottom-[22px] left-5 text-g500 md:left-[clamp(20px,3.4vw,48px)]">Click anywhere to skip</span>
+          <span className="label absolute bottom-[22px] left-5 text-g500 md:left-[clamp(20px,3.4vw,48px)]"><span className="md:hidden">Tap to skip</span><span className="max-md:hidden">Click anywhere to skip</span></span>
 
           <ul className="absolute left-[calc(clamp(20px,3.4vw,48px)+30px)] top-1/2 grid -translate-y-1/2 gap-[clamp(4px,1vh,12px)] md:left-[calc(clamp(20px,3.4vw,48px)+46px)]">
             {introRoles.map((r, i) => (
-              <li key={r} className={cn("font-display leading-none transition-all duration-500", size,
+              <li key={r} data-s={i === role ? "now" : i < role ? "done" : "next"} className={cn("intro-role font-display leading-none transition-all duration-500", size,
                 i === role ? "translate-x-[18px] text-ink [-webkit-text-stroke:1.5px_var(--color-ink)]"
                   : i < role ? "text-g400 [-webkit-text-stroke:1.5px_var(--color-g400)]"
                     : "text-outline-soft")}>

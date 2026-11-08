@@ -12,7 +12,7 @@ export default function Contact() {
       <Reveal><div className="label mb-5 text-g500"><b className="text-accent-d">[ 05 ]</b> <Hl>— {site.location} · Let's talk</Hl></div></Reveal>
       <Reveal>
         {/* the apostrophe is a plain mustard glyph with no outline, so it never doubles up */}
-        <h2 className="font-display text-[clamp(64px,14vw,220px)] leading-[0.88] text-ink">
+        <h2 className="font-display text-[clamp(48px,10vw,150px)] leading-[0.88] text-ink">
           <span className="text-outline">LET<span className="mx-[0.02em] text-accent [-webkit-text-stroke:0]">&apos;</span>S</span> TALK<span className="text-accent">.</span>
         </h2>
       </Reveal>
