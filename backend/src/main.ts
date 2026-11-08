@@ -1,3 +1,4 @@
+import "dotenv/config";
 // Load backend/.env first, before anything reads process.env. Variables already set by the shell, Docker or systemd win.
 import "dotenv/config";
 import "reflect-metadata";
