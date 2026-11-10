@@ -1,7 +1,8 @@
 import { site } from "@/data/site";
-import { addMessage } from "@/lib/server/messages";
+import { fieldFromService, WORK_FIELDS, type WorkField } from "@/lib/inquiry";
+import { apiMode, createInquiry, legacyAdd } from "@/lib/server/inbox";
 
-/** At most 5 messages per visitor address every 10 minutes. */
+/** Used only in fallback mode (no INQUIRIES_API_URL): at most 5 messages per visitor address every 10 minutes. */
 const hits = new Map<string, number[]>();
 const WINDOW = 10 * 60_000;
 const LIMIT = 5;
@@ -10,14 +11,21 @@ const clean = (v: unknown, max: number) => String(v ?? "").replace(/[\u0000-\u00
 
 /**
  * The contact form. A message sent after choosing "Hire me as ..." is a hire request; anything else is a general message.
- * It is stored privately (admin panel -> Messages, with a red count of the unread ones) and, when RESEND_API_KEY is set,
- * also emailed to CONTACT_TO with the sender's email as reply-to, so replying in the mailbox answers the visitor.
+ * Each one is tagged with a work field (architecture, photography, ...) so the owner can filter the feed in the admin panel.
+ *
+ * - INQUIRIES_API_URL set: forwarded to the NestJS backend, which stores it in PostgreSQL, rate-limits it and emails the owner.
+ * - not set: stored in the private Blob file (and emailed through Resend when RESEND_API_KEY is set), as before.
  */
 export async function POST(req: Request) {
   const ip = (req.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW);
-  if (recent.length >= LIMIT) return Response.json({ message: "Too many messages. Please try again in a few minutes, or email me directly." }, { status: 429 });
+
+  if (!apiMode()) {
+    const now = Date.now();
+    const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW);
+    if (recent.length >= LIMIT) return Response.json({ message: "Too many messages. Please try again in a few minutes, or email me directly." }, { status: 429 });
+    recent.push(now);
+    hits.set(ip, recent);
+  }
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return Response.json({ message: "Something went wrong. Please try again." }, { status: 400 }); }
@@ -30,18 +38,22 @@ export async function POST(req: Request) {
   const phone = clean(body.phone, 30) || undefined;
   const message = clean(body.message, 2000);
   const service = clean(body.service, 80) || undefined;
+  const asked = clean(body.field, 32);
+  const field: WorkField = (WORK_FIELDS as readonly string[]).includes(asked) ? (asked as WorkField) : fieldFromService(service);
   if (name.length < 2) return Response.json({ message: "Please enter your name." }, { status: 400 });
   if (!email && !phone) return Response.json({ message: "Please give an email address or a phone number so I can reply." }, { status: 400 });
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return Response.json({ message: "Please enter a valid email address." }, { status: 400 });
   if (phone && !/^\+?[\d\s\-()]{6,}$/.test(phone)) return Response.json({ message: "Please enter a valid phone number." }, { status: 400 });
   if (message.length < 10) return Response.json({ message: "Please write a little more (at least 10 characters)." }, { status: 400 });
 
-  recent.push(now);
-  hits.set(ip, recent);
+  if (apiMode()) {
+    const r = await createInquiry({ name, email, phone, message, service, field }, ip);
+    return Response.json({ message: r.message }, { status: r.status });
+  }
 
   const kind = service ? "hire" : "general";
   try {
-    await addMessage({ kind, name, email, phone, message, service });
+    await legacyAdd({ kind, name, email, phone, message, service });
   } catch {
     return Response.json({ message: `Could not save your message. Please email me at ${site.email}.` }, { status: 500 });
   }

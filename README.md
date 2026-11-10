@@ -6,7 +6,7 @@ Portfolio website for **AR. Shakhaouth Hossain Shakil**: architect, photographer
 
 ```
 frontend/   Next.js (App Router) + TypeScript + Tailwind v4 + Framer Motion + Lenis
-backend/    NestJS + TypeScript + Redis   (content API + contact form)
+backend/    NestJS + TypeScript + PostgreSQL (TypeORM) + Redis   (content API + inquiries inbox)
 ```
 
 The two apps are independent: each has its own `package.json`, `node_modules` and scripts.
@@ -14,18 +14,18 @@ The two apps are independent: each has its own `package.json`, `node_modules` an
 ## Run it
 
 ```bash
-# 0. Redis (optional, powers the contact-form rate limit; needs Docker)
-docker compose up -d redis
+# 0. Databases (needs Docker): PostgreSQL stores the inquiries, Redis powers the contact-form rate limit (optional)
+docker compose up -d postgres redis
 
 # 1. backend  (http://localhost:4000/api)
 cd backend
-cp .env.example .env        # REDIS_URL=redis://localhost:6379
+cp .env.example .env        # set ADMIN_API_KEY (openssl rand -hex 32); DATABASE_URL already matches docker-compose
 npm install
-npm run start:dev
+npm run start:dev           # dev: the inquiries table is created automatically
 
 # 2. frontend (http://localhost:3000)
 cd frontend
-cp .env.example .env.local
+cp .env.example .env.local  # use the SAME ADMIN_API_KEY; set ADMIN_SECRET / ADMIN_USER / ADMIN_PASS for the admin login
 npm install
 npm run dev
 ```
@@ -77,15 +77,46 @@ Content lives in `frontend/src/data/` (`site.ts`, `content.ts`). Photos are in `
 
 Tokens are in `frontend/src/app/globals.css` (`@theme`).
 
+## Inquiries: hire requests and messages
+
+Everything sent through the website's contact form becomes one row in the `inquiries` table (PostgreSQL), so the owner has a
+permanent history he can search later. Nothing is trimmed or capped.
+
+```
+visitor ─► Next.js /api/contact ─► NestJS POST /api/inquiries ─► PostgreSQL (the record)
+                                                            └──► email to the owner (Resend), replies go to the visitor
+admin   ─► /ar6061 → Inquiries ─► Next.js /api/admin/messages* (checks the admin login) ─► NestJS /api/admin/inquiries* (x-admin-key)
+```
+
+- **Tags.** Each inquiry has a *kind* (`hire` when the visitor picked "Hire me as ...", otherwise `general`) and a *work field*
+  (`architecture`, `photography`, `content-creation`, `consulting`, `other`), taken from the service picked. The admin filters by field.
+- **Journal.** The admin sets a *status* (`new` → `read` → `replied` → `archived`) and writes a private *note* on each one.
+  `new` ones show as a red count. Search covers name, email, phone, message, service and notes; dates can be filtered too.
+- **Email.** With `RESEND_API_KEY` + `CONTACT_TO` set in `backend/.env`, each inquiry is also emailed to the owner (reply-to = the visitor).
+  The row is saved first; if the email fails, the row records `email_status = failed` and the admin sees a note on the card.
+- **Fallback.** If the frontend has no `INQUIRIES_API_URL` it keeps using the old private Blob file (statuses and notes work there too),
+  so nothing breaks before the backend is live. Once it is, the admin shows an **Import** button for the older messages (safe to repeat).
+- **Schema.** In production (`NODE_ENV=production`) tables come only from migrations in `backend/src/database/migrations`, run on start
+  (PostgreSQL 13+). In development TypeORM builds the table from `inquiry.entity.ts`. Add a migration when the entity changes.
+- **The work-field list** lives in `backend/src/inquiries/inquiry.constants.ts` and `frontend/src/lib/inquiry.ts`: keep them in step.
+
 ## API (`backend`, prefix `/api`)
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/health` | liveness + Redis status |
+| GET | `/health` | liveness: database + Redis status |
 | GET | `/content/site` · `/content/fields` · `/content/projects` · `/content/projects/:slug` · `/content/services` | placeholder content |
-| POST | `/contact` | `{ name, email, message }`, validated, max 5 per IP per minute (Redis), appended to `backend/storage/messages.jsonl` (gitignored) |
+| POST | `/inquiries` (alias `/contact`) | `{ name, email?, phone?, message, service?, field?, website? }`: at least one of email / phone; `website` is a bot trap. Max 5 per IP per minute (Redis) |
+| GET | `/admin/inquiries` | `?field&kind&status&q&from&to&page&pageSize`, newest first → `{ items, total, page, pageSize }` |
+| GET | `/admin/inquiries/summary` | totals and unread counts per field and kind |
+| PATCH | `/admin/inquiries/:id` | `{ status?, notes? }` |
+| POST | `/admin/inquiries/mark-all-read` | `{ field?, kind? }` |
+| POST | `/admin/inquiries/import` | one-time import of messages from the old Blob store |
+| DELETE | `/admin/inquiries/:id` | |
 
-`FRONTEND_URL` (comma-separated) controls CORS. The frontend reads `NEXT_PUBLIC_API_URL` (default `http://localhost:4000/api`).
+`/admin/*` needs the `x-admin-key` header (`ADMIN_API_KEY`). Only the Next.js server holds that key, after checking the admin's login;
+the browser never calls these. With the key unset, every admin call is refused. `FRONTEND_URL` (comma-separated) controls CORS.
+Behind nginx set `TRUST_PROXY=1` so the rate limit sees the visitor's IP.
 
 ## Notes
 

@@ -1,6 +1,8 @@
 import type { ContactPayload } from "@/types";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+// The form always posts to this site's own /api/contact. That route forwards to the NestJS API (INQUIRIES_API_URL),
+// so the browser never talks to the backend directly (no CORS, and the visitor's IP is passed on for the rate limit).
+const API = "/api";
 
 export async function sendContact(payload: ContactPayload): Promise<{ ok: boolean; message: string }> {
   try {

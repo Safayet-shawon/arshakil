@@ -31,12 +31,25 @@ jobs:
       - run: npm run build
 
   backend:
-    name: Backend (type-check + build + Redis smoke test)
+    name: Backend (type-check + build + Postgres/Redis smoke test)
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
     services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: arshakil
+          POSTGRES_PASSWORD: arshakil_ci
+          POSTGRES_DB: arshakil
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U arshakil -d arshakil"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
       redis:
         image: redis:7-alpine
         ports:
@@ -56,10 +69,14 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
-      - name: Smoke test (API + Redis rate limit)
+      - name: Smoke test (migration, inquiries, admin feed, Redis rate limit)
         env:
+          NODE_ENV: production # tables come from the migration, as on the server
           PORT: "4000"
           REDIS_URL: redis://localhost:6379
+          DATABASE_URL: postgres://arshakil:arshakil_ci@localhost:5432/arshakil
+          ADMIN_API_KEY: ci-admin-key-0123456789abcdef0123
+          TRUST_PROXY: "1" # lets the test pretend to be different visitors with X-Forwarded-For
         run: |
           node dist/main &
           for i in $(seq 1 30); do curl -sf localhost:4000/api/health >/dev/null && break; sleep 1; done
@@ -67,12 +84,28 @@ jobs:
           echo "health:"
           for i in $(seq 1 15); do curl -sf localhost:4000/api/health | grep -q '"redis":"up"' && break; sleep 1; done
           curl -sf localhost:4000/api/health | tee /dev/stderr | grep '"redis":"up"'
+          curl -sf localhost:4000/api/health | grep '"database":"up"'
           echo; echo "content:"; curl -sf localhost:4000/api/content/site | grep 'Shakhaouth'
 
+          J='Content-Type: application/json'; K='x-admin-key: ci-admin-key-0123456789abcdef0123'
+          echo; echo "inquiry is stored and tagged:"
+          curl -sf -X POST localhost:4000/api/inquiries -H "$J" -H 'X-Forwarded-For: 10.1.1.1' \
+            -d '{"name":"CI Client","email":"ci@example.com","message":"Hello from the CI smoke test.","service":"an Architect"}' | grep '"id"'
+          curl -sf -H "$K" 'localhost:4000/api/admin/inquiries?field=architecture&q=CI%20Client' | tee /dev/stderr | grep '"total":1'
+          curl -sf -H "$K" localhost:4000/api/admin/inquiries/summary | grep '"unread":1'
+
+          echo; echo "bad input and missing contact are refused:"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST localhost:4000/api/inquiries -H "$J" -H 'X-Forwarded-For: 10.1.1.2' -d '{"name":"No Contact","message":"No email or phone given."}')
+          test "$code" = "400"
+          echo "admin without the key is refused:"
+          code=$(curl -s -o /dev/null -w '%{http_code}' localhost:4000/api/admin/inquiries)
+          test "$code" = "401"
+
+          echo; echo "legacy /contact alias still works, then the 6th request in a minute is limited:"
           body='{"name":"CI Test","email":"ci@example.com","message":"Hello from the CI smoke test."}'
           for i in 1 2 3 4 5; do
-            curl -sf -X POST localhost:4000/api/contact -H 'Content-Type: application/json' -d "$body" >/dev/null
+            curl -sf -X POST localhost:4000/api/contact -H "$J" -H 'X-Forwarded-For: 10.2.2.2' -d "$body" >/dev/null
           done
-          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST localhost:4000/api/contact -H 'Content-Type: application/json' -d "$body")
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST localhost:4000/api/contact -H "$J" -H 'X-Forwarded-For: 10.2.2.2' -d "$body")
           echo "6th request status: $code (expected 429 from the Redis rate limit)"
           test "$code" = "429"
