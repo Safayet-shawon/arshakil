@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { site } from "@/data/site";
 
 /** The public address of the site. Set NEXT_PUBLIC_SITE_URL when a custom domain is connected. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://arshakil.vercel.app").replace(/\/$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://architectshakil.com").replace(/\/$/, "");
 
 /** Makes a path absolute: "/a" -> "https://site/a". Full URLs are left alone. */
 export const abs = (p: string) => (p.startsWith("http") ? p : `${SITE_URL}${p.startsWith("/") ? "" : "/"}${p}`);
