@@ -1,3 +1,4 @@
+import Empty from "@/components/ui/Empty";
 import { PhotoFeatured } from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -25,6 +26,8 @@ export default async function PhotographyPage() {
       <PageHero index="02" title="Architectural Photography" intro="Buildings, light and the people inside them, one frame at a time. Open an album to see every frame." />
       <PhotoFeatured />
 
+      {albums.length > 0 ? (
+        <>
       <Section>
         <SectionHead index="01" kicker="The albums" title="Browse by album" aside={String(albums.length).padStart(2, "0")} />
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
@@ -63,6 +66,8 @@ export default async function PhotographyPage() {
           ))}
         </div>
       </Section>
+        </>
+      ) : <Empty what="photos" />}
       <CtaBand text="Need architectural photography for a building, a studio or a publication? Tell me about it." />
     </>
   );

@@ -81,12 +81,14 @@ export function reply(question: string, c: Facts): BotReply {
         chips: ["Contact", "Photography"],
       };
     case "architecture":
+      if (!c.projects.length) return { text: "Nothing has been uploaded in this section yet, but it is coming. Anything else I can help with?", chips: ["Services & pricing", "Contact"] };
       return {
         text: `Selected architecture work (through Kolpo and Studio Karu):\n${list(c.projects.map((p) => `${p.title}: ${p.type.split(" · ")[0].toLowerCase()}, ${p.location} (${p.year})`), 6)}\n\n${approach}`.slice(0, 700),
         links: [{ label: "All architecture projects", href: "/architecture" }],
         chips: ["Services & pricing", "Contact"],
       };
     case "photography": {
+      if (!c.gallery.length) return { text: "Nothing has been uploaded in this section yet, but it is coming. Anything else I can help with?", chips: ["Services & pricing", "Contact"] };
       const cats = c.categories.map((x) => x.name).join(", ");
       return {
         text: `Architectural photography: buildings, people and places, one frame at a time. The gallery has ${c.gallery.length}+ photos in sections like ${cats}. Photos are grouped into albums, and the gallery has a "See all" view for each.`,
@@ -95,6 +97,7 @@ export function reply(question: string, c: Facts): BotReply {
       };
     }
     case "content": {
+      if (!c.videos.length) return { text: "Nothing has been uploaded in this section yet, but it is coming. Anything else I can help with?", chips: ["Services & pricing", "Contact"] };
       const groups = [...new Set(c.videos.map((v) => v.group))].join(", ");
       return {
         text: `Shakil makes videos and vlogs${groups ? ` (${groups})` : ""}. Find them on ${socials.slice(0, 4).map((s) => s.label).join(", ")}.`,
@@ -103,6 +106,7 @@ export function reply(question: string, c: Facts): BotReply {
       };
     }
     case "travel": {
+      if (!c.places.length) return { text: "Nothing has been uploaded in this section yet, but it is coming. Anything else I can help with?", chips: ["Services & pricing", "Contact"] };
       const bd = c.places.filter((p) => p.region === "bangladesh").map((p) => p.name);
       const ab = c.places.filter((p) => p.region === "abroad").map((p) => p.name);
       return {
@@ -112,12 +116,14 @@ export function reply(question: string, c: Facts): BotReply {
       };
     }
     case "books":
+      if (!c.books.length) return { text: "Nothing has been uploaded in this section yet, but it is coming. Anything else I can help with?", chips: ["Services & pricing", "Contact"] };
       return {
         text: `Books and essays:\n${list(c.books.map((b) => `${b.title}: ${b.language}, ${b.pages} pages, ${b.priceBdt} BDT`))}\n\nThe first 5% of every book is free to read online. To read the rest, pay by bKash or Nagad and send your transaction ID: you'll get a personal access code.`,
         links: [{ label: "Open the books", href: "/author" }],
         chips: ["Contact", "Social work"],
       };
     case "social":
+      if (!c.initiatives.length) return { text: "Nothing has been uploaded in this section yet, but it is coming. Anything else I can help with?", chips: ["Services & pricing", "Contact"] };
       return {
         text: `Shakil gives time to community work:\n${list(c.initiatives.map((i) => `${i.title}: ${i.blurb}`))}`,
         links: [{ label: "See social work", href: "/social-work" }],

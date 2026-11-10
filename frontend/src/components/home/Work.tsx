@@ -23,6 +23,7 @@ export default function Work() {
   const sx = useSpring(x, { stiffness: 900, damping: 50, mass: 0.4 });
   const sy = useSpring(y, { stiffness: 900, damping: 50, mass: 0.4 });
   const hover = active === null ? null : items[active];
+  if (!items.length) return null;
 
   return (
     <Section id="work" className="bg-ink text-g100">

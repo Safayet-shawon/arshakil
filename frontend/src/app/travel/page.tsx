@@ -1,3 +1,4 @@
+import Empty from "@/components/ui/Empty";
 import SectionFeatured from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -18,24 +19,29 @@ export const metadata: Metadata = pageMeta({ title: "Travel", description: "Trav
 
 export default async function TravelPage() {
   const { places, stories, videos } = await getContent();
+  const travelVideos = videos.filter((v) => v.group === "Travel vlogs");
   return (
     <>
       <PageHero index="04" title="Travel" intro="Choose Bangladesh for its cities, or Abroad for countries. Open one to see what to do there, what it costs, and the posts and videos from it." />
       <SectionFeatured sector="travel" />
 
-      <Section>
-        <SectionHead index="01" kicker="Places" title="Where to?" aside={String(places.length).padStart(2, "0")} />
-        <TravelExplorer />
-      </Section>
+      {places.length > 0 ? (
+        <Section>
+          <SectionHead index="01" kicker="Places" title="Where to?" aside={String(places.length).padStart(2, "0")} />
+          <TravelExplorer />
+        </Section>
+      ) : <Empty what="places" />}
 
-      <Section className="bg-g200">
-        <SectionHead index="02" kicker="On video" title="Travel vlogs" aside="Tap to watch on YouTube" />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {videos.filter((v) => v.group === "Travel vlogs").map((v, i) => <Reveal key={v.title} delay={i * 0.07}><VideoCard video={v} /></Reveal>)}
-        </div>
-      </Section>
+      {travelVideos.length > 0 && (
+        <Section className="bg-g200">
+          <SectionHead index="02" kicker="On video" title="Travel vlogs" aside="Press play to watch here" />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {travelVideos.map((v, i) => <Reveal key={v.title} delay={i * 0.07}><VideoCard video={v} /></Reveal>)}
+          </div>
+        </Section>
+      )}
 
-      <Section>
+      {stories.length > 0 && <Section>
         <SectionHead index="03" kicker="Stories" title="History & heritage of Bangladesh" aside={String(stories.length).padStart(2, "0")} />
         <div className="grid gap-12">
           {stories.map((s, i) => (
@@ -51,7 +57,7 @@ export default async function TravelPage() {
             </Reveal>
           ))}
         </div>
-      </Section>
+      </Section>}
       <Albums sector="travel" />
       <CtaBand text="Planning a trip, a talk or a story together? Let's plan it." />
     </>

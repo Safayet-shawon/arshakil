@@ -1,4 +1,3 @@
-import { bestOf } from "@/data/content";
 import { coverOf } from "./media";
 import { videoOf } from "./video";
 import type { BestOf, SiteContent } from "@/types";
@@ -14,5 +13,5 @@ export function featuredWork(c: SiteContent): BestOf[] {
     ...c.books.filter((b) => b.featured).map((b) => ({ category: "Author", title: b.title, meta: "Book", year: b.year, href: "/author", photo: b.thumb })),
     ...c.initiatives.filter((n) => n.featured).map((n) => ({ category: "Social Work", title: n.title, meta: n.area, year: "", href: `/social-work/${n.slug}`, photo: coverOf(n) })),
   ];
-  return out.length ? out : bestOf;
+  return out;
 }

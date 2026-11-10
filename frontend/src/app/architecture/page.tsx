@@ -1,3 +1,4 @@
+import Empty from "@/components/ui/Empty";
 import SectionFeatured from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -38,10 +39,12 @@ export default async function ArchitecturePage() {
     <>
       <PageHero index="01" title="Architecture" intro="Spaces shaped by light, material and silence: selected projects from Kolpo and Studio Karu." />
       <SectionFeatured sector="architecture" />
-      <Section>
-        <SectionHead index="01" kicker="Kolpo & Studio Karu" title="Selected projects" aside={String(projects.length).padStart(2, "0")} />
-        <div className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">{projects.map((p, i) => <ProjectCard key={p.slug} p={p} index={i} />)}</div>
-      </Section>
+      {projects.length > 0 ? (
+        <Section>
+          <SectionHead index="01" kicker="Kolpo & Studio Karu" title="Selected projects" aside={String(projects.length).padStart(2, "0")} />
+          <div className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">{projects.map((p, i) => <ProjectCard key={p.slug} p={p} index={i} />)}</div>
+        </Section>
+      ) : <Empty what="projects" />}
       <Albums sector="architecture" />
       <CtaBand text="Planning a house, a library or a small public space? Tell me about it." />
     </>

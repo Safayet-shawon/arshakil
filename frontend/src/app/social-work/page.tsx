@@ -1,3 +1,4 @@
+import Empty from "@/components/ui/Empty";
 import SectionFeatured from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -22,9 +23,7 @@ export default async function SocialWorkPage() {
     <>
       <PageHero index="06" title="Social Work" intro="Design is only useful if it reaches people. Pick an initiative to read more about it." />
       <SectionFeatured sector="social-work" />
-      <div className="group h-[clamp(150px,24vw,320px)]"><Photo name="social-volunteers" alt="Volunteers working together" className="h-full" /></div>
-
-      <Section>
+      {initiatives.length > 0 ? <Section>
         <SectionHead index="01" kicker="What we do" title="Initiatives" aside={String(initiatives.length).padStart(2, "0")} />
         <div className="grid gap-x-6 gap-y-10 md:grid-cols-3">
           {initiatives.map((n, i) => (
@@ -38,7 +37,7 @@ export default async function SocialWorkPage() {
             </Reveal>
           ))}
         </div>
-      </Section>
+      </Section> : <Empty what="initiatives" />}
 
       <Section className="bg-g200 text-center">
         <Reveal>

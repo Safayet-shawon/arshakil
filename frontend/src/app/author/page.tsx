@@ -1,3 +1,4 @@
+import Empty from "@/components/ui/Empty";
 import SectionFeatured from "@/components/ui/SectionFeatured";
 import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -61,11 +62,12 @@ export default async function AuthorPage() {
     <>
       <PageHero index="05" title="Author" intro="Books and essays on design, place and a life in motion. Read the first pages free; ask for access to read the whole book." />
       <SectionFeatured sector="author" />
-      <div className="group h-[clamp(140px,22vw,280px)]"><Photo name="author-notebook" alt="Notebook and pen" className="h-full" /></div>
-      <Section>
-        <SectionHead index="01" kicker="Library" title="Books" aside={String(books.length).padStart(2, "0")} />
-        {books.map((b, i) => <BookRow key={b.slug} b={b} n={i} />)}
-      </Section>
+      {books.length > 0 ? (
+        <Section>
+          <SectionHead index="01" kicker="Library" title="Books" aside={String(books.length).padStart(2, "0")} />
+          {books.map((b, i) => <BookRow key={b.slug} b={b} n={i} />)}
+        </Section>
+      ) : <Empty what="books" />}
       <Albums sector="author" />
       <CtaBand text="Want a talk, a signed copy or a commissioned essay? Get in touch." />
     </>
