@@ -11,7 +11,8 @@ interface Featurable { featured?: boolean; featuredSection?: boolean }
 export interface Media { photos?: string[]; video?: string; videoPoster?: string; videoThumb?: boolean; youtubeId?: string }
 export interface Project extends Featurable, Media { slug: string; title: string; year: string; location: string; type: string; summary: string; photo: string }
 export interface Photo extends Featurable { photo: string; title: string; category: string; description?: string }
-export interface Video extends Featurable { title: string; group: string; thumb: string; youtubeId?: string }
+/** `url`: any video link (YouTube, Facebook, Instagram, TikTok). `youtubeId` is the older way and still works. */
+export interface Video extends Featurable { title: string; group: string; thumb: string; url?: string; youtubeId?: string }
 export interface Story { title: string; place: string; era: string; blurb: string; photo: string }
 export interface Initiative extends Featurable, Media { slug: string; title: string; area: string; blurb: string; photo: string; points: string[] }
 export interface Named { name: string }

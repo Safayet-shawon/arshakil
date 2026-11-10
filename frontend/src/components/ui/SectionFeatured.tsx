@@ -1,5 +1,6 @@
 import { albumSlug, coverOf } from "@/lib/media";
 import { getContent } from "@/lib/server/content";
+import { videoOf } from "@/lib/video";
 import type { Sector } from "@/types";
 import FeaturedCarousel, { type Slide } from "./FeaturedCarousel";
 
@@ -21,10 +22,10 @@ export default async function SectionFeatured({ sector }: { sector: Sector }) {
       slides = c.initiatives.filter((n) => n.featuredSection).map((n) => ({ title: n.title, kicker: n.area, href: `/social-work/${n.slug}`, photo: coverOf(n) }));
       break;
     case "content-creation":
-      slides = c.videos.filter((v) => v.featuredSection).map((v) => ({
-        title: v.title, kicker: v.group, href: v.youtubeId ? `https://www.youtube.com/watch?v=${v.youtubeId}` : "/content-creation", external: !!v.youtubeId,
-        photo: v.thumb || (v.youtubeId ? `https://img.youtube.com/vi/${v.youtubeId}/hqdefault.jpg` : ""),
-      }));
+      slides = c.videos.filter((v) => v.featuredSection).map((v) => {
+        const pv = videoOf(v);
+        return { title: v.title, kicker: v.group, href: pv?.url ?? "/content-creation", external: !!pv, photo: v.thumb || pv?.thumb || "" };
+      });
       break;
   }
   if (!slides.length) return null;

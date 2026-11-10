@@ -43,7 +43,7 @@ export default async function ContentPage() {
 
       {groups.map((g, i) => (
         <Section key={g} className={i % 2 === 0 ? "bg-g200" : ""}>
-          <SectionHead index={String(i + 2).padStart(2, "0")} kicker="Videos" title={g} aside="Tap to watch on YouTube" />
+          <SectionHead index={String(i + 2).padStart(2, "0")} kicker="Videos" title={g} aside="Press play to watch here" />
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {videos.filter((v) => v.group === g).map((v, k) => (
               <Reveal key={v.title} delay={k * 0.07}><VideoCard video={v} /></Reveal>

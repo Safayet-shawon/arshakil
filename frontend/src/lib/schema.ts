@@ -44,7 +44,7 @@ export const lists: ListDef[] = [
       { key: "video", label: "Short video (optional)", type: "video", posterKey: "videoPoster" },
       { key: "videoThumb", label: "Use the video as the thumbnail", type: "bool", showIf: (i) => !!i.video && !!i.videoPoster,
         hint: "The video's first picture becomes the thumbnail, and the thumbnail photo above is then counted with the other photos." },
-      { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
+      { key: "youtubeId", label: "Or a video link (YouTube, Facebook, ... optional)", type: "text" },
       { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
     ], blank: { title: "", year: "", location: "", type: "", summary: "", photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "", featured: false } },
 
@@ -61,14 +61,15 @@ export const lists: ListDef[] = [
   { name: "categories", label: "Photography sections", singular: "section", blurb: "Add, rename or remove the filter sections of the gallery. Renaming updates the photos in it.",
     title: str("name"), fields: [{ key: "name", label: "Section name", type: "text" }], blank: { name: "" } },
 
-  { name: "videos", label: "Content Creation", singular: "video", blurb: "YouTube videos. Paste the video id (the part after v= in the link).",
+  { name: "videos", label: "Content Creation", singular: "video", blurb: "Paste the video link from YouTube, Facebook, Instagram or TikTok. The platform's logo shows on the video and it plays right on the site.",
     title: str("title"), photo: "thumb", featurable: true,
+    prepare: (it) => (it.url || !it.youtubeId ? it : { ...it, url: `https://www.youtube.com/watch?v=${String(it.youtubeId)}` }),
     fields: [
       { key: "title", label: "Title", type: "text" },
       { key: "group", label: "Group", type: "select", options: { list: "videoGroups", value: "name", label: "name" } },
-      { key: "youtubeId", label: "YouTube video id", type: "text", hint: "Its thumbnail is used automatically" },
-      { key: "thumb", label: "Custom thumbnail (optional)", type: "image" }, { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
-    ], blank: { title: "", group: "", youtubeId: "", thumb: "", featured: false } },
+      { key: "url", label: "Video link", type: "text", hint: "Paste the link as it is: YouTube, Facebook, Instagram or TikTok. YouTube gives its own thumbnail; for Facebook, Instagram and TikTok add a thumbnail below." },
+      { key: "thumb", label: "Thumbnail (needed for Facebook, Instagram, TikTok; optional for YouTube)", type: "image" }, { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
+    ], blank: { title: "", group: "", url: "", thumb: "", featured: false } },
 
   { name: "videoGroups", label: "Video groups", singular: "group", blurb: "Sections of the Content Creation page. Renaming updates the videos in it.",
     title: str("name"), fields: [{ key: "name", label: "Group name", type: "text" }], blank: { name: "" } },
@@ -85,7 +86,7 @@ export const lists: ListDef[] = [
       { key: "video", label: "Short video (optional)", type: "video", posterKey: "videoPoster" },
       { key: "videoThumb", label: "Use the video as the thumbnail", type: "bool", showIf: (i) => !!i.video && !!i.videoPoster,
         hint: "The video's first picture becomes the thumbnail, and the thumbnail photo above is then counted with the other photos." },
-      { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
+      { key: "youtubeId", label: "Or a video link (YouTube, Facebook, ... optional)", type: "text" },
       { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
     ], blank: { region: "bangladesh", name: "", country: "Bangladesh", summary: "", ideas: [], cost: "", photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "", featured: false } },
 
@@ -103,7 +104,7 @@ export const lists: ListDef[] = [
       { key: "pdf", label: "Blog PDF", type: "pdf", folder: "posts", showIf: (i) => i.kind === "pdf" },
       { key: "photos", label: "Photos (add as many as you like)", type: "images" },
       { key: "video", label: "Short video (optional)", type: "video", posterKey: "videoPoster" },
-      { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
+      { key: "youtubeId", label: "Or a video link (YouTube, Facebook, ... optional)", type: "text" },
     ], blank: { region: "bangladesh", place: "", title: "", summary: "", kind: "write", text: "", pdf: "", photos: [], video: "", videoPoster: "", youtubeId: "" } },
 
   { name: "books", label: "Author", singular: "book", blurb: "Upload a PDF, pick a thumbnail and a price in BDT. Readers get the first 5% free and need an access code for the rest. Nobody can download the file.",
@@ -128,7 +129,7 @@ export const lists: ListDef[] = [
       { key: "video", label: "Short video (optional)", type: "video", posterKey: "videoPoster" },
       { key: "videoThumb", label: "Use the video as the thumbnail", type: "bool", showIf: (i) => !!i.video && !!i.videoPoster,
         hint: "The video's first picture becomes the thumbnail, and the thumbnail photo above is then counted with the other photos." },
-      { key: "youtubeId", label: "Or a YouTube video id (optional)", type: "text" },
+      { key: "youtubeId", label: "Or a video link (YouTube, Facebook, ... optional)", type: "text" },
       { key: "featured", label: "Featured on the home page", type: "bool" }, { key: "featuredSection", label: "Featured at the top of its own section (carousel)", type: "bool" },
     ], blank: { title: "", area: "", blurb: "", points: [], photo: "", photos: [], video: "", videoPoster: "", videoThumb: false, youtubeId: "", featured: false } },
 
