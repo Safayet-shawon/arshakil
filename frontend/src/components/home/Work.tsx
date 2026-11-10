@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motio
 import Link from "next/link";
 import { useState } from "react";
 import { featuredWork } from "@/lib/featured";
-import { photoSrc } from "@/lib/media";
+import { resized } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { useSite } from "../layout/SiteProvider";
 import Reveal from "../ui/Reveal";
@@ -53,7 +53,7 @@ export default function Work() {
         <AnimatePresence initial={false} mode="popLayout">
           {hover?.photo && (
             // shown whole, in its own shape: tall, wide or square, nothing is cut off
-            <motion.img key={hover.photo} src={photoSrc(hover.photo)} alt="" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            <motion.img key={hover.photo} src={resized(hover.photo, 640)} alt="" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.22, ease: "easeOut" }} className="block h-auto max-h-[56vh] w-auto max-w-[min(360px,32vw)]" />
           )}
         </AnimatePresence>

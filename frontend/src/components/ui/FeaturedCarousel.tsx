@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { photoSrc } from "@/lib/media";
+import { resized } from "@/lib/media";
+import Img from "./Img";
 import { cn } from "@/lib/utils";
 
 export interface Slide { title: string; kicker: string; href: string; photo: string; external?: boolean }
@@ -35,8 +36,9 @@ export default function FeaturedCarousel({ slides, label }: { slides: Slide[]; l
       {s.photo && (
         <>
           {/* the same picture, blurred, fills the sides; the sharp one sits in front, whole, so no project is ever cut off */}
-          <img src={photoSrc(s.photo)} alt="" aria-hidden loading="lazy" decoding="async" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-90 blur-2xl" />
-          <img src={photoSrc(s.photo)} alt={s.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={resized(s.photo, 384)} alt="" aria-hidden loading="lazy" decoding="async" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-90 blur-2xl" />
+          <Img name={s.photo} alt={s.title} sizes="(min-width:1024px) 80vw, 100vw" className="absolute inset-0 h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]" />
         </>
       )}
       <span className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />

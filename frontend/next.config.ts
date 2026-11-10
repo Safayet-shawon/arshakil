@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // pictures from the site itself may be resized by /_next/image
+    localPatterns: [{ pathname: "/api/media/**" }, { pathname: "/photos/**" }, { pathname: "/images/**" }],
+    qualities: [75],
     remotePatterns: [{ protocol: "https", hostname: "img.youtube.com" }],
   },
 };

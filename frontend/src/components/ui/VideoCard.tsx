@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { socials } from "@/data/site";
-import { photoSrc } from "@/lib/media";
+import { resized } from "@/lib/media";
 import { PLATFORM_NAME, videoOf } from "@/lib/video";
 import type { Video } from "@/types";
 import Hl from "./Hl";
@@ -16,7 +16,7 @@ export default function VideoCard({ video }: { video: Video }) {
   const [playing, setPlaying] = useState(false);
   const platform = v?.platform ?? "youtube";
   const href = v?.url ?? socials[0].href;
-  const thumb = video.thumb ? photoSrc(video.thumb) : v?.thumb;
+  const thumb = video.thumb ? resized(video.thumb, 828) : v?.thumb;
   const canPlay = !!v?.embed;
 
   const face = (

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { photoSrc } from "@/lib/media";
+import Img from "./Img";
 import { getContent } from "@/lib/server/content";
 import type { Sector } from "@/types";
 import Reveal from "./Reveal";
@@ -7,6 +7,8 @@ import Section from "./Section";
 import SectionHead from "./SectionHead";
 
 /** The photo albums of one sector: each a small stack of its own photos, opening the full album. Nothing is shown until an album has photos. */
+const SZ = "(min-width:1024px) 30vw, (min-width:640px) 45vw, 90vw";
+
 export default async function Albums({ sector }: { sector: Sector }) {
   const albums = (await getContent()).albums.filter((a) => a.sector === sector && a.photos.length > 0);
   if (!albums.length) return null;
@@ -21,16 +23,13 @@ export default async function Albums({ sector }: { sector: Sector }) {
               <Link href={`/album/${a.slug}`} data-link className="group block">
                 <div className="relative aspect-[4/3]">
                   {third && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photoSrc(third.photo)} alt="" loading="lazy" className="absolute inset-0 h-full w-full rotate-[5deg] rounded-2xl border-4 border-paper object-cover shadow-md transition-transform duration-500 group-hover:rotate-[8deg] group-hover:translate-x-2" />
+                    <Img name={third.photo} alt="" sizes={SZ} className="absolute inset-0 h-full w-full rotate-[5deg] rounded-2xl border-4 border-paper object-cover shadow-md transition-transform duration-500 group-hover:rotate-[8deg] group-hover:translate-x-2" />
                   )}
                   {second && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photoSrc(second.photo)} alt="" loading="lazy" className="absolute inset-0 h-full w-full -rotate-[3deg] rounded-2xl border-4 border-paper object-cover shadow-md transition-transform duration-500 group-hover:-rotate-[6deg] group-hover:-translate-x-2" />
+                    <Img name={second.photo} alt="" sizes={SZ} className="absolute inset-0 h-full w-full -rotate-[3deg] rounded-2xl border-4 border-paper object-cover shadow-md transition-transform duration-500 group-hover:-rotate-[6deg] group-hover:-translate-x-2" />
                   )}
                   <div className="absolute inset-0 overflow-hidden rounded-2xl border-4 border-paper bg-g200 shadow-[0_14px_36px_rgba(77,79,83,0.22)] transition-transform duration-500 group-hover:-translate-y-1.5">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photoSrc(cover.photo)} alt={a.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <Img name={cover.photo} alt={a.name} sizes={SZ} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     <span className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
                   </div>
                 </div>

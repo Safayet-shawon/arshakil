@@ -33,3 +33,19 @@ export const SECTORS: { key: import("@/types").Sector; label: string; href: stri
   { key: "social-work", label: "Social Work", href: "/social-work" },
   { key: "content-creation", label: "Content Creation", href: "/content-creation" },
 ];
+
+/** Widths the site asks for. Each uploaded picture is resized to these by /api/media (once, then cached), so a phone never downloads an 1800px photo for a small card. */
+const WIDTHS = [384, 640, 828, 1080, 1920];
+const isUpload = (src: string) => src.startsWith("/api/media/uploads/img/");
+
+/** The resized copy of an uploaded picture. Bundled and external pictures (YouTube) are used as they are. */
+export const resized = (v: string, w: number) => {
+  const src = photoSrc(v);
+  return isUpload(src) ? `${src}?w=${w}` : src;
+};
+
+/** `srcSet` for an uploaded picture, or undefined for the others. */
+export const srcSetOf = (v: string) => {
+  const src = photoSrc(v);
+  return isUpload(src) ? WIDTHS.map((w) => `${src}?w=${w} ${w}w`).join(", ") : undefined;
+};

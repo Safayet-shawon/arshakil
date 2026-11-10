@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
-import { photoSrc } from "@/lib/media";
+import { resized } from "@/lib/media";
+import Img from "./Img";
 import { cn } from "@/lib/utils";
 import type { Photo } from "@/types";
 import Lightbox from "./Lightbox";
@@ -12,7 +13,7 @@ import Lightbox from "./Lightbox";
 export default function Gallery({ items, layout = "masonry" }: { items: Photo[]; layout?: "mosaic" | "masonry" }) {
   const [open, setOpen] = useState<number | null>(null);
 
-  const lightItems = useMemo(() => items.map((g) => ({ src: photoSrc(g.photo), title: g.title, kicker: g.category, description: g.description })), [items]);
+  const lightItems = useMemo(() => items.map((g) => ({ src: resized(g.photo, 1920), title: g.title, kicker: g.category, description: g.description })), [items]);
 
   const mosaic = layout === "mosaic";
   const big = mosaic && items.length >= 3;
@@ -23,8 +24,7 @@ export default function Gallery({ items, layout = "masonry" }: { items: Photo[];
   const tile = (g: Photo, i: number) => (
     <button key={g.photo + i} data-view onClick={() => setOpen(i)}
       className={cn("group relative block overflow-hidden text-left", mosaic ? "h-full w-full" : "mb-3 w-full", big && i === 0 && "col-span-2 row-span-2", big && i === items.length - 1 && i > 2 && lastSpan)}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={photoSrc(g.photo)} alt={g.title} loading="lazy"
+      <Img name={g.photo} alt={g.title} sizes={mosaic ? "(min-width:768px) 22vw, 34vw" : "(min-width:1280px) 25vw, (min-width:768px) 33vw, 50vw"}
         className={cn("block w-full transition-transform duration-700 group-hover:scale-105", mosaic ? "h-full object-cover" : "h-auto")} />
       <span className="absolute inset-x-0 bottom-0 translate-y-2 bg-gradient-to-t from-ink/80 to-transparent p-3 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
         <span className="font-display text-xl text-g50">{g.title}</span>

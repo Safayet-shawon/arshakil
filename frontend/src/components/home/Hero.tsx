@@ -2,7 +2,7 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useState } from "react";
 import { useIntroDone } from "@/lib/intro";
-import { photoSrc } from "@/lib/media";
+import { resized } from "@/lib/media";
 import { useSite } from "../layout/SiteProvider";
 import { site, socials } from "@/data/site";
 import { Apos, ButtonLink } from "../ui/Button";
@@ -85,7 +85,7 @@ export default function Hero() {
         {full && (
           <div className="absolute inset-0 z-[1] overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photoSrc(custom)} alt={`Portrait of ${site.name}`} fetchPriority="high" style={framing} className="block h-full w-full object-cover" />
+            <img src={resized(custom, 1920)} alt={`Portrait of ${site.name}`} fetchPriority="high" style={framing} className="block h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/20 to-white/60" />
           </div>
         )}
@@ -99,7 +99,7 @@ export default function Hero() {
           <motion.div style={{ x: px, y: py }} className="h-full w-full">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {custom
-              ? <img src={photoSrc(custom)} alt={`Portrait of ${site.name}`} fetchPriority="high" style={framing} className="block h-full w-full object-cover [mask-image:linear-gradient(to_bottom,#000_62%,transparent)]" />
+              ? <img src={resized(custom, 1920)} alt={`Portrait of ${site.name}`} fetchPriority="high" style={framing} className="block h-full w-full object-cover [mask-image:linear-gradient(to_bottom,#000_62%,transparent)]" />
               : <img src={site.heroImage} alt={`Portrait of ${site.name}`} className="block h-full w-full" />}
           </motion.div>
         </motion.div>}
